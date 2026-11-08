@@ -75,7 +75,21 @@ const luxuryStyles = `
   .spot-occupied { background: rgba(239, 68, 68, 0.05); color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3); cursor: not-allowed; opacity: 0.6; }
   .zone-title { width: 100%; grid-column: 1 / -1; margin: 24px 0 12px 0; color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.35rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 8px;}
 
-  /* Editor */
+  /* -------------------------------------------------------------
+     MAP EDITOR MOBILE FIXES (Zones stack on mobile)
+     ------------------------------------------------------------- */
+  .editor-zone-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; }
+  .editor-zone-input { width: 60%; margin-bottom: 0 !important; font-size: 1.35rem; color: var(--accent-gold); font-family: var(--font-heading); background: transparent; border: none; border-bottom: 1px solid var(--card-border); padding: 8px 0; border-radius: 0; transition: border-color 0.3s ease; }
+  .editor-zone-input:focus { outline: none; border-color: #fff; background: transparent; box-shadow: none; }
+  .editor-zone-actions { display: flex; gap: 12px; }
+
+  @media (max-width: 768px) {
+    .editor-zone-header { flex-direction: column; align-items: stretch; gap: 16px; }
+    .editor-zone-input { width: 100%; text-align: center; }
+    .editor-zone-actions { flex-wrap: wrap; }
+    .editor-zone-actions > button { flex: 1; }
+  }
+
   .spot-edit-input { background: rgba(0,0,0,0.3); color: var(--accent-gold); border: 1px dashed rgba(212, 175, 55, 0.5); text-align: center; border-radius: 8px; padding: 16px 4px; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; font-family: var(--font-ui); transition: all 0.3s ease;}
   .spot-edit-input:focus { outline: none; background: rgba(0,0,0,0.8); border-style: solid; border-color: var(--accent-gold); }
   .spot-delete-btn { position: absolute; top: -8px; right: -8px; background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; }
@@ -784,7 +798,7 @@ function MasterAdminView({ parkingMap }) {
                 
                 {editingMap.map((section, idx) => (
                   <div key={idx} className="editor-card" style={{ animationDelay: `${idx * 0.1}s` }}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+                    <div className="editor-zone-header">
                       <input 
                         type="text" 
                         value={section.zone} 
@@ -793,10 +807,9 @@ function MasterAdminView({ parkingMap }) {
                           newMap[idx].zone = e.target.value;
                           setEditingMap(newMap);
                         }} 
-                        className="luxury-input" 
-                        style={{width: '60%', marginBottom: 0, fontSize: '1.35rem', color: 'var(--accent-gold)', fontFamily: 'var(--font-heading)', background: 'transparent', border: 'none', borderBottom: '1px solid var(--card-border)', padding: '8px 0', borderRadius: '0'}} 
+                        className="luxury-input editor-zone-input" 
                       />
-                      <div style={{display: 'flex', gap: '12px'}}>
+                      <div className="editor-zone-actions">
                         <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
                         <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
                         <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto'}}>Delete Zone</button>
