@@ -347,9 +347,14 @@ function ValetDashboardView() {
   const [tickets, setTickets] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
+  
+  // New state to hold the ID of the ticket we want to show a QR for
+  const [qrModalTicket, setQrModalTicket] = useState(null);
+  
   const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', phone: '' });
 
   const currentVenueId = "venue_001";
+  const currentDomain = window.location.origin;
 
   useEffect(() => {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
@@ -383,7 +388,6 @@ function ValetDashboardView() {
 
   const requestedCars = tickets.filter(t => t.status === "requested");
   const parkedCars = tickets.filter(t => t.status === "parked");
-  const currentDomain = window.location.origin;
 
   return (
     <div className="app-container">
@@ -425,20 +429,47 @@ function ValetDashboardView() {
             <h2 className="queue-title" style={{ color: 'var(--text-main)' }}>Currently Parked ({parkedCars.length})</h2>
             {parkedCars.map(t => (
               <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid var(--card-border)' }}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                   <div>
                     <h3 style={{margin: '0 0 4px 0', fontSize: '1.1rem'}}>{t.vehicle.make} {t.vehicle.model}</h3>
                     <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{t.vehicle.licensePlate}</p>
                   </div>
-                  <div style={{color: 'var(--accent-gold)', fontWeight: '500'}}>
+                  <div style={{color: 'var(--accent-gold)', fontWeight: '500', textAlign: 'right'}}>
                     {t.parkingSpot}
                   </div>
                 </div>
+                {/* NEW QR BUTTON FOR PARKED CARS */}
+                <button 
+                  onClick={() => setQrModalTicket(t.id)} 
+                  className="btn-outline" 
+                  style={{marginTop: '12px', padding: '8px', fontSize: '0.85rem'}}
+                >
+                  Show QR Code
+                </button>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* RE-VIEW QR MODAL */}
+      {qrModalTicket && (
+        <div className="modal-overlay">
+          <div className="luxury-card" style={{width: '90%'}}>
+            <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>DIGITAL TICKET</h2>
+            <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} 
+                alt="QR Code" 
+                style={{display: 'block'}} 
+              />
+            </div>
+            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%'}}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* NEW ARRIVAL MODAL */}
       {showModal && (
