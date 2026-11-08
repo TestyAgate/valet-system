@@ -157,6 +157,23 @@ const DEFAULT_PARKING_MAP = [
   { zone: 'Zone B', spots: Array.from({length: 30}, (_, i) => `B-${i + 1}`) }
 ];
 
+// Helper to determine the prefix based on Zone name
+const getZonePrefix = (zoneName) => {
+  const trimmed = zoneName.trim();
+  // If it matches "Zone [Letter/Number]" (e.g. "Zone C")
+  if (/^Zone\s+[A-Z0-9]+$/i.test(trimmed)) {
+    return trimmed.split(/\s+/)[1].toUpperCase();
+  }
+  // Otherwise grab the first word
+  const firstWord = trimmed.split(/\s+/)[0];
+  // If the first word is all caps (like "VIP"), use it entirely
+  if (firstWord === firstWord.toUpperCase() && firstWord.length > 1) {
+    return firstWord;
+  }
+  // Default to the very first letter (e.g. "North Lot" -> "N")
+  return firstWord.charAt(0).toUpperCase();
+};
+
 
 // ------------------------------------------------------------------
 // REUSABLE COMPONENTS
@@ -574,11 +591,23 @@ function MasterAdminView({ parkingMap }) {
   };
 
   const addZone = () => {
-    setEditingMap([...editingMap, { zone: 'New Zone', spots: [] }]);
+    let nextZoneName = "Zone A";
+    if (editingMap.length > 0) {
+      const lastZone = editingMap[editingMap.length - 1].zone.trim();
+      const match = lastZone.match(/^(Zone\s+)([A-Y])$/i); // Matches "Zone A" to "Zone Y"
+      if (match) {
+        // Automatically increment to the next letter (e.g. Zone B -> Zone C)
+        const nextLetter = String.fromCharCode(match[2].charCodeAt(0) + 1);
+        nextZoneName = match[1] + nextLetter;
+      } else {
+        nextZoneName = lastZone + " (New)";
+      }
+    }
+    setEditingMap([...editingMap, { zone: nextZoneName, spots: [] }]);
   };
 
   const removeZone = (index) => {
-    if(window.confirm("Are you sure you want to delete this entire zone?")) {
+    if(window.confirm("WARNING: Are you sure you want to delete this entire zone? All spots inside will be lost.")) {
       const newMap = [...editingMap];
       newMap.splice(index, 1);
       setEditingMap(newMap);
@@ -592,15 +621,28 @@ function MasterAdminView({ parkingMap }) {
   };
 
   const removeSpot = (zoneIdx, spotIdx) => {
-    const newMap = [...editingMap];
-    newMap[zoneIdx].spots.splice(spotIdx, 1);
-    setEditingMap(newMap);
+    if(window.confirm("Delete this parking spot?")) {
+      const newMap = [...editingMap];
+      newMap[zoneIdx].spots.splice(spotIdx, 1);
+      setEditingMap(newMap);
+    }
   };
 
   const addSpotToZone = (zoneIdx) => {
     const newMap = [...editingMap];
-    const prefix = newMap[zoneIdx].zone.charAt(0).toUpperCase();
-    newMap[zoneIdx].spots.push(`${prefix}-${newMap[zoneIdx].spots.length + 1}`);
+    const prefix = getZonePrefix(newMap[zoneIdx].zone);
+    
+    // Auto-generate the next available number
+    let newNum = newMap[zoneIdx].spots.length + 1;
+    let newSpotName = `${prefix}-${newNum}`;
+    
+    // Ensure we don't accidentally create a duplicate if someone deleted an earlier spot
+    while (newMap[zoneIdx].spots.includes(newSpotName)) {
+      newNum++;
+      newSpotName = `${prefix}-${newNum}`;
+    }
+    
+    newMap[zoneIdx].spots.push(newSpotName);
     setEditingMap(newMap);
   };
 
@@ -708,7 +750,7 @@ function MasterAdminView({ parkingMap }) {
                       </div>
                     </div>
                     
-                    {/* VISUAL SPOT GRID (Replaces the textarea) */}
+                    {/* VISUAL SPOT GRID */}
                     <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
                       {section.spots.map((spot, sIdx) => (
                         <div key={sIdx} style={{ position: 'relative' }}>
