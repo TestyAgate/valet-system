@@ -51,12 +51,21 @@ const luxuryStyles = `
   .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--card-border); transition: background 0.2s; font-size: 0.95rem; }
   .autocomplete-item:hover { background: #262626; color: var(--accent-gold); }
 
+  /* Parking Grid Styles */
   .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
-  .spot-box { padding: 16px 4px; border-radius: 6px; text-align: center; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--card-border); transition: all 0.2s; }
+  .spot-box { padding: 16px 4px; border-radius: 6px; text-align: center; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--card-border); transition: all 0.2s; box-sizing: border-box; }
   .spot-empty { background: rgba(20, 83, 45, 0.15); color: #86efac; border-color: #14532d; cursor: pointer; }
   .spot-empty:hover { background: #14532d; color: #fff; transform: scale(1.05); }
   .spot-occupied { background: rgba(127, 29, 29, 0.15); color: #fca5a5; border-color: #7f1d1d; cursor: not-allowed; opacity: 0.7; }
   .zone-title { width: 100%; grid-column: 1 / -1; margin: 16px 0 8px 0; color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 8px;}
+
+  /* Map Editor Specific Styles */
+  .spot-edit-input { background: #1a1a1a; color: var(--accent-gold); border: 1px dashed var(--accent-gold); text-align: center; border-radius: 6px; padding: 16px 4px; font-size: 0.85rem; font-weight: bold; width: 100%; box-sizing: border-box; font-family: var(--font-ui); transition: all 0.2s;}
+  .spot-edit-input:focus { outline: none; background: #262626; border-style: solid; }
+  .spot-delete-btn { position: absolute; top: -6px; right: -6px; background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.2s;}
+  .spot-delete-btn:hover { transform: scale(1.15); background: #991b1b; }
+  .spot-add-btn { background: rgba(197, 160, 89, 0.05); color: var(--accent-gold); border: 1px dashed var(--accent-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 6px; min-height: 49px; transition: all 0.2s; box-sizing: border-box;}
+  .spot-add-btn:hover { background: var(--accent-gold); color: #000; border-style: solid;}
 
   .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
   @media (min-width: 768px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
@@ -69,10 +78,7 @@ const luxuryStyles = `
   .luxury-table { width: 100%; border-collapse: collapse; text-align: left; }
   .luxury-table th { padding: 16px; border-bottom: 1px solid var(--card-border); color: var(--text-muted); font-weight: 500; }
   .luxury-table td { padding: 16px; border-bottom: 1px solid var(--card-border); }
-
-  .editor-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 8px; margin-bottom: 16px; }
-  .editor-textarea { background: #1a1a1a; border: 1px solid var(--card-border); color: #fff; width: 100%; padding: 12px; border-radius: 4px; box-sizing: border-box; min-height: 80px; font-family: var(--font-ui); font-size: 0.9rem; resize: vertical; margin-bottom: 12px; }
-  .editor-textarea:focus { outline: none; border-color: var(--accent-gold); }
+  .editor-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 8px; margin-bottom: 24px; }
 `;
 
 // ------------------------------------------------------------------
@@ -269,7 +275,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots }) {
             <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
             <p style={{color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px'}}>Tap an empty green spot to assign it.</p>
             
-            <div className="parking-map">
+            <div className="parking-map" style={{maxHeight: '60vh'}}>
               {parkingMap.map((section, idx) => (
                 <div key={idx} style={{display: 'contents'}}>
                   <div className="zone-title">{section.zone}</div>
@@ -527,7 +533,8 @@ function MasterAdminView({ parkingMap }) {
   const [editingMap, setEditingMap] = useState([]);
 
   useEffect(() => {
-    setEditingMap(parkingMap || []);
+    // Make a deep copy so we can edit freely before saving
+    setEditingMap(JSON.parse(JSON.stringify(parkingMap || [])));
   }, [parkingMap]);
 
   useEffect(() => {
@@ -550,10 +557,10 @@ function MasterAdminView({ parkingMap }) {
 
   const occupiedSpots = parkedCars.map(t => t.parkingSpot);
 
-  // Editor Functions
+  // --- Editor Functions ---
   const handleSaveMap = async () => {
     await set(ref(db, 'parkingMap'), editingMap);
-    alert('Parking Map Updated Successfully');
+    alert('Parking Floor Plan Live Updated Successfully');
   };
 
   const moveZone = (index, direction) => {
@@ -578,6 +585,25 @@ function MasterAdminView({ parkingMap }) {
     }
   };
 
+  const updateSpotName = (zoneIdx, spotIdx, val) => {
+    const newMap = [...editingMap];
+    newMap[zoneIdx].spots[spotIdx] = val;
+    setEditingMap(newMap);
+  };
+
+  const removeSpot = (zoneIdx, spotIdx) => {
+    const newMap = [...editingMap];
+    newMap[zoneIdx].spots.splice(spotIdx, 1);
+    setEditingMap(newMap);
+  };
+
+  const addSpotToZone = (zoneIdx) => {
+    const newMap = [...editingMap];
+    const prefix = newMap[zoneIdx].zone.charAt(0).toUpperCase();
+    newMap[zoneIdx].spots.push(`${prefix}-${newMap[zoneIdx].spots.length + 1}`);
+    setEditingMap(newMap);
+  };
+
   return (
     <div className="app-container">
       <div className="dashboard-wrapper">
@@ -597,7 +623,7 @@ function MasterAdminView({ parkingMap }) {
             Performance Metrics
           </button>
           <button className={activeTab === 'map' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
-            Map Editor
+            Visual Map Editor
           </button>
         </div>
 
@@ -657,9 +683,9 @@ function MasterAdminView({ parkingMap }) {
               </table>
             ) : (
               
-              /* MAP EDITOR TAB */
-              <div style={{maxWidth: '800px', margin: '0 auto'}}>
-                <p style={{color: 'var(--text-muted)', marginBottom: '24px'}}>Changes made here will instantly update the interactive floor map for all valets.</p>
+              /* VISUAL MAP EDITOR TAB */
+              <div style={{maxWidth: '900px', margin: '0 auto'}}>
+                <p style={{color: 'var(--text-muted)', marginBottom: '24px'}}>Changes made here will instantly update the interactive floor map for all valets. Tap a spot to rename it.</p>
                 
                 {editingMap.map((section, idx) => (
                   <div key={idx} className="editor-card">
@@ -682,23 +708,34 @@ function MasterAdminView({ parkingMap }) {
                       </div>
                     </div>
                     
-                    <p style={{margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--text-muted)'}}>Parking Spots (Comma Separated)</p>
-                    <textarea 
-                      className="editor-textarea"
-                      value={section.spots.join(', ')}
-                      onChange={(e) => {
-                        const newMap = [...editingMap];
-                        newMap[idx].spots = e.target.value.split(',').map(s => s.trim()).filter(s => s !== '');
-                        setEditingMap(newMap);
-                      }}
-                      placeholder="e.g. VIP-1, VIP-2, VIP-3"
-                    />
+                    {/* VISUAL SPOT GRID (Replaces the textarea) */}
+                    <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
+                      {section.spots.map((spot, sIdx) => (
+                        <div key={sIdx} style={{ position: 'relative' }}>
+                          <input
+                            value={spot}
+                            onChange={(e) => updateSpotName(idx, sIdx, e.target.value)}
+                            className="spot-edit-input"
+                          />
+                          <button
+                            onClick={() => removeSpot(idx, sIdx)}
+                            className="spot-delete-btn"
+                            title="Remove Spot"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                      <div className="spot-add-btn" onClick={() => addSpotToZone(idx)} title="Add New Spot">
+                        +
+                      </div>
+                    </div>
                   </div>
                 ))}
 
                 <div style={{display: 'flex', gap: '16px', marginTop: '32px'}}>
                   <button onClick={addZone} className="btn-outline" style={{flex: 1}}>+ Add New Zone</button>
-                  <button onClick={handleSaveMap} className="btn-gold" style={{flex: 2}}>Save Map to Live Database</button>
+                  <button onClick={handleSaveMap} className="btn-gold" style={{flex: 2}}>Save Floor Plan to Live Database</button>
                 </div>
               </div>
             )}
