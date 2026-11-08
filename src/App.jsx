@@ -4,6 +4,246 @@ import { ref, onValue, update, set, get } from 'firebase/database';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // ------------------------------------------------------------------
+// INJECTED CSS FOR LUXURY UI & RESPONSIVENESS
+// ------------------------------------------------------------------
+const luxuryStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg-color: #0a0a0a;
+    --card-bg: #141414;
+    --card-border: #262626;
+    --text-main: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --accent-gold: #c5a059;
+    --accent-gold-hover: #d4af37;
+    --danger-red: #7f1d1d;
+    --success-green: #14532d;
+    --font-heading: 'Playfair Display', serif;
+    --font-ui: 'Inter', sans-serif;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Layouts */
+  .app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  .center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 48px);
+  }
+
+  .dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Cards */
+  .luxury-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 32px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+
+  /* Typography */
+  .heading-brand {
+    font-family: var(--font-heading);
+    color: var(--accent-gold);
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+    letter-spacing: 1px;
+  }
+
+  .heading-dashboard {
+    font-family: var(--font-heading);
+    color: var(--text-main);
+    font-size: 2rem;
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  .car-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .car-subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0 0 24px 0;
+    font-weight: 300;
+  }
+
+  /* Buttons */
+  .btn-gold {
+    background: var(--accent-gold);
+    color: #000;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn-gold:hover:not(:disabled) {
+    background: var(--accent-gold-hover);
+    transform: translateY(-2px);
+  }
+  .btn-gold:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--card-border);
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-outline:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--text-muted);
+  }
+
+  .btn-action {
+    background: #450a0a;
+    color: #fca5a5;
+    border: 1px solid #7f1d1d;
+    padding: 12px;
+    border-radius: 4px;
+    width: 100%;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-action:hover { background: #7f1d1d; color: #fff; }
+
+  /* Inputs */
+  .luxury-input {
+    background: #000;
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 14px;
+    width: 100%;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+  }
+  .luxury-input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+  }
+
+  /* Grid for Dashboard */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-top: 32px;
+  }
+  @media (min-width: 768px) {
+    .dashboard-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Queue Columns */
+  .queue-column {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .queue-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin: 0 0 20px 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  /* Status Box */
+  .status-box {
+    background: #000;
+    border: 1px solid var(--card-border);
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 32px;
+  }
+
+  .ticket-card {
+    background: #000;
+    border: 1px solid var(--card-border);
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  /* Tables */
+  .luxury-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .luxury-table th {
+    padding: 16px;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .luxury-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--card-border);
+  }
+`;
+
+// ------------------------------------------------------------------
 // 1. GUEST VIEW COMPONENT (PUBLIC)
 // ------------------------------------------------------------------
 function GuestTicketView({ ticketId }) {
@@ -11,8 +251,7 @@ function GuestTicketView({ ticketId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const ticketRef = ref(db, `tickets/${ticketId}`);
-    const unsubscribe = onValue(ticketRef, (snapshot) => {
+    const unsubscribe = onValue(ref(db, \`tickets/\${ticketId}\`), (snapshot) => {
       if (snapshot.exists()) setTicket(snapshot.val());
       setLoading(false);
     });
@@ -21,37 +260,45 @@ function GuestTicketView({ ticketId }) {
 
   const requestVehicle = async () => {
     if (!ticket) return;
-    await update(ref(db, `tickets/${ticketId}`), {
+    await update(ref(db, \`tickets/\${ticketId}\`), {
       status: "requested",
       "timestamps/requestedAt": Date.now()
     });
   };
 
-  if (loading) return <div style={styles.container}>Loading your digital ticket...</div>;
-  if (!ticket) return <div style={styles.container}>Ticket not found.</div>;
+  if (loading) return <div className="app-container center-wrapper">Retrieving digital ticket...</div>;
+  if (!ticket) return <div className="app-container center-wrapper">Ticket not found or expired.</div>;
 
   const { vehicle, status, parkingSpot } = ticket;
   const isRequested = status === "requested" || status === "retrieved";
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Waldorf Astoria Valet</h2>
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={styles.carName}>{vehicle.make} {vehicle.model}</h3>
-          <p style={styles.carDetails}>{vehicle.color} • {vehicle.licensePlate}</p>
+    <div className="app-container center-wrapper">
+      <div className="luxury-card">
+        <h2 className="heading-brand">WALDORF ASTORIA</h2>
+        
+        <div>
+          <h3 className="car-title">{vehicle.make} {vehicle.model}</h3>
+          <p className="car-subtitle">{vehicle.color} &nbsp;|&nbsp; {vehicle.licensePlate}</p>
         </div>
-        <div style={styles.statusBox}>
-          <p style={styles.statusLabel}>Current Status</p>
-          <p style={{ ...styles.statusValue, color: status === 'parked' ? '#10b981' : '#f59e0b' }}>
+
+        <div className="status-box">
+          <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Current Status</p>
+          <p style={{ 
+            margin: 0, 
+            fontSize: '1.75rem', 
+            fontWeight: '600',
+            color: status === 'parked' ? 'var(--accent-gold)' : '#f5f5f5' 
+          }}>
             {status.toUpperCase()}
           </p>
-          {status === "parked" && <p style={styles.spotText}>Spot: {parkingSpot}</p>}
+          {status === "parked" && <p style={{ margin: '12px 0 0 0', color: 'var(--text-muted)' }}>Spot: <span style={{color: '#fff'}}>{parkingSpot}</span></p>}
         </div>
+
         <button 
           onClick={requestVehicle} 
           disabled={isRequested}
-          style={{ ...styles.button, backgroundColor: isRequested ? '#9ca3af' : '#000000', cursor: isRequested ? 'not-allowed' : 'pointer' }}
+          className="btn-gold"
         >
           {isRequested ? "Vehicle Requested" : "Request My Vehicle"}
         </button>
@@ -74,19 +321,19 @@ function LoginView() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError('Invalid email or password.');
+      setError('Invalid credentials. Access denied.');
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Staff Login</h2>
-        {error && <p style={{ color: 'red', fontSize: '0.875rem' }}>{error}</p>}
+    <div className="app-container center-wrapper">
+      <div className="luxury-card">
+        <h2 className="heading-brand" style={{color: '#fff'}}>STAFF PORTAL</h2>
+        {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', marginBottom: '16px' }}>{error}</p>}
         <form onSubmit={handleLogin}>
-          <input type="email" placeholder="Email" required style={styles.input} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" required style={styles.input} onChange={(e) => setPassword(e.target.value)} />
-          <button type="submit" style={styles.submitButton}>Login</button>
+          <input type="email" placeholder="Staff Email" required className="luxury-input" onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" required className="luxury-input" onChange={(e) => setPassword(e.target.value)} />
+          <button type="submit" className="btn-gold" style={{marginTop: '8px'}}>Authenticate</button>
         </form>
       </div>
     </div>
@@ -108,10 +355,9 @@ function ValetDashboardView() {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const activeTickets = Object.keys(data)
+        setTickets(Object.keys(data)
           .map(key => ({ id: key, ...data[key] }))
-          .filter(t => t.venueId === currentVenueId && t.status !== "retrieved");
-        setTickets(activeTickets);
+          .filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
       } else {
         setTickets([]);
       }
@@ -120,25 +366,18 @@ function ValetDashboardView() {
   }, []);
 
   const markAsRetrieved = async (ticketId) => {
-    await update(ref(db, `tickets/${ticketId}`), {
-      status: "retrieved",
-      "timestamps/retrievedAt": Date.now()
-    });
+    await update(ref(db, \`tickets/\${ticketId}\`), { status: "retrieved", "timestamps/retrievedAt": Date.now() });
   };
 
   const handleCreateTicket = async (e) => {
     e.preventDefault();
-    const ticketId = `ticket_${Date.now()}`;
-    const newTicket = {
-      venueId: currentVenueId,
-      guestPhone: formData.phone,
+    const ticketId = \`ticket_\${Date.now()}\`;
+    await set(ref(db, \`tickets/\${ticketId}\`), {
+      venueId: currentVenueId, guestPhone: formData.phone,
       vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate },
-      parkingSpot: formData.spot,
-      status: "parked",
-      parkedByUserId: auth.currentUser.uid,
+      parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
       timestamps: { issuedAt: Date.now(), parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
-    };
-    await set(ref(db, `tickets/${ticketId}`), newTicket);
+    });
     setNewlyCreatedTicket(ticketId);
   };
 
@@ -147,61 +386,87 @@ function ValetDashboardView() {
   const currentDomain = window.location.origin;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.dashboard}>
-        <div style={styles.header}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <h1 style={styles.title}>Live Queue</h1>
-            <button onClick={() => signOut(auth)} style={styles.logoutButton}>Logout</button>
+    <div className="app-container">
+      <div className="dashboard-wrapper">
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <h1 className="heading-dashboard">Live Queue</h1>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.8rem'}}>Logout</button>
           </div>
-          <button onClick={() => setShowModal(true)} style={styles.newButton}>+ Log Vehicle</button>
+          <button onClick={() => setShowModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
         </div>
 
-        <div style={styles.grid}>
-          <div style={styles.column}>
-            <h2 style={{...styles.columnTitle, color: '#dc2626'}}>Action Required ({requestedCars.length})</h2>
+        <div className="dashboard-grid">
+          {/* URGENT QUEUE */}
+          <div className="queue-column" style={{ borderColor: 'var(--danger-red)' }}>
+            <h2 className="queue-title" style={{ color: '#fca5a5' }}>Action Required ({requestedCars.length})</h2>
             {requestedCars.map(t => (
-              <div key={t.id} style={{...styles.card, borderLeft: '6px solid #dc2626'}}>
-                <h3 style={styles.carName}>{t.vehicle.make} {t.vehicle.model}</h3>
-                <div style={styles.spotHighlight}>Spot: {t.parkingSpot}</div>
-                <button onClick={() => markAsRetrieved(t.id)} style={styles.actionButton}>Handed to Guest</button>
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid #f87171' }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                  <div>
+                    <h3 style={{margin: '0 0 4px 0', fontSize: '1.2rem'}}>{t.vehicle.make} {t.vehicle.model}</h3>
+                    <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{t.vehicle.color} • {t.vehicle.licensePlate}</p>
+                  </div>
+                  <div style={{background: 'rgba(248, 113, 113, 0.1)', color: '#fca5a5', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.9rem'}}>
+                    Spot: {t.parkingSpot}
+                  </div>
+                </div>
+                <button onClick={() => markAsRetrieved(t.id)} className="btn-action" style={{marginTop: '12px'}}>
+                  Handed to Guest
+                </button>
               </div>
             ))}
+            {requestedCars.length === 0 && <p style={{color: 'var(--text-muted)'}}>No pending requests.</p>}
           </div>
-          <div style={styles.column}>
-            <h2 style={{...styles.columnTitle, color: '#10b981'}}>Parked ({parkedCars.length})</h2>
+
+          {/* PARKED QUEUE */}
+          <div className="queue-column">
+            <h2 className="queue-title" style={{ color: 'var(--text-main)' }}>Currently Parked ({parkedCars.length})</h2>
             {parkedCars.map(t => (
-              <div key={t.id} style={{...styles.card, borderLeft: '6px solid #10b981'}}>
-                <h3 style={styles.carName}>{t.vehicle.make} {t.vehicle.model}</h3>
-                <p style={{...styles.spotText, color: '#10b981'}}>Spot: {t.parkingSpot}</p>
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid var(--card-border)' }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <div>
+                    <h3 style={{margin: '0 0 4px 0', fontSize: '1.1rem'}}>{t.vehicle.make} {t.vehicle.model}</h3>
+                    <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{t.vehicle.licensePlate}</p>
+                  </div>
+                  <div style={{color: 'var(--accent-gold)', fontWeight: '500'}}>
+                    {t.parkingSpot}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
+      {/* NEW ARRIVAL MODAL */}
       {showModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
+        <div className="modal-overlay">
+          <div className="luxury-card" style={{width: '90%'}}>
             {!newlyCreatedTicket ? (
               <form onSubmit={handleCreateTicket}>
-                <h2 style={{marginTop: 0}}>New Arrival</h2>
-                <input required placeholder="Make" style={styles.input} onChange={e => setFormData({...formData, make: e.target.value})} />
-                <input required placeholder="Model" style={styles.input} onChange={e => setFormData({...formData, model: e.target.value})} />
-                <input required placeholder="Color" style={styles.input} onChange={e => setFormData({...formData, color: e.target.value})} />
-                <input required placeholder="Plate" style={styles.input} onChange={e => setFormData({...formData, plate: e.target.value})} />
-                <input required placeholder="Spot" style={styles.input} onChange={e => setFormData({...formData, spot: e.target.value})} />
-                <input required placeholder="Phone" style={styles.input} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
-                  <button type="submit" style={styles.submitButton}>Create</button>
-                  <button type="button" onClick={() => setShowModal(false)} style={styles.cancelButton}>Cancel</button>
+                <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem'}}>LOG ARRIVAL</h2>
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                  <input required placeholder="Make" className="luxury-input" style={{marginBottom: 0}} onChange={e => setFormData({...formData, make: e.target.value})} />
+                  <input required placeholder="Model" className="luxury-input" style={{marginBottom: 0}} onChange={e => setFormData({...formData, model: e.target.value})} />
+                </div>
+                <input required placeholder="Color" className="luxury-input" style={{marginTop: '12px'}} onChange={e => setFormData({...formData, color: e.target.value})} />
+                <input required placeholder="License Plate" className="luxury-input" onChange={e => setFormData({...formData, plate: e.target.value})} />
+                <input required placeholder="Parking Spot" className="luxury-input" onChange={e => setFormData({...formData, spot: e.target.value})} />
+                <input required placeholder="Guest Phone" className="luxury-input" onChange={e => setFormData({...formData, phone: e.target.value})} />
+                <div style={{display: 'flex', gap: '12px', marginTop: '16px'}}>
+                  <button type="submit" className="btn-gold">Generate</button>
+                  <button type="button" onClick={() => setShowModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
                 </div>
               </form>
             ) : (
-              <div style={{textAlign: 'center'}}>
-                <h2 style={{color: '#10b981'}}>Ticket Created!</h2>
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{margin: '20px 0', borderRadius: '8px'}} />
-                <button onClick={() => { setShowModal(false); setNewlyCreatedTicket(null); }} style={styles.submitButton}>Close</button>
+              <div>
+                <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>TICKET ACTIVE</h2>
+                <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
+                  <img src={\`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=\${encodeURIComponent(\`\${currentDomain}/?ticket=\${newlyCreatedTicket}\`)}\`} alt="QR Code" style={{display: 'block'}} />
+                </div>
+                <button onClick={() => { setShowModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
               </div>
             )}
           </div>
@@ -221,57 +486,52 @@ function MasterAdminView() {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        // Get only completed tickets to calculate stats
-        const completed = Object.keys(data)
+        setHistory(Object.keys(data)
           .map(key => ({ id: key, ...data[key] }))
           .filter(t => t.status === "retrieved" && t.timestamps.requestedAt && t.timestamps.retrievedAt)
-          .sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt); // Newest first
-        setHistory(completed);
+          .sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt));
       }
     });
     return () => unsubscribe();
   }, []);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.dashboard}>
-        <div style={styles.header}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <h1 style={styles.title}>Master Admin: Metrics</h1>
-            <button onClick={() => signOut(auth)} style={styles.logoutButton}>Logout</button>
-          </div>
+    <div className="app-container">
+      <div className="dashboard-wrapper">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <h1 className="heading-dashboard">Management Overview</h1>
+          <button onClick={() => signOut(auth)} className="btn-outline">Logout</button>
         </div>
 
-        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-          <h2 style={styles.columnTitle}>Completed Vehicles Log</h2>
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
-                <th style={{ padding: '12px 8px' }}>Vehicle</th>
-                <th style={{ padding: '12px 8px' }}>Plate</th>
-                <th style={{ padding: '12px 8px' }}>Wait Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map(t => {
-                // Calculate wait time in minutes and seconds
-                const ms = t.timestamps.retrievedAt - t.timestamps.requestedAt;
-                const mins = Math.floor(ms / 60000);
-                const secs = ((ms % 60000) / 1000).toFixed(0);
-                
-                return (
-                  <tr key={t.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    <td style={{ padding: '12px 8px', fontWeight: '500' }}>{t.vehicle.make} {t.vehicle.model}</td>
-                    <td style={{ padding: '12px 8px', color: '#6b7280' }}>{t.vehicle.licensePlate}</td>
-                    <td style={{ padding: '12px 8px', color: mins > 5 ? '#dc2626' : '#10b981', fontWeight: '600' }}>
-                      {mins}m {secs}s
-                    </td>
-                  </tr>
-                );
-              })}
-              {history.length === 0 && (<tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>No completed tickets yet.</td></tr>)}
-            </tbody>
-          </table>
+        <div className="queue-column">
+          <h2 className="queue-title">Performance Metrics</h2>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="luxury-table">
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>License Plate</th>
+                  <th>Retrieval Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map(t => {
+                  const ms = t.timestamps.retrievedAt - t.timestamps.requestedAt;
+                  const mins = Math.floor(ms / 60000);
+                  const secs = ((ms % 60000) / 1000).toFixed(0);
+                  return (
+                    <tr key={t.id}>
+                      <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                      <td>{t.vehicle.licensePlate}</td>
+                      <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>
+                        {mins}m {secs}s
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -279,7 +539,7 @@ function MasterAdminView() {
 }
 
 // ------------------------------------------------------------------
-// 5. MAIN ROUTER & AUTH LISTENER
+// 5. MAIN ROUTER & APP SHELL
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -290,63 +550,38 @@ function App() {
   const requestedTicketId = searchParams.get('ticket');
 
   useEffect(() => {
+    // Inject the CSS into the document head automatically
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = luxuryStyles;
+    document.head.appendChild(styleSheet);
+
     if (requestedTicketId) {
       setIsGuest(true);
       setAuthLoading(false);
-      return;
+      return () => document.head.removeChild(styleSheet);
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Fetch the user's role from the database
-        const userRef = ref(db, `users/${currentUser.uid}`);
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          setUserRole(snapshot.val().role); // "valet_runner" or "master_admin"
-        } else {
-          setUserRole("valet_runner"); // Fallback
-        }
+        const snapshot = await get(ref(db, \`users/\${currentUser.uid}\`));
+        setUserRole(snapshot.exists() ? snapshot.val().role : "valet_runner");
       } else {
         setUserRole(null);
       }
       setAuthLoading(false);
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      document.head.removeChild(styleSheet);
+    };
   }, [requestedTicketId]);
 
-  if (authLoading) return <div style={styles.container}>Verifying credentials...</div>;
+  if (authLoading) return <div className="app-container center-wrapper">Authenticating...</div>;
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   if (!userRole) return <LoginView />;
   if (userRole === "master_admin") return <MasterAdminView />;
   return <ValetDashboardView />;
 }
-
-// Shared Styles
-const styles = {
-  container: { display: 'flex', flexDirection: 'column', backgroundColor: '#f3f4f6', minHeight: '100vh', padding: '20px', fontFamily: 'system-ui, sans-serif' },
-  card: { backgroundColor: 'white', padding: '2rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px', textAlign: 'center', margin: 'auto', marginBottom: '16px' },
-  title: { margin: '0', color: '#111827' },
-  carName: { margin: '0 0 4px 0', fontSize: '1.25rem', fontWeight: '700' },
-  carDetails: { margin: '0 0 12px 0', color: '#4b5563', fontSize: '0.875rem' },
-  statusBox: { backgroundColor: '#f9fafb', padding: '16px', borderRadius: '12px', marginBottom: '32px', border: '1px solid #e5e7eb' },
-  statusLabel: { margin: '0 0 4px 0', fontSize: '0.875rem', color: '#6b7280' },
-  statusValue: { margin: 0, fontSize: '1.5rem', fontWeight: '800', letterSpacing: '1px' },
-  spotText: { margin: '8px 0 0 0', fontSize: '0.875rem', fontWeight: '600' },
-  button: { width: '100%', padding: '16px', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1.125rem', fontWeight: '600', transition: 'background-color 0.2s' },
-  dashboard: { maxWidth: '1000px', margin: '0 auto', width: '100%' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
-  newButton: { backgroundColor: '#000', color: '#fff', padding: '10px 20px', borderRadius: '8px', border: 'none', fontWeight: '600', cursor: 'pointer' },
-  logoutButton: { backgroundColor: '#e5e7eb', color: '#374151', padding: '6px 12px', borderRadius: '6px', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '0.875rem' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' },
-  column: { backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' },
-  columnTitle: { margin: '0 0 16px 0', fontSize: '1.25rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '12px' },
-  spotHighlight: { backgroundColor: '#fee2e2', color: '#991b1b', padding: '8px', borderRadius: '6px', fontWeight: '600', marginBottom: '12px', fontSize: '0.875rem' },
-  actionButton: { width: '100%', padding: '12px', backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: '#fff', padding: '30px', borderRadius: '12px', width: '90%', maxWidth: '400px' },
-  input: { width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #d1d5db', boxSizing: 'border-box' },
-  submitButton: { width: '100%', padding: '12px', backgroundColor: '#000', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' },
-  cancelButton: { flex: 1, padding: '12px', backgroundColor: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }
-};
 
 export default App;
