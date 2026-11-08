@@ -4,81 +4,105 @@ import { ref, onValue, update, set, get } from 'firebase/database';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // ------------------------------------------------------------------
-// INJECTED CSS FOR LUXURY UI & RESPONSIVENESS
+// INJECTED CSS FOR ULTRA-LUXURY UI & SMOOTH ANIMATIONS
 // ------------------------------------------------------------------
 const luxuryStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg-color: #0a0a0a;
-    --card-bg: #141414;
-    --card-border: #262626;
+    --bg-color: #050505;
+    --card-bg: #0a0a0a;
+    --card-border: rgba(255, 255, 255, 0.08);
     --text-main: #f5f5f5;
-    --text-muted: #a3a3a3;
-    --accent-gold: #c5a059;
-    --accent-gold-hover: #d4af37;
-    --danger-red: #7f1d1d;
-    --success-green: #14532d;
+    --text-muted: #888888;
+    --accent-gold: #d4af37;
+    --accent-gold-hover: #f1c40f;
+    --danger-red: #ef4444;
+    --danger-red-hover: #dc2626;
+    --success-green: #10b981;
     --font-heading: 'Playfair Display', serif;
     --font-ui: 'Inter', sans-serif;
   }
 
-  body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   .app-container { min-height: 100vh; display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; }
   .center-wrapper { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 48px); }
-  .dashboard-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; }
+  .dashboard-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; animation: fadeIn 0.6s ease-out; }
 
-  .luxury-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
-  .heading-brand { font-family: var(--font-heading); color: var(--accent-gold); font-size: 1.75rem; font-weight: 600; margin: 0 0 24px 0; letter-spacing: 1px; }
-  .heading-dashboard { font-family: var(--font-heading); color: var(--text-main); font-size: 2rem; margin: 0; font-weight: 400; letter-spacing: 0.5px; }
+  /* Smooth Animations */
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  
+  .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-  .btn-gold { background: var(--accent-gold); color: #000; border: none; padding: 16px 24px; border-radius: 4px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
-  .btn-gold:hover:not(:disabled) { background: var(--accent-gold-hover); transform: translateY(-2px); }
-  .btn-gold:disabled { background: #333; color: #666; cursor: not-allowed; }
+  /* Premium Cards */
+  .luxury-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 24px 48px rgba(0,0,0,0.6); text-align: center; position: relative; overflow: hidden; }
+  .luxury-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-gold), transparent); opacity: 0.3; }
   
-  .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
-  .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
-  
-  .btn-action { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; padding: 12px; border-radius: 4px; width: 100%; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .btn-action:hover { background: #7f1d1d; color: #fff; }
+  .heading-brand { font-family: var(--font-heading); color: var(--accent-gold); font-size: 1.75rem; font-weight: 600; margin: 0 0 24px 0; letter-spacing: 2px; text-transform: uppercase; }
+  .heading-dashboard { font-family: var(--font-heading); color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 400; letter-spacing: 0.5px; }
 
-  .luxury-input { background: #000; border: 1px solid var(--card-border); color: var(--text-main); padding: 14px; width: 100%; border-radius: 4px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; }
-  .luxury-input:focus { outline: none; border-color: var(--accent-gold); }
-  .luxury-input[readonly] { cursor: pointer; background: #1a1a1a; }
+  /* Buttons */
+  .btn-gold { background: linear-gradient(135deg, var(--accent-gold), #b8860b); color: #000; border: none; padding: 16px 24px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); }
+  .btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); filter: brightness(1.1); }
+  .btn-gold:active:not(:disabled) { transform: translateY(0); }
+  .btn-gold:disabled { background: #222; color: #555; box-shadow: none; cursor: not-allowed; }
   
+  .btn-outline { background: rgba(255,255,255,0.03); color: var(--text-main); border: 1px solid var(--card-border); padding: 12px 20px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(4px); }
+  .btn-outline:hover { background: rgba(255,255,255,0.08); border-color: var(--text-muted); transform: translateY(-1px); }
+  
+  .btn-action { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+  .btn-action:hover { background: var(--danger-red); color: #fff; border-color: var(--danger-red); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+
+  /* Inputs */
+  .luxury-input { background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 8px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; transition: all 0.3s ease; }
+  .luxury-input:focus { outline: none; border-color: var(--accent-gold); background: rgba(0,0,0,0.8); box-shadow: 0 0 0 1px var(--accent-gold); }
+  .luxury-input[readonly] { cursor: pointer; }
+  
+  /* Autocomplete */
   .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
-  .autocomplete-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1a1a1a; border: 1px solid var(--accent-gold); border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.8); list-style: none; padding: 0; margin: 0; text-align: left; }
-  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--card-border); transition: background 0.2s; font-size: 0.95rem; }
-  .autocomplete-item:hover { background: #262626; color: var(--accent-gold); }
+  .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #111; border: 1px solid var(--accent-gold); border-radius: 8px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.9); list-style: none; padding: 4px; margin: 0; text-align: left; animation: slideUp 0.2s ease-out; }
+  .autocomplete-item { padding: 14px 16px; cursor: pointer; color: var(--text-muted); border-radius: 6px; transition: all 0.2s; font-size: 0.95rem; }
+  .autocomplete-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--accent-gold); }
 
-  /* Parking Grid Styles */
-  .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
-  .spot-box { padding: 16px 4px; border-radius: 6px; text-align: center; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--card-border); transition: all 0.2s; box-sizing: border-box; }
-  .spot-empty { background: rgba(20, 83, 45, 0.15); color: #86efac; border-color: #14532d; cursor: pointer; }
-  .spot-empty:hover { background: #14532d; color: #fff; transform: scale(1.05); }
-  .spot-occupied { background: rgba(127, 29, 29, 0.15); color: #fca5a5; border-color: #7f1d1d; cursor: not-allowed; opacity: 0.7; }
-  .zone-title { width: 100%; grid-column: 1 / -1; margin: 16px 0 8px 0; color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 8px;}
+  /* Parking Grid */
+  .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 14px; margin-top: 20px; max-height: 55vh; overflow-y: auto; padding: 4px 12px 12px 4px; }
+  .spot-box { padding: 18px 4px; border-radius: 8px; text-align: center; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--card-border); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; position: relative; overflow: hidden; }
+  .spot-empty { background: rgba(16, 185, 129, 0.05); color: var(--success-green); border-color: rgba(16, 185, 129, 0.3); cursor: pointer; }
+  .spot-empty:hover { background: var(--success-green); color: #fff; border-color: var(--success-green); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3); }
+  .spot-occupied { background: rgba(239, 68, 68, 0.05); color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3); cursor: not-allowed; opacity: 0.6; }
+  .zone-title { width: 100%; grid-column: 1 / -1; margin: 24px 0 12px 0; color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.35rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 8px;}
 
-  /* Map Editor Specific Styles */
-  .spot-edit-input { background: #1a1a1a; color: var(--accent-gold); border: 1px dashed var(--accent-gold); text-align: center; border-radius: 6px; padding: 16px 4px; font-size: 0.85rem; font-weight: bold; width: 100%; box-sizing: border-box; font-family: var(--font-ui); transition: all 0.2s;}
-  .spot-edit-input:focus { outline: none; background: #262626; border-style: solid; }
-  .spot-delete-btn { position: absolute; top: -6px; right: -6px; background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.2s;}
-  .spot-delete-btn:hover { transform: scale(1.15); background: #991b1b; }
-  .spot-add-btn { background: rgba(197, 160, 89, 0.05); color: var(--accent-gold); border: 1px dashed var(--accent-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 6px; min-height: 49px; transition: all 0.2s; box-sizing: border-box;}
+  /* Editor */
+  .spot-edit-input { background: rgba(0,0,0,0.3); color: var(--accent-gold); border: 1px dashed rgba(212, 175, 55, 0.5); text-align: center; border-radius: 8px; padding: 16px 4px; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; font-family: var(--font-ui); transition: all 0.3s ease;}
+  .spot-edit-input:focus { outline: none; background: rgba(0,0,0,0.8); border-style: solid; border-color: var(--accent-gold); }
+  .spot-delete-btn { position: absolute; top: -8px; right: -8px; background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; }
+  div[style*="position: relative"]:hover .spot-delete-btn { opacity: 1; transform: scale(1); }
+  .spot-delete-btn:hover { background: var(--danger-red-hover); transform: scale(1.15) !important; }
+  .spot-add-btn { background: rgba(212, 175, 55, 0.05); color: var(--accent-gold); border: 1px dashed rgba(212, 175, 55, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; border-radius: 8px; min-height: 54px; transition: all 0.3s ease; box-sizing: border-box;}
   .spot-add-btn:hover { background: var(--accent-gold); color: #000; border-style: solid;}
 
+  /* Dashboard Structure */
   .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
   @media (min-width: 768px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
-  .queue-column { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 24px; }
-  .queue-title { font-family: var(--font-heading); font-size: 1.5rem; margin: 0 0 20px 0; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); }
-  .status-box { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 6px; margin-bottom: 32px; }
-  .ticket-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 6px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+  .queue-column { background: rgba(10,10,10,0.6); border: 1px solid var(--card-border); border-radius: 12px; padding: 24px; backdrop-filter: blur(10px); }
+  .queue-title { font-family: var(--font-heading); font-size: 1.5rem; margin: 0 0 24px 0; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); }
   
-  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; }
-  .luxury-table th { padding: 16px; border-bottom: 1px solid var(--card-border); color: var(--text-muted); font-weight: 500; }
-  .luxury-table td { padding: 16px; border-bottom: 1px solid var(--card-border); }
-  .editor-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 8px; margin-bottom: 24px; }
+  .ticket-card { background: #000; border: 1px solid var(--card-border); padding: 24px; border-radius: 12px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; animation: slideUp 0.4s ease-out backwards; }
+  .ticket-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); }
+  
+  /* Overlays & Modals */
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; animation: fadeIn 0.3s ease-out; }
+  
+  /* Tables */
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+  .luxury-table th { padding: 16px; border-bottom: 1px solid var(--card-border); color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; }
+  .luxury-table td { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.2s; }
+  .luxury-table tr:hover td { background: rgba(255,255,255,0.02); }
+  
+  .editor-card { background: #000; border: 1px solid var(--card-border); padding: 24px; border-radius: 12px; margin-bottom: 24px; animation: slideUp 0.4s ease-out backwards; }
 `;
 
 // ------------------------------------------------------------------
@@ -144,11 +168,7 @@ const COUNTRY_CODES = [
   { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" }, { label: "🇶🇦 Qatar (+974)", value: "+974" }, { label: "🇰🇼 Kuwait (+965)", value: "+965" }, { label: "🇧🇭 Bahrain (+973)", value: "+973" },
   { label: "🇴🇲 Oman (+968)", value: "+968" }, { label: "🇯🇴 Jordan (+962)", value: "+962" }, { label: "🇪🇬 Egypt (+20)", value: "+20" }, { label: "🇱🇧 Lebanon (+961)", value: "+961" },
   { label: "🇫🇷 France (+33)", value: "+33" }, { label: "🇩🇪 Germany (+49)", value: "+49" }, { label: "🇮🇹 Italy (+39)", value: "+39" }, { label: "🇪🇸 Spain (+34)", value: "+34" },
-  { label: "🇨🇭 Switzerland (+41)", value: "+41" }, { label: "🇳🇱 Netherlands (+31)", value: "+31" }, { label: "🇧🇪 Belgium (+32)", value: "+32" }, { label: "🇸🇪 Sweden (+46)", value: "+46" },
-  { label: "🇷🇺 Russia (+7)", value: "+7" }, { label: "🇮🇳 India (+91)", value: "+91" }, { label: "🇨🇳 China (+86)", value: "+86" }, { label: "🇯🇵 Japan (+81)", value: "+81" },
-  { label: "🇰🇷 South Korea (+82)", value: "+82" }, { label: "🇦🇺 Australia (+61)", value: "+61" }, { label: "🇳🇿 New Zealand (+64)", value: "+64" }, { label: "🇧🇷 Brazil (+55)", value: "+55" },
-  { label: "🇲🇽 Mexico (+52)", value: "+52" }, { label: "🇿🇦 South Africa (+27)", value: "+27" }, { label: "🇹🇷 Turkey (+90)", value: "+90" }, { label: "🇬🇷 Greece (+30)", value: "+30" },
-  { label: "🇵🇹 Portugal (+351)", value: "+351" }, { label: "🇦🇹 Austria (+43)", value: "+43" }, { label: "🇮🇪 Ireland (+353)", value: "+353" }, { label: "🇵🇱 Poland (+48)", value: "+48" }
+  { label: "🇨🇭 Switzerland (+41)", value: "+41" }, { label: "🇳🇱 Netherlands (+31)", value: "+31" }, { label: "🇧🇪 Belgium (+32)", value: "+32" }, { label: "🇸🇪 Sweden (+46)", value: "+46" }
 ];
 
 const DEFAULT_PARKING_MAP = [
@@ -157,23 +177,36 @@ const DEFAULT_PARKING_MAP = [
   { zone: 'Zone B', spots: Array.from({length: 30}, (_, i) => `B-${i + 1}`) }
 ];
 
-// Helper to determine the prefix based on Zone name
 const getZonePrefix = (zoneName) => {
   const trimmed = zoneName.trim();
-  // If it matches "Zone [Letter/Number]" (e.g. "Zone C")
-  if (/^Zone\s+[A-Z0-9]+$/i.test(trimmed)) {
-    return trimmed.split(/\s+/)[1].toUpperCase();
-  }
-  // Otherwise grab the first word
+  if (/^Zone\s+[A-Z0-9]+$/i.test(trimmed)) return trimmed.split(/\s+/)[1].toUpperCase();
   const firstWord = trimmed.split(/\s+/)[0];
-  // If the first word is all caps (like "VIP"), use it entirely
-  if (firstWord === firstWord.toUpperCase() && firstWord.length > 1) {
-    return firstWord;
-  }
-  // Default to the very first letter (e.g. "North Lot" -> "N")
+  if (firstWord === firstWord.toUpperCase() && firstWord.length > 1) return firstWord;
   return firstWord.charAt(0).toUpperCase();
 };
 
+// ------------------------------------------------------------------
+// CUSTOM CONFIRM MODAL (Replaces window.confirm)
+// ------------------------------------------------------------------
+function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
+  if (!isOpen) return null;
+  return (
+    <div className="modal-overlay" style={{ zIndex: 1100 }}>
+      <div className="luxury-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
+        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--accent-gold)', marginTop: 0, fontFamily: 'var(--font-heading)', fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          {title}
+        </h3>
+        <p style={{ color: 'var(--text-main)', marginBottom: '32px', lineHeight: '1.6', fontSize: '0.95rem' }}>
+          {message}
+        </p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-gold"} style={{ flex: 1 }}>{confirmText}</button>
+          <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ------------------------------------------------------------------
 // REUSABLE COMPONENTS
@@ -277,20 +310,20 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots }) {
 
   return (
     <div className="modal-overlay">
-      <div className="luxury-card" style={{width: '90%', maxWidth: isMapOpen ? '800px' : '420px', padding: '24px', maxHeight: '90vh', overflowY: 'visible', transition: 'max-width 0.3s'}}>
+      <div className="luxury-card animate-scale-in" style={{width: '90%', maxWidth: isMapOpen ? '850px' : '460px', padding: '40px', maxHeight: '90vh', overflowY: 'visible', transition: 'max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'}}>
         
         {newlyCreatedTicket ? (
-          <div>
+          <div className="animate-slide-up">
             <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>TICKET ACTIVE</h2>
-            <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
-            <button onClick={onClose} className="btn-outline" style={{width: '100%'}}>Return to Dashboard</button>
+            <button onClick={onClose} className="btn-outline" style={{width: '100%', padding: '16px'}}>Return to Dashboard</button>
           </div>
         ) : isMapOpen ? (
-          <div style={{textAlign: 'left'}}>
-            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
-            <p style={{color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px'}}>Tap an empty green spot to assign it.</p>
+          <div className="animate-slide-up" style={{textAlign: 'left'}}>
+            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.75rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
+            <p style={{color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px'}}>Tap an empty green spot to assign it to this vehicle.</p>
             
             <div className="parking-map" style={{maxHeight: '60vh'}}>
               {parkingMap.map((section, idx) => (
@@ -316,40 +349,39 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots }) {
                 </div>
               ))}
             </div>
-            <button onClick={() => setIsMapOpen(false)} className="btn-outline" style={{width: '100%', marginTop: '24px'}}>Cancel Selection</button>
+            <button onClick={() => setIsMapOpen(false)} className="btn-outline" style={{width: '100%', marginTop: '32px', padding: '16px'}}>Cancel Selection</button>
           </div>
         ) : (
-          <form onSubmit={handleCreateTicket}>
-            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '16px'}}>LOG ARRIVAL</h2>
+          <form onSubmit={handleCreateTicket} className="animate-slide-up">
+            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.75rem', marginBottom: '24px'}}>LOG ARRIVAL</h2>
             
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
               <LuxuryAutocomplete options={availableMakes} value={formData.make} onChange={(val) => setFormData({...formData, make: val, model: ''})} placeholder="Search Make" isObject={false} />
               <LuxuryAutocomplete options={availableModels} value={formData.model} onChange={(val) => setFormData({...formData, model: val})} placeholder="Search Model" isObject={false} />
             </div>
             
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
               <input required placeholder="Color" className="luxury-input" style={{marginBottom: '16px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
-              <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} />
+              <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px', textTransform: 'uppercase'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} />
             </div>
             
-            {/* The interactive spot selector */}
             <input 
               required 
               readOnly
               placeholder="Tap to Select Parking Spot" 
               className="luxury-input" 
-              style={{marginBottom: '16px', textAlign: 'center', color: 'var(--accent-gold)', fontWeight: 'bold'}} 
+              style={{marginBottom: '20px', textAlign: 'center', color: 'var(--accent-gold)', fontWeight: '600', letterSpacing: '1px'}} 
               value={formData.spot} 
               onClick={() => setIsMapOpen(true)} 
             />
             
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', alignItems: 'start'}}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', alignItems: 'start'}}>
               <LuxuryAutocomplete options={COUNTRY_CODES} value={formData.countryCode} onChange={(val) => setFormData({...formData, countryCode: val})} placeholder="+ Code" isObject={true} />
-              <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '16px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+              <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '24px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
             </div>
 
-            <div style={{display: 'flex', gap: '12px', marginTop: '8px'}}>
-              <button type="submit" className="btn-gold">Generate Ticket</button>
+            <div style={{display: 'flex', gap: '16px'}}>
+              <button type="submit" className="btn-gold" style={{flex: 2}}>Generate Ticket</button>
               <button type="button" onClick={onClose} className="btn-outline" style={{flex: 1}}>Cancel</button>
             </div>
           </form>
@@ -379,28 +411,28 @@ function GuestTicketView({ ticketId }) {
     await update(ref(db, `tickets/${ticketId}`), { status: "requested", "timestamps/requestedAt": Date.now() });
   };
 
-  if (loading) return <div className="app-container center-wrapper">Retrieving digital ticket...</div>;
-  if (!ticket) return <div className="app-container center-wrapper">Ticket not found or expired.</div>;
+  if (loading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-gold)', letterSpacing: '2px'}}>RETRIEVING TICKET...</div></div>;
+  if (!ticket) return <div className="app-container center-wrapper"><div className="luxury-card animate-scale-in">Ticket not found or expired.</div></div>;
 
   const { vehicle, status, parkingSpot } = ticket;
   const isRequested = status === "requested" || status === "retrieved";
 
   return (
     <div className="app-container center-wrapper">
-      <div className="luxury-card">
+      <div className="luxury-card animate-scale-in">
         <h2 className="heading-brand">WALDORF ASTORIA</h2>
-        <div>
+        <div style={{ marginBottom: '32px' }}>
           <h3 className="car-title">{vehicle.make} {vehicle.model}</h3>
           <p className="car-subtitle">{vehicle.color} &nbsp;|&nbsp; {vehicle.licensePlate}</p>
         </div>
-        <div className="status-box">
-          <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Current Status</p>
-          <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: '600', color: status === 'parked' ? 'var(--accent-gold)' : '#f5f5f5' }}>
+        <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid var(--card-border)', padding: '24px', borderRadius: '12px', marginBottom: '40px' }}>
+          <p style={{ margin: '0 0 12px 0', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Status</p>
+          <p style={{ margin: 0, fontSize: '2rem', fontWeight: '400', color: status === 'parked' ? 'var(--accent-gold)' : '#fff', letterSpacing: '1px' }}>
             {status.toUpperCase()}
           </p>
-          {status === "parked" && <p style={{ margin: '12px 0 0 0', color: 'var(--text-muted)' }}>Spot: <span style={{color: '#fff'}}>{parkingSpot}</span></p>}
+          {status === "parked" && <p style={{ margin: '16px 0 0 0', color: 'var(--text-muted)', fontSize: '1rem' }}>Spot: <span style={{color: '#fff', fontWeight: '600'}}>{parkingSpot}</span></p>}
         </div>
-        <button onClick={requestVehicle} disabled={isRequested} className="btn-gold">
+        <button onClick={requestVehicle} disabled={isRequested} className="btn-gold" style={{ padding: '20px' }}>
           {isRequested ? "Vehicle Requested" : "Request My Vehicle"}
         </button>
       </div>
@@ -424,13 +456,13 @@ function LoginView() {
 
   return (
     <div className="app-container center-wrapper">
-      <div className="luxury-card">
-        <h2 className="heading-brand" style={{color: '#fff'}}>STAFF PORTAL</h2>
-        {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', marginBottom: '16px' }}>{error}</p>}
+      <div className="luxury-card animate-scale-in" style={{ padding: '48px 32px' }}>
+        <h2 className="heading-brand" style={{color: '#fff', marginBottom: '40px'}}>STAFF PORTAL</h2>
+        {error && <p style={{ color: 'var(--danger-red)', fontSize: '0.9rem', marginBottom: '24px', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '6px' }}>{error}</p>}
         <form onSubmit={handleLogin}>
-          <input type="email" placeholder="Staff Email" required className="luxury-input" style={{marginBottom: '16px'}} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" required className="luxury-input" style={{marginBottom: '16px'}} onChange={(e) => setPassword(e.target.value)} />
-          <button type="submit" className="btn-gold" style={{marginTop: '8px'}}>Authenticate</button>
+          <input type="email" placeholder="Staff Email" required className="luxury-input" style={{marginBottom: '20px'}} onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" required className="luxury-input" style={{marginBottom: '32px'}} onChange={(e) => setPassword(e.target.value)} />
+          <button type="submit" className="btn-gold">Authenticate</button>
         </form>
       </div>
     </div>
@@ -470,50 +502,52 @@ function ValetDashboardView({ parkingMap }) {
     <div className="app-container">
       <div className="dashboard-wrapper">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <h1 className="heading-dashboard">Live Queue</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.8rem'}}>Logout</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
           </div>
-          <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
+          <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto', padding: '12px 32px'}}>+ Log Arrival</button>
         </div>
 
         <div className="dashboard-grid">
           {/* URGENT QUEUE */}
-          <div className="queue-column" style={{ borderColor: 'var(--danger-red)' }}>
-            <h2 className="queue-title" style={{ color: '#fca5a5' }}>Action Required ({requestedCars.length})</h2>
-            {requestedCars.map(t => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid #f87171' }}>
+          <div className="queue-column" style={{ borderColor: 'var(--danger-red)', background: 'rgba(239, 68, 68, 0.02)' }}>
+            <h2 className="queue-title" style={{ color: '#fca5a5', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Action Required ({requestedCars.length})</h2>
+            {requestedCars.map((t, index) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid #ef4444', animationDelay: `${index * 0.05}s` }}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                   <div>
-                    <h3 style={{margin: '0 0 4px 0', fontSize: '1.2rem'}}>{t.vehicle.make} {t.vehicle.model}</h3>
-                    <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{t.vehicle.color} • {t.vehicle.licensePlate}</p>
+                    <h3 style={{margin: '0 0 6px 0', fontSize: '1.25rem', fontWeight: '600'}}>{t.vehicle.make} {t.vehicle.model}</h3>
+                    <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.95rem'}}>{t.vehicle.color} • <span style={{color: '#fff'}}>{t.vehicle.licensePlate}</span></p>
                   </div>
-                  <div style={{background: 'rgba(248, 113, 113, 0.1)', color: '#fca5a5', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.9rem'}}>
+                  <div style={{background: 'rgba(239, 68, 68, 0.1)', color: '#fca5a5', padding: '6px 10px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.9rem', border: '1px solid rgba(239,68,68,0.3)'}}>
                     Spot: {t.parkingSpot}
                   </div>
                 </div>
-                <button onClick={() => markAsRetrieved(t.id)} className="btn-action" style={{marginTop: '12px'}}>Handed to Guest</button>
+                <button onClick={() => markAsRetrieved(t.id)} className="btn-action" style={{marginTop: '16px'}}>Handed to Guest</button>
               </div>
             ))}
+            {requestedCars.length === 0 && <p style={{color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '32px'}}>No pending requests.</p>}
           </div>
 
           {/* PARKED QUEUE */}
           <div className="queue-column">
             <h2 className="queue-title" style={{ color: 'var(--text-main)' }}>Currently Parked ({parkedCars.length})</h2>
-            {parkedCars.map(t => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid var(--card-border)' }}>
+            {parkedCars.map((t, index) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '4px solid var(--card-border)', animationDelay: `${index * 0.05}s` }}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                   <div>
-                    <h3 style={{margin: '0 0 4px 0', fontSize: '1.1rem'}}>{t.vehicle.make} {t.vehicle.model}</h3>
-                    <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{t.vehicle.licensePlate}</p>
+                    <h3 style={{margin: '0 0 6px 0', fontSize: '1.15rem', fontWeight: '500'}}>{t.vehicle.make} {t.vehicle.model}</h3>
+                    <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.95rem'}}><span style={{color: '#fff'}}>{t.vehicle.licensePlate}</span></p>
                   </div>
-                  <div style={{color: 'var(--accent-gold)', fontWeight: '500', textAlign: 'right'}}>{t.parkingSpot}</div>
+                  <div style={{color: 'var(--accent-gold)', fontWeight: '600', textAlign: 'right', fontSize: '1.1rem'}}>{t.parkingSpot}</div>
                 </div>
-                <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{marginTop: '12px', padding: '8px', fontSize: '0.85rem'}}>
-                  Show QR Code
+                <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{marginTop: '16px', padding: '10px', fontSize: '0.9rem'}}>
+                  View Digital Ticket
                 </button>
               </div>
             ))}
+            {parkedCars.length === 0 && <p style={{color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '32px'}}>Lot is completely empty.</p>}
           </div>
         </div>
       </div>
@@ -522,12 +556,12 @@ function ValetDashboardView({ parkingMap }) {
 
       {qrModalTicket && (
         <div className="modal-overlay">
-          <div className="luxury-card" style={{width: '90%'}}>
+          <div className="luxury-card animate-scale-in" style={{width: '90%'}}>
             <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>DIGITAL TICKET</h2>
-            <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            <div style={{background: '#fff', padding: '20px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
-            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%'}}>Close</button>
+            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Ticket</button>
           </div>
         </div>
       )}
@@ -542,15 +576,13 @@ function MasterAdminView({ parkingMap }) {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
   const [activeTab, setActiveTab] = useState('parked');
-  
-  // Shared Arrival Modal for Admin
   const [showLogModal, setShowLogModal] = useState(false);
-  
-  // Map Editor State
   const [editingMap, setEditingMap] = useState([]);
+  
+  // Custom Confirm Dialog State
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
 
   useEffect(() => {
-    // Make a deep copy so we can edit freely before saving
     setEditingMap(JSON.parse(JSON.stringify(parkingMap || [])));
   }, [parkingMap]);
 
@@ -574,10 +606,19 @@ function MasterAdminView({ parkingMap }) {
 
   const occupiedSpots = parkedCars.map(t => t.parkingSpot);
 
-  // --- Editor Functions ---
+  // --- Editor Functions using Custom Confirm ---
   const handleSaveMap = async () => {
-    await set(ref(db, 'parkingMap'), editingMap);
-    alert('Parking Floor Plan Live Updated Successfully');
+    setConfirmConfig({
+      isOpen: true,
+      title: "Save Floor Plan",
+      message: "Are you sure you want to push these changes to the live database? This will update the interactive map for all valets instantly.",
+      isDanger: false,
+      onConfirm: async () => {
+        await set(ref(db, 'parkingMap'), editingMap);
+        setConfirmConfig({ ...confirmConfig, isOpen: false });
+      },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
   };
 
   const moveZone = (index, direction) => {
@@ -594,9 +635,8 @@ function MasterAdminView({ parkingMap }) {
     let nextZoneName = "Zone A";
     if (editingMap.length > 0) {
       const lastZone = editingMap[editingMap.length - 1].zone.trim();
-      const match = lastZone.match(/^(Zone\s+)([A-Y])$/i); // Matches "Zone A" to "Zone Y"
+      const match = lastZone.match(/^(Zone\s+)([A-Y])$/i); 
       if (match) {
-        // Automatically increment to the next letter (e.g. Zone B -> Zone C)
         const nextLetter = String.fromCharCode(match[2].charCodeAt(0) + 1);
         nextZoneName = match[1] + nextLetter;
       } else {
@@ -607,11 +647,19 @@ function MasterAdminView({ parkingMap }) {
   };
 
   const removeZone = (index) => {
-    if(window.confirm("WARNING: Are you sure you want to delete this entire zone? All spots inside will be lost.")) {
-      const newMap = [...editingMap];
-      newMap.splice(index, 1);
-      setEditingMap(newMap);
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: "Delete Zone",
+      message: "Are you sure you want to delete this entire zone? All parking spots inside this zone will be permanently lost.",
+      isDanger: true,
+      onConfirm: () => {
+        const newMap = [...editingMap];
+        newMap.splice(index, 1);
+        setEditingMap(newMap);
+        setConfirmConfig({ ...confirmConfig, isOpen: false });
+      },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
   };
 
   const updateSpotName = (zoneIdx, spotIdx, val) => {
@@ -621,22 +669,28 @@ function MasterAdminView({ parkingMap }) {
   };
 
   const removeSpot = (zoneIdx, spotIdx) => {
-    if(window.confirm("Delete this parking spot?")) {
-      const newMap = [...editingMap];
-      newMap[zoneIdx].spots.splice(spotIdx, 1);
-      setEditingMap(newMap);
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: "Remove Spot",
+      message: "Are you sure you want to delete this parking spot from the floor plan?",
+      isDanger: true,
+      onConfirm: () => {
+        const newMap = [...editingMap];
+        newMap[zoneIdx].spots.splice(spotIdx, 1);
+        setEditingMap(newMap);
+        setConfirmConfig({ ...confirmConfig, isOpen: false });
+      },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
   };
 
   const addSpotToZone = (zoneIdx) => {
     const newMap = [...editingMap];
     const prefix = getZonePrefix(newMap[zoneIdx].zone);
     
-    // Auto-generate the next available number
     let newNum = newMap[zoneIdx].spots.length + 1;
     let newSpotName = `${prefix}-${newNum}`;
     
-    // Ensure we don't accidentally create a duplicate if someone deleted an earlier spot
     while (newMap[zoneIdx].spots.includes(newSpotName)) {
       newNum++;
       newSpotName = `${prefix}-${newNum}`;
@@ -650,21 +704,21 @@ function MasterAdminView({ parkingMap }) {
     <div className="app-container">
       <div className="dashboard-wrapper">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <h1 className="heading-dashboard">Management Overview</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.8rem'}}>Logout</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
           </div>
-          <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
+          <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto', padding: '12px 32px'}}>+ Log Arrival</button>
         </div>
 
         <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('parked')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
+          <button className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('parked')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
             Currently Parked ({parkedCars.length})
           </button>
-          <button className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
+          <button className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
             Performance Metrics
           </button>
-          <button className={activeTab === 'map' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
+          <button className={activeTab === 'map' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
             Visual Map Editor
           </button>
         </div>
@@ -675,9 +729,8 @@ function MasterAdminView({ parkingMap }) {
           </h2>
           
           <div style={{ overflowX: 'auto' }}>
-            {/* PARKED OR METRICS TABS */}
             {activeTab !== 'map' ? (
-              <table className="luxury-table">
+              <table className="luxury-table animate-slide-up">
                 {activeTab === 'parked' && (
                   <>
                     <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th></tr></thead>
@@ -686,15 +739,15 @@ function MasterAdminView({ parkingMap }) {
                         const { date, time } = formatDateTime(t.timestamps?.parkedAt);
                         return (
                           <tr key={t.id}>
-                            <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                            <td style={{ color: '#fff', fontWeight: '500' }}>{t.vehicle.make} {t.vehicle.model}</td>
                             <td>{t.vehicle.licensePlate}</td>
                             <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
-                            <td style={{ color: 'var(--accent-gold)' }}>{t.parkingSpot}</td>
+                            <td style={{ color: 'var(--accent-gold)', fontWeight: '600' }}>{t.parkingSpot}</td>
                             <td>{date}</td><td>{time}</td>
                           </tr>
                         );
                       })}
-                      {parkedCars.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>}
+                      {parkedCars.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>Lot is completely empty.</td></tr>}
                     </tbody>
                   </>
                 )}
@@ -710,15 +763,15 @@ function MasterAdminView({ parkingMap }) {
                         const secs = ((ms % 60000) / 1000).toFixed(0);
                         return (
                           <tr key={t.id}>
-                            <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                            <td style={{ color: '#fff', fontWeight: '500' }}>{t.vehicle.make} {t.vehicle.model}</td>
                             <td>{t.vehicle.licensePlate}</td>
                             <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
                             <td>{date}</td>
-                            <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>{mins}m {secs}s</td>
+                            <td style={{ color: mins > 5 ? 'var(--danger-red)' : 'var(--accent-gold)', fontWeight: '600' }}>{mins}m {secs}s</td>
                           </tr>
                         );
                       })}
-                      {history.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>}
+                      {history.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No completed retrieval data.</td></tr>}
                     </tbody>
                   </>
                 )}
@@ -726,12 +779,12 @@ function MasterAdminView({ parkingMap }) {
             ) : (
               
               /* VISUAL MAP EDITOR TAB */
-              <div style={{maxWidth: '900px', margin: '0 auto'}}>
-                <p style={{color: 'var(--text-muted)', marginBottom: '24px'}}>Changes made here will instantly update the interactive floor map for all valets. Tap a spot to rename it.</p>
+              <div style={{maxWidth: '1000px', margin: '0 auto'}}>
+                <p style={{color: 'var(--text-muted)', marginBottom: '32px', fontSize: '1rem'}}>Changes made here will instantly update the interactive floor map for all valets. Tap a spot to rename it.</p>
                 
                 {editingMap.map((section, idx) => (
-                  <div key={idx} className="editor-card">
-                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                  <div key={idx} className="editor-card" style={{ animationDelay: `${idx * 0.1}s` }}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
                       <input 
                         type="text" 
                         value={section.zone} 
@@ -741,16 +794,15 @@ function MasterAdminView({ parkingMap }) {
                           setEditingMap(newMap);
                         }} 
                         className="luxury-input" 
-                        style={{width: '60%', marginBottom: 0, fontSize: '1.25rem', color: 'var(--accent-gold)'}} 
+                        style={{width: '60%', marginBottom: 0, fontSize: '1.35rem', color: 'var(--accent-gold)', fontFamily: 'var(--font-heading)', background: 'transparent', border: 'none', borderBottom: '1px solid var(--card-border)', padding: '8px 0', borderRadius: '0'}} 
                       />
-                      <div style={{display: 'flex', gap: '8px'}}>
-                        <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 12px'}}>↑</button>
-                        <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 12px'}}>↓</button>
-                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 12px', width: 'auto'}}>X</button>
+                      <div style={{display: 'flex', gap: '12px'}}>
+                        <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
+                        <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
+                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto'}}>Delete Zone</button>
                       </div>
                     </div>
                     
-                    {/* VISUAL SPOT GRID */}
                     <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
                       {section.spots.map((spot, sIdx) => (
                         <div key={sIdx} style={{ position: 'relative' }}>
@@ -775,9 +827,9 @@ function MasterAdminView({ parkingMap }) {
                   </div>
                 ))}
 
-                <div style={{display: 'flex', gap: '16px', marginTop: '32px'}}>
-                  <button onClick={addZone} className="btn-outline" style={{flex: 1}}>+ Add New Zone</button>
-                  <button onClick={handleSaveMap} className="btn-gold" style={{flex: 2}}>Save Floor Plan to Live Database</button>
+                <div style={{display: 'flex', gap: '24px', marginTop: '40px'}}>
+                  <button onClick={addZone} className="btn-outline" style={{flex: 1, padding: '16px', fontSize: '1.05rem'}}>+ Add New Zone</button>
+                  <button onClick={handleSaveMap} className="btn-gold" style={{flex: 2, padding: '16px', fontSize: '1.05rem'}}>Save Floor Plan to Live Database</button>
                 </div>
               </div>
             )}
@@ -786,6 +838,15 @@ function MasterAdminView({ parkingMap }) {
       </div>
       
       {showLogModal && <LogArrivalModal onClose={() => setShowLogModal(false)} venueId="venue_001" parkingMap={parkingMap} occupiedSpots={occupiedSpots} />}
+      
+      <CustomConfirmWidget 
+        isOpen={confirmConfig.isOpen} 
+        title={confirmConfig.title} 
+        message={confirmConfig.message} 
+        onConfirm={confirmConfig.onConfirm} 
+        onCancel={confirmConfig.onCancel}
+        isDanger={confirmConfig.isDanger}
+      />
     </div>
   );
 }
@@ -813,7 +874,6 @@ function App() {
       return () => document.head.removeChild(styleSheet);
     }
 
-    // Listen for Auth Role
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const snapshot = await get(ref(db, `users/${currentUser.uid}`));
@@ -824,12 +884,10 @@ function App() {
       setAuthLoading(false);
     });
 
-    // Listen for global parking map changes
     const unsubscribeMap = onValue(ref(db, 'parkingMap'), (snapshot) => {
       if (snapshot.exists()) {
         setGlobalParkingMap(snapshot.val());
       } else {
-        // Seed default map if database is empty
         set(ref(db, 'parkingMap'), DEFAULT_PARKING_MAP);
         setGlobalParkingMap(DEFAULT_PARKING_MAP);
       }
@@ -838,7 +896,7 @@ function App() {
     return () => { unsubscribeAuth(); unsubscribeMap(); document.head.removeChild(styleSheet); };
   }, [requestedTicketId]);
 
-  if (authLoading) return <div className="app-container center-wrapper">Authenticating...</div>;
+  if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-gold)', letterSpacing: '2px'}}>AUTHENTICATING...</div></div>;
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   if (!userRole) return <LoginView />;
   if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} />;
