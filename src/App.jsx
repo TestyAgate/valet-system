@@ -347,10 +347,7 @@ function ValetDashboardView() {
   const [tickets, setTickets] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
-  
-  // New state to hold the ID of the ticket we want to show a QR for
   const [qrModalTicket, setQrModalTicket] = useState(null);
-  
   const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', phone: '' });
 
   const currentVenueId = "venue_001";
@@ -381,7 +378,7 @@ function ValetDashboardView() {
       venueId: currentVenueId, guestPhone: formData.phone,
       vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate },
       parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
-      timestamps: { issuedAt: Date.now(), parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
+      timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
     });
     setNewlyCreatedTicket(ticketId);
   };
@@ -438,7 +435,7 @@ function ValetDashboardView() {
                     {t.parkingSpot}
                   </div>
                 </div>
-                {/* NEW QR BUTTON FOR PARKED CARS */}
+                {/* QR BUTTON FOR PARKED CARS */}
                 <button 
                   onClick={() => setQrModalTicket(t.id)} 
                   className="btn-outline" 
@@ -512,19 +509,42 @@ function ValetDashboardView() {
 // ------------------------------------------------------------------
 function MasterAdminView() {
   const [history, setHistory] = useState([]);
+  const [parkedCars, setParkedCars] = useState([]);
+  
+  // New State for tab toggling
+  const [activeTab, setActiveTab] = useState('parked');
 
   useEffect(() => {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        setHistory(Object.keys(data)
-          .map(key => ({ id: key, ...data[key] }))
+        const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+
+        // Filter and sort the cars currently sitting in the lot
+        const activeLot = allTickets
+          .filter(t => t.status !== "retrieved")
+          .sort((a, b) => b.timestamps.parkedAt - a.timestamps.parkedAt);
+        setParkedCars(activeLot);
+
+        // Filter and sort the completed cars for performance metrics
+        const completed = allTickets
           .filter(t => t.status === "retrieved" && t.timestamps.requestedAt && t.timestamps.retrievedAt)
-          .sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt));
+          .sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt);
+        setHistory(completed);
       }
     });
     return () => unsubscribe();
   }, []);
+
+  // Helper function to format timestamp into human-readable date and time
+  const formatDateTime = (timestamp) => {
+    if (!timestamp) return { date: '-', time: '-' };
+    const dateObj = new Date(timestamp);
+    return {
+      date: dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }),
+      time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+  };
 
   return (
     <div className="app-container">
@@ -534,33 +554,98 @@ function MasterAdminView() {
           <button onClick={() => signOut(auth)} className="btn-outline">Logout</button>
         </div>
 
+        {/* TABS MENU */}
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+          <button 
+            className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} 
+            onClick={() => setActiveTab('parked')}
+            style={{ width: 'auto', padding: '12px 24px', fontSize: '0.9rem' }}
+          >
+            Currently Parked ({parkedCars.length})
+          </button>
+          <button 
+            className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} 
+            onClick={() => setActiveTab('metrics')}
+            style={{ width: 'auto', padding: '12px 24px', fontSize: '0.9rem' }}
+          >
+            Performance Metrics
+          </button>
+        </div>
+
         <div className="queue-column">
-          <h2 className="queue-title">Performance Metrics</h2>
+          <h2 className="queue-title">
+            {activeTab === 'parked' ? 'Active Lot Inventory' : 'Retrieval Time History'}
+          </h2>
           <div style={{ overflowX: 'auto' }}>
             <table className="luxury-table">
-              <thead>
-                <tr>
-                  <th>Vehicle</th>
-                  <th>License Plate</th>
-                  <th>Retrieval Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map(t => {
-                  const ms = t.timestamps.retrievedAt - t.timestamps.requestedAt;
-                  const mins = Math.floor(ms / 60000);
-                  const secs = ((ms % 60000) / 1000).toFixed(0);
-                  return (
-                    <tr key={t.id}>
-                      <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
-                      <td>{t.vehicle.licensePlate}</td>
-                      <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>
-                        {mins}m {secs}s
-                      </td>
+              
+              {/* CURRENTLY PARKED TAB VIEW */}
+              {activeTab === 'parked' && (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Vehicle</th>
+                      <th>Plate</th>
+                      <th>Spot</th>
+                      <th>Arrival Date</th>
+                      <th>Parked Time</th>
                     </tr>
-                  );
-                })}
-              </tbody>
+                  </thead>
+                  <tbody>
+                    {parkedCars.map(t => {
+                      const { date, time } = formatDateTime(t.timestamps?.parkedAt);
+                      return (
+                        <tr key={t.id}>
+                          <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                          <td>{t.vehicle.licensePlate}</td>
+                          <td style={{ color: 'var(--accent-gold)' }}>{t.parkingSpot}</td>
+                          <td>{date}</td>
+                          <td>{time}</td>
+                        </tr>
+                      );
+                    })}
+                    {parkedCars.length === 0 && (
+                      <tr><td colSpan="5" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>
+                    )}
+                  </tbody>
+                </>
+              )}
+
+              {/* PERFORMANCE METRICS TAB VIEW */}
+              {activeTab === 'metrics' && (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Vehicle</th>
+                      <th>Plate</th>
+                      <th>Arrival Date</th>
+                      <th>Retrieval Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map(t => {
+                      const { date } = formatDateTime(t.timestamps?.parkedAt);
+                      const ms = t.timestamps.retrievedAt - t.timestamps.requestedAt;
+                      const mins = Math.floor(ms / 60000);
+                      const secs = ((ms % 60000) / 1000).toFixed(0);
+                      return (
+                        <tr key={t.id}>
+                          <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                          <td>{t.vehicle.licensePlate}</td>
+                          <td>{date}</td>
+                          <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>
+                            {mins}m {secs}s
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {history.length === 0 && (
+                      <tr><td colSpan="4" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>
+                    )}
+                  </tbody>
+                </>
+              )}
+
             </table>
           </div>
         </div>
