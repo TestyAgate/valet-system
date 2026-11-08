@@ -283,7 +283,7 @@ function App() {
 }
 
 // Shared Styles
-const styles = {
+const styles = { 
   container: { display: 'flex', flexDirection: 'column', backgroundColor: '#f3f4f6', minHeight: '100vh', padding: '20px', fontFamily: 'system-ui, sans-serif' },
   card: { backgroundColor: 'white', padding: '2rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px', textAlign: 'center', margin: 'auto' },
   title: { margin: '0 0 24px 0', color: '#111827' },
