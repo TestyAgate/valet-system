@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
 import { ref, onValue, update, set, get } from 'firebase/database';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
@@ -23,225 +23,169 @@ const luxuryStyles = `
     --font-ui: 'Inter', sans-serif;
   }
 
-  body {
-    margin: 0;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: var(--font-ui);
-    -webkit-font-smoothing: antialiased;
-  }
+  body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; }
+  .app-container { min-height: 100vh; display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; }
+  .center-wrapper { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 48px); }
+  .dashboard-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; }
 
-  /* Layouts */
-  .app-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    box-sizing: border-box;
-  }
+  .luxury-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
+  .heading-brand { font-family: var(--font-heading); color: var(--accent-gold); font-size: 1.75rem; font-weight: 600; margin: 0 0 24px 0; letter-spacing: 1px; }
+  .heading-dashboard { font-family: var(--font-heading); color: var(--text-main); font-size: 2rem; margin: 0; font-weight: 400; letter-spacing: 0.5px; }
+  .car-title { font-size: 1.75rem; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+  .car-subtitle { color: var(--text-muted); font-size: 1rem; margin: 0 0 24px 0; font-weight: 300; }
 
-  .center-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 48px);
-  }
-
-  .dashboard-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  /* Cards */
-  .luxury-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 32px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    text-align: center;
-  }
-
-  /* Typography */
-  .heading-brand {
-    font-family: var(--font-heading);
-    color: var(--accent-gold);
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin: 0 0 24px 0;
-    letter-spacing: 1px;
-  }
-
-  .heading-dashboard {
-    font-family: var(--font-heading);
-    color: var(--text-main);
-    font-size: 2rem;
-    margin: 0;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-  }
-
-  .car-title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
-  }
-
-  .car-subtitle {
-    color: var(--text-muted);
-    font-size: 1rem;
-    margin: 0 0 24px 0;
-    font-weight: 300;
-  }
-
-  /* Buttons */
-  .btn-gold {
-    background: var(--accent-gold);
-    color: #000;
-    border: none;
-    padding: 16px 24px;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    width: 100%;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .btn-gold:hover:not(:disabled) {
-    background: var(--accent-gold-hover);
-    transform: translateY(-2px);
-  }
-  .btn-gold:disabled {
-    background: #333;
-    color: #666;
-    cursor: not-allowed;
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--text-main);
-    border: 1px solid var(--card-border);
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .btn-outline:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--text-muted);
-  }
-
-  .btn-action {
-    background: #450a0a;
-    color: #fca5a5;
-    border: 1px solid #7f1d1d;
-    padding: 12px;
-    border-radius: 4px;
-    width: 100%;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
+  .btn-gold { background: var(--accent-gold); color: #000; border: none; padding: 16px 24px; border-radius: 4px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-gold:hover:not(:disabled) { background: var(--accent-gold-hover); transform: translateY(-2px); }
+  .btn-gold:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+  .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+  .btn-action { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; padding: 12px; border-radius: 4px; width: 100%; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .btn-action:hover { background: #7f1d1d; color: #fff; }
 
-  /* Inputs */
-  .luxury-input {
-    background: #000;
-    border: 1px solid var(--card-border);
-    color: var(--text-main);
-    padding: 14px;
-    width: 100%;
-    margin-bottom: 16px;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-family: var(--font-ui);
-    font-size: 1rem;
-  }
-  .luxury-input:focus {
-    outline: none;
-    border-color: var(--accent-gold);
-  }
-
-  /* Grid for Dashboard */
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 32px;
-    margin-top: 32px;
-  }
-  @media (min-width: 768px) {
-    .dashboard-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-  /* Queue Columns */
-  .queue-column {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    padding: 24px;
-  }
-  .queue-title {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    margin: 0 0 20px 0;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  /* Status Box */
-  .status-box {
-    background: #000;
-    border: 1px solid var(--card-border);
-    padding: 20px;
-    border-radius: 6px;
-    margin-bottom: 32px;
-  }
-
-  .ticket-card {
-    background: #000;
-    border: 1px solid var(--card-border);
-    padding: 20px;
-    border-radius: 6px;
-    margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* Modal */
-  .modal-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(4px);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
-    padding: 20px;
-  }
+  .luxury-input { background: #000; border: 1px solid var(--card-border); color: var(--text-main); padding: 14px; width: 100%; border-radius: 4px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; }
+  .luxury-input:focus { outline: none; border-color: var(--accent-gold); }
   
-  /* Tables */
-  .luxury-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-  }
-  .luxury-table th {
-    padding: 16px;
-    border-bottom: 1px solid var(--card-border);
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-  .luxury-table td {
-    padding: 16px;
-    border-bottom: 1px solid var(--card-border);
-  }
+  /* Autocomplete Dropdown Styles */
+  .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
+  .autocomplete-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1a1a1a; border: 1px solid var(--accent-gold); border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.8); list-style: none; padding: 0; margin: 0; text-align: left; }
+  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--card-border); transition: background 0.2s; font-size: 0.95rem; }
+  .autocomplete-item:hover { background: #262626; color: var(--accent-gold); }
+
+  .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
+  @media (min-width: 768px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
+  .queue-column { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 24px; }
+  .queue-title { font-family: var(--font-heading); font-size: 1.5rem; margin: 0 0 20px 0; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); }
+  .status-box { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 6px; margin-bottom: 32px; }
+  .ticket-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 6px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; }
+  .luxury-table th { padding: 16px; border-bottom: 1px solid var(--card-border); color: var(--text-muted); font-weight: 500; }
+  .luxury-table td { padding: 16px; border-bottom: 1px solid var(--card-border); }
 `;
+
+// ------------------------------------------------------------------
+// DATABASES FOR AUTOCOMPLETE
+// ------------------------------------------------------------------
+const CAR_DATABASE = {
+  "Aston Martin": ["DBX", "Vantage", "DB11", "DBS"],
+  "Audi": ["A3", "A4", "A6", "A8", "Q3", "Q5", "Q7", "Q8", "RS Q8", "e-tron", "R8"],
+  "Bentley": ["Bentayga", "Continental GT", "Flying Spur"],
+  "BMW": ["3 Series", "5 Series", "7 Series", "X3", "X5", "X6", "X7", "M3", "M4", "M5", "M8", "iX"],
+  "Cadillac": ["Escalade", "CT4", "CT5", "XT5", "Lyriq"],
+  "Chevrolet": ["Tahoe", "Suburban", "Corvette", "Camaro", "Silverado"],
+  "Ferrari": ["Roma", "F8 Tributo", "SF90", "Purosangue", "812 Superfast"],
+  "Ford": ["Mustang", "Explorer", "Expedition", "F-150", "Bronco"],
+  "Genesis": ["G70", "G80", "G90", "GV70", "GV80"],
+  "Lamborghini": ["Urus", "Huracan", "Aventador", "Revuelto"],
+  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Velar", "Evoque"],
+  "Lexus": ["IS", "ES", "LS", "NX", "RX", "GX", "LX"],
+  "Maserati": ["Ghibli", "Quattroporte", "Levante", "Grecale", "MC20"],
+  "McLaren": ["Artura", "720S", "750S", "GT"],
+  "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "G-Class (G63)", "GLE", "GLS", "Maybach", "AMG GT", "EQS"],
+  "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne"],
+  "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Spectre"],
+  "Tesla": ["Model S", "Model 3", "Model X", "Model Y", "Cybertruck"],
+  "Toyota": ["Land Cruiser", "Camry", "Corolla", "RAV4", "Highlander"]
+};
+
+const COUNTRY_CODES = [
+  { label: "🇦🇪 UAE (+971)", value: "+971" },
+  { label: "🇮🇱 Israel (+972)", value: "+972" },
+  { label: "🇺🇸 USA (+1)", value: "+1" },
+  { label: "🇬🇧 UK (+44)", value: "+44" },
+  { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" },
+  { label: "🇶🇦 Qatar (+974)", value: "+974" },
+  { label: "🇰🇼 Kuwait (+965)", value: "+965" },
+  { label: "🇧🇭 Bahrain (+973)", value: "+973" },
+  { label: "🇴🇲 Oman (+968)", value: "+968" },
+  { label: "🇯🇴 Jordan (+962)", value: "+962" },
+  { label: "🇪🇬 Egypt (+20)", value: "+20" },
+  { label: "🇫🇷 France (+33)", value: "+33" },
+  { label: "🇩🇪 Germany (+49)", value: "+49" }
+];
+
+// ------------------------------------------------------------------
+// REUSABLE AUTOCOMPLETE COMPONENT
+// ------------------------------------------------------------------
+function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isObject }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const wrapperRef = useRef(null);
+
+  // Sync internal search term with provided value initially
+  useEffect(() => {
+    if (isObject) {
+      const match = options.find(o => o.value === value);
+      setSearchTerm(match ? match.label : value);
+    } else {
+      setSearchTerm(value);
+    }
+  }, [value, options, isObject]);
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setSearchTerm(val);
+    setIsOpen(true);
+    // If not using object options, update parent state immediately so custom typing is captured
+    if (!isObject) onChange(val); 
+  };
+
+  const handleSelect = (option) => {
+    if (isObject) {
+      setSearchTerm(option.label);
+      onChange(option.value);
+    } else {
+      setSearchTerm(option);
+      onChange(option);
+    }
+    setIsOpen(false);
+  };
+
+  const filteredOptions = options.filter(opt => {
+    const text = isObject ? opt.label : opt;
+    return text.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  return (
+    <div className="autocomplete-container" ref={wrapperRef} style={style}>
+      <input
+        type="text"
+        className="luxury-input"
+        style={{ marginBottom: 0 }}
+        placeholder={placeholder}
+        value={searchTerm}
+        onChange={handleInputChange}
+        onFocus={() => setIsOpen(true)}
+        required
+      />
+      {isOpen && filteredOptions.length > 0 && (
+        <ul className="autocomplete-dropdown">
+          {filteredOptions.map((opt, i) => (
+            <li 
+              key={i} 
+              className="autocomplete-item"
+              onClick={() => handleSelect(opt)}
+            >
+              {isObject ? opt.label : opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 
 // ------------------------------------------------------------------
 // 1. GUEST VIEW COMPONENT (PUBLIC)
@@ -260,10 +204,7 @@ function GuestTicketView({ ticketId }) {
 
   const requestVehicle = async () => {
     if (!ticket) return;
-    await update(ref(db, `tickets/${ticketId}`), {
-      status: "requested",
-      "timestamps/requestedAt": Date.now()
-    });
+    await update(ref(db, `tickets/${ticketId}`), { status: "requested", "timestamps/requestedAt": Date.now() });
   };
 
   if (loading) return <div className="app-container center-wrapper">Retrieving digital ticket...</div>;
@@ -276,30 +217,18 @@ function GuestTicketView({ ticketId }) {
     <div className="app-container center-wrapper">
       <div className="luxury-card">
         <h2 className="heading-brand">WALDORF ASTORIA</h2>
-        
         <div>
           <h3 className="car-title">{vehicle.make} {vehicle.model}</h3>
           <p className="car-subtitle">{vehicle.color} &nbsp;|&nbsp; {vehicle.licensePlate}</p>
         </div>
-
         <div className="status-box">
           <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Current Status</p>
-          <p style={{ 
-            margin: 0, 
-            fontSize: '1.75rem', 
-            fontWeight: '600',
-            color: status === 'parked' ? 'var(--accent-gold)' : '#f5f5f5' 
-          }}>
+          <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: '600', color: status === 'parked' ? 'var(--accent-gold)' : '#f5f5f5' }}>
             {status.toUpperCase()}
           </p>
           {status === "parked" && <p style={{ margin: '12px 0 0 0', color: 'var(--text-muted)' }}>Spot: <span style={{color: '#fff'}}>{parkingSpot}</span></p>}
         </div>
-
-        <button 
-          onClick={requestVehicle} 
-          disabled={isRequested}
-          className="btn-gold"
-        >
+        <button onClick={requestVehicle} disabled={isRequested} className="btn-gold">
           {isRequested ? "Vehicle Requested" : "Request My Vehicle"}
         </button>
       </div>
@@ -331,8 +260,8 @@ function LoginView() {
         <h2 className="heading-brand" style={{color: '#fff'}}>STAFF PORTAL</h2>
         {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', marginBottom: '16px' }}>{error}</p>}
         <form onSubmit={handleLogin}>
-          <input type="email" placeholder="Staff Email" required className="luxury-input" onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" required className="luxury-input" onChange={(e) => setPassword(e.target.value)} />
+          <input type="email" placeholder="Staff Email" required className="luxury-input" style={{marginBottom: '16px'}} onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" required className="luxury-input" style={{marginBottom: '16px'}} onChange={(e) => setPassword(e.target.value)} />
           <button type="submit" className="btn-gold" style={{marginTop: '8px'}}>Authenticate</button>
         </form>
       </div>
@@ -348,7 +277,11 @@ function ValetDashboardView() {
   const [showModal, setShowModal] = useState(false);
   const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
   const [qrModalTicket, setQrModalTicket] = useState(null);
-  const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', phone: '' });
+  
+  const [formData, setFormData] = useState({ 
+    make: '', model: '', color: '', plate: '', spot: '', 
+    countryCode: '+971', phone: '' 
+  });
 
   const currentVenueId = "venue_001";
   const currentDomain = window.location.origin;
@@ -357,9 +290,7 @@ function ValetDashboardView() {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        setTickets(Object.keys(data)
-          .map(key => ({ id: key, ...data[key] }))
-          .filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
+        setTickets(Object.keys(data).map(key => ({ id: key, ...data[key] })).filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
       } else {
         setTickets([]);
       }
@@ -374,8 +305,13 @@ function ValetDashboardView() {
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     const ticketId = `ticket_${Date.now()}`;
+    
+    // Combine Country Code and Phone Number
+    const fullPhone = `${formData.countryCode} ${formData.phone}`;
+
     await set(ref(db, `tickets/${ticketId}`), {
-      venueId: currentVenueId, guestPhone: formData.phone,
+      venueId: currentVenueId, 
+      guestPhone: fullPhone,
       vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate },
       parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
       timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
@@ -386,10 +322,13 @@ function ValetDashboardView() {
   const requestedCars = tickets.filter(t => t.status === "requested");
   const parkedCars = tickets.filter(t => t.status === "parked");
 
+  // Dynamically determine the available models based on selected Make
+  const availableMakes = Object.keys(CAR_DATABASE);
+  const availableModels = CAR_DATABASE[formData.make] || []; // Empty if custom make is typed
+
   return (
     <div className="app-container">
       <div className="dashboard-wrapper">
-        
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <h1 className="heading-dashboard">Live Queue</h1>
@@ -413,12 +352,9 @@ function ValetDashboardView() {
                     Spot: {t.parkingSpot}
                   </div>
                 </div>
-                <button onClick={() => markAsRetrieved(t.id)} className="btn-action" style={{marginTop: '12px'}}>
-                  Handed to Guest
-                </button>
+                <button onClick={() => markAsRetrieved(t.id)} className="btn-action" style={{marginTop: '12px'}}>Handed to Guest</button>
               </div>
             ))}
-            {requestedCars.length === 0 && <p style={{color: 'var(--text-muted)'}}>No pending requests.</p>}
           </div>
 
           {/* PARKED QUEUE */}
@@ -435,11 +371,7 @@ function ValetDashboardView() {
                     {t.parkingSpot}
                   </div>
                 </div>
-                <button 
-                  onClick={() => setQrModalTicket(t.id)} 
-                  className="btn-outline" 
-                  style={{marginTop: '12px', padding: '8px', fontSize: '0.85rem'}}
-                >
+                <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{marginTop: '12px', padding: '8px', fontSize: '0.85rem'}}>
                   Show QR Code
                 </button>
               </div>
@@ -454,35 +386,60 @@ function ValetDashboardView() {
           <div className="luxury-card" style={{width: '90%'}}>
             <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>DIGITAL TICKET</h2>
             <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} 
-                alt="QR Code" 
-                style={{display: 'block'}} 
-              />
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
-            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%'}}>
-              Close
-            </button>
+            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%'}}>Close</button>
           </div>
         </div>
       )}
 
-      {/* NEW ARRIVAL MODAL */}
+      {/* NEW ARRIVAL MODAL (UPDATED WITH AUTOCOMPLETE) */}
       {showModal && (
         <div className="modal-overlay">
-          <div className="luxury-card" style={{width: '90%'}}>
+          <div className="luxury-card" style={{width: '90%', padding: '24px', maxHeight: '90vh', overflowY: 'visible'}}>
             {!newlyCreatedTicket ? (
               <form onSubmit={handleCreateTicket}>
-                <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem'}}>LOG ARRIVAL</h2>
+                <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '16px'}}>LOG ARRIVAL</h2>
+                
                 <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  <input required placeholder="Make" className="luxury-input" style={{marginBottom: 0}} onChange={e => setFormData({...formData, make: e.target.value})} />
-                  <input required placeholder="Model" className="luxury-input" style={{marginBottom: 0}} onChange={e => setFormData({...formData, model: e.target.value})} />
+                  {/* Make Search */}
+                  <LuxuryAutocomplete 
+                    options={availableMakes} 
+                    value={formData.make} 
+                    onChange={(val) => setFormData({...formData, make: val, model: ''})} 
+                    placeholder="Search Make (e.g. BMW)" 
+                    isObject={false}
+                  />
+                  {/* Model Search (Dependent on Make) */}
+                  <LuxuryAutocomplete 
+                    options={availableModels} 
+                    value={formData.model} 
+                    onChange={(val) => setFormData({...formData, model: val})} 
+                    placeholder="Search Model" 
+                    isObject={false}
+                  />
                 </div>
-                <input required placeholder="Color" className="luxury-input" style={{marginTop: '12px'}} onChange={e => setFormData({...formData, color: e.target.value})} />
-                <input required placeholder="License Plate" className="luxury-input" onChange={e => setFormData({...formData, plate: e.target.value})} />
-                <input required placeholder="Parking Spot" className="luxury-input" onChange={e => setFormData({...formData, spot: e.target.value})} />
-                <input required placeholder="Guest Phone" className="luxury-input" onChange={e => setFormData({...formData, phone: e.target.value})} />
-                <div style={{display: 'flex', gap: '12px', marginTop: '16px'}}>
+                
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                  <input required placeholder="Color" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, color: e.target.value})} />
+                  <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, plate: e.target.value})} />
+                </div>
+                
+                <input required placeholder="Parking Spot" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, spot: e.target.value})} />
+                
+                {/* Phone Component: Code Search + Number */}
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', alignItems: 'start'}}>
+                  <LuxuryAutocomplete 
+                    options={COUNTRY_CODES} 
+                    value={formData.countryCode} 
+                    onChange={(val) => setFormData({...formData, countryCode: val})} 
+                    placeholder="+ Code" 
+                    isObject={true}
+                  />
+                  <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                </div>
+
+                <div style={{display: 'flex', gap: '12px', marginTop: '8px'}}>
                   <button type="submit" className="btn-gold">Generate</button>
                   <button type="button" onClick={() => setShowModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
                 </div>
@@ -493,7 +450,7 @@ function ValetDashboardView() {
                 <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
                 </div>
-                <button onClick={() => { setShowModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
+                <button onClick={() => { setShowModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
               </div>
             )}
           </div>
@@ -509,7 +466,6 @@ function ValetDashboardView() {
 function MasterAdminView() {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
-  
   const [activeTab, setActiveTab] = useState('parked');
 
   useEffect(() => {
@@ -517,16 +473,8 @@ function MasterAdminView() {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-
-        const activeLot = allTickets
-          .filter(t => t.status !== "retrieved")
-          .sort((a, b) => b.timestamps.parkedAt - a.timestamps.parkedAt);
-        setParkedCars(activeLot);
-
-        const completed = allTickets
-          .filter(t => t.status === "retrieved" && t.timestamps.requestedAt && t.timestamps.retrievedAt)
-          .sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt);
-        setHistory(completed);
+        setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => b.timestamps.parkedAt - a.timestamps.parkedAt));
+        setHistory(allTickets.filter(t => t.status === "retrieved" && t.timestamps.requestedAt && t.timestamps.retrievedAt).sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt));
       }
     });
     return () => unsubscribe();
@@ -549,44 +497,22 @@ function MasterAdminView() {
           <button onClick={() => signOut(auth)} className="btn-outline">Logout</button>
         </div>
 
-        {/* TABS MENU */}
         <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-          <button 
-            className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} 
-            onClick={() => setActiveTab('parked')}
-            style={{ width: 'auto', padding: '12px 24px', fontSize: '0.9rem' }}
-          >
+          <button className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('parked')} style={{ padding: '12px 24px' }}>
             Currently Parked ({parkedCars.length})
           </button>
-          <button 
-            className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} 
-            onClick={() => setActiveTab('metrics')}
-            style={{ width: 'auto', padding: '12px 24px', fontSize: '0.9rem' }}
-          >
+          <button className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 24px' }}>
             Performance Metrics
           </button>
         </div>
 
         <div className="queue-column">
-          <h2 className="queue-title">
-            {activeTab === 'parked' ? 'Active Lot Inventory' : 'Retrieval Time History'}
-          </h2>
+          <h2 className="queue-title">{activeTab === 'parked' ? 'Active Lot Inventory' : 'Retrieval Time History'}</h2>
           <div style={{ overflowX: 'auto' }}>
             <table className="luxury-table">
-              
-              {/* CURRENTLY PARKED TAB VIEW */}
               {activeTab === 'parked' && (
                 <>
-                  <thead>
-                    <tr>
-                      <th>Vehicle</th>
-                      <th>Plate</th>
-                      <th>Phone</th>
-                      <th>Spot</th>
-                      <th>Arrival Date</th>
-                      <th>Parked Time</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th></tr></thead>
                   <tbody>
                     {parkedCars.map(t => {
                       const { date, time } = formatDateTime(t.timestamps?.parkedAt);
@@ -596,30 +522,18 @@ function MasterAdminView() {
                           <td>{t.vehicle.licensePlate}</td>
                           <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
                           <td style={{ color: 'var(--accent-gold)' }}>{t.parkingSpot}</td>
-                          <td>{date}</td>
-                          <td>{time}</td>
+                          <td>{date}</td><td>{time}</td>
                         </tr>
                       );
                     })}
-                    {parkedCars.length === 0 && (
-                      <tr><td colSpan="6" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>
-                    )}
+                    {parkedCars.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>}
                   </tbody>
                 </>
               )}
 
-              {/* PERFORMANCE METRICS TAB VIEW */}
               {activeTab === 'metrics' && (
                 <>
-                  <thead>
-                    <tr>
-                      <th>Vehicle</th>
-                      <th>Plate</th>
-                      <th>Phone</th>
-                      <th>Arrival Date</th>
-                      <th>Retrieval Time</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Arrival Date</th><th>Retrieval Time</th></tr></thead>
                   <tbody>
                     {history.map(t => {
                       const { date } = formatDateTime(t.timestamps?.parkedAt);
@@ -632,19 +546,14 @@ function MasterAdminView() {
                           <td>{t.vehicle.licensePlate}</td>
                           <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
                           <td>{date}</td>
-                          <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>
-                            {mins}m {secs}s
-                          </td>
+                          <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>{mins}m {secs}s</td>
                         </tr>
                       );
                     })}
-                    {history.length === 0 && (
-                      <tr><td colSpan="5" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>
-                    )}
+                    {history.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>}
                   </tbody>
                 </>
               )}
-
             </table>
           </div>
         </div>
@@ -665,7 +574,6 @@ function App() {
   const requestedTicketId = searchParams.get('ticket');
 
   useEffect(() => {
-    // Inject the CSS into the document head automatically
     const styleSheet = document.createElement("style");
     styleSheet.innerText = luxuryStyles;
     document.head.appendChild(styleSheet);
@@ -686,10 +594,7 @@ function App() {
       setAuthLoading(false);
     });
 
-    return () => {
-      unsubscribe();
-      document.head.removeChild(styleSheet);
-    };
+    return () => { unsubscribe(); document.head.removeChild(styleSheet); };
   }, [requestedTicketId]);
 
   if (authLoading) return <div className="app-container center-wrapper">Authenticating...</div>;
