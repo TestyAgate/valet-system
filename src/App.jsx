@@ -435,7 +435,6 @@ function ValetDashboardView() {
                     {t.parkingSpot}
                   </div>
                 </div>
-                {/* QR BUTTON FOR PARKED CARS */}
                 <button 
                   onClick={() => setQrModalTicket(t.id)} 
                   className="btn-outline" 
@@ -511,7 +510,6 @@ function MasterAdminView() {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
   
-  // New State for tab toggling
   const [activeTab, setActiveTab] = useState('parked');
 
   useEffect(() => {
@@ -520,13 +518,11 @@ function MasterAdminView() {
         const data = snapshot.val();
         const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] }));
 
-        // Filter and sort the cars currently sitting in the lot
         const activeLot = allTickets
           .filter(t => t.status !== "retrieved")
           .sort((a, b) => b.timestamps.parkedAt - a.timestamps.parkedAt);
         setParkedCars(activeLot);
 
-        // Filter and sort the completed cars for performance metrics
         const completed = allTickets
           .filter(t => t.status === "retrieved" && t.timestamps.requestedAt && t.timestamps.retrievedAt)
           .sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt);
@@ -536,7 +532,6 @@ function MasterAdminView() {
     return () => unsubscribe();
   }, []);
 
-  // Helper function to format timestamp into human-readable date and time
   const formatDateTime = (timestamp) => {
     if (!timestamp) return { date: '-', time: '-' };
     const dateObj = new Date(timestamp);
@@ -586,6 +581,7 @@ function MasterAdminView() {
                     <tr>
                       <th>Vehicle</th>
                       <th>Plate</th>
+                      <th>Phone</th>
                       <th>Spot</th>
                       <th>Arrival Date</th>
                       <th>Parked Time</th>
@@ -598,6 +594,7 @@ function MasterAdminView() {
                         <tr key={t.id}>
                           <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
                           <td>{t.vehicle.licensePlate}</td>
+                          <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
                           <td style={{ color: 'var(--accent-gold)' }}>{t.parkingSpot}</td>
                           <td>{date}</td>
                           <td>{time}</td>
@@ -605,7 +602,7 @@ function MasterAdminView() {
                       );
                     })}
                     {parkedCars.length === 0 && (
-                      <tr><td colSpan="5" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>
+                      <tr><td colSpan="6" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>
                     )}
                   </tbody>
                 </>
@@ -618,6 +615,7 @@ function MasterAdminView() {
                     <tr>
                       <th>Vehicle</th>
                       <th>Plate</th>
+                      <th>Phone</th>
                       <th>Arrival Date</th>
                       <th>Retrieval Time</th>
                     </tr>
@@ -632,6 +630,7 @@ function MasterAdminView() {
                         <tr key={t.id}>
                           <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
                           <td>{t.vehicle.licensePlate}</td>
+                          <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
                           <td>{date}</td>
                           <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>
                             {mins}m {secs}s
@@ -640,7 +639,7 @@ function MasterAdminView() {
                       );
                     })}
                     {history.length === 0 && (
-                      <tr><td colSpan="4" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>
+                      <tr><td colSpan="5" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>
                     )}
                   </tbody>
                 </>
