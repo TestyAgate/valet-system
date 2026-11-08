@@ -17,8 +17,6 @@ const luxuryStyles = `
     --text-muted: #a3a3a3;
     --accent-gold: #c5a059;
     --accent-gold-hover: #d4af37;
-    --danger-red: #7f1d1d;
-    --success-green: #14532d;
     --font-heading: 'Playfair Display', serif;
     --font-ui: 'Inter', sans-serif;
   }
@@ -31,14 +29,14 @@ const luxuryStyles = `
   .luxury-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
   .heading-brand { font-family: var(--font-heading); color: var(--accent-gold); font-size: 1.75rem; font-weight: 600; margin: 0 0 24px 0; letter-spacing: 1px; }
   .heading-dashboard { font-family: var(--font-heading); color: var(--text-main); font-size: 2rem; margin: 0; font-weight: 400; letter-spacing: 0.5px; }
-  .car-title { font-size: 1.75rem; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.5px; }
-  .car-subtitle { color: var(--text-muted); font-size: 1rem; margin: 0 0 24px 0; font-weight: 300; }
 
   .btn-gold { background: var(--accent-gold); color: #000; border: none; padding: 16px 24px; border-radius: 4px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
   .btn-gold:hover:not(:disabled) { background: var(--accent-gold-hover); transform: translateY(-2px); }
   .btn-gold:disabled { background: #333; color: #666; cursor: not-allowed; }
+  
   .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
   .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+  
   .btn-action { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; padding: 12px; border-radius: 4px; width: 100%; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .btn-action:hover { background: #7f1d1d; color: #fff; }
 
@@ -50,6 +48,14 @@ const luxuryStyles = `
   .autocomplete-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1a1a1a; border: 1px solid var(--accent-gold); border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.8); list-style: none; padding: 0; margin: 0; text-align: left; }
   .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--card-border); transition: background 0.2s; font-size: 0.95rem; }
   .autocomplete-item:hover { background: #262626; color: var(--accent-gold); }
+
+  /* Parking Grid Styles */
+  .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
+  .spot-box { padding: 16px 4px; border-radius: 6px; text-align: center; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--card-border); transition: all 0.2s; }
+  .spot-empty { background: rgba(20, 83, 45, 0.15); color: #86efac; border-color: #14532d; cursor: pointer; }
+  .spot-empty:hover { background: #14532d; color: #fff; transform: scale(1.05); }
+  .spot-occupied { background: rgba(127, 29, 29, 0.15); color: #fca5a5; border-color: #7f1d1d; cursor: not-allowed; opacity: 0.7; }
+  .zone-title { width: 100%; grid-column: 1 / -1; margin: 16px 0 8px 0; color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 8px;}
 
   .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
   @media (min-width: 768px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
@@ -64,45 +70,84 @@ const luxuryStyles = `
 `;
 
 // ------------------------------------------------------------------
-// DATABASES FOR AUTOCOMPLETE
+// MASSIVE DATABASES
 // ------------------------------------------------------------------
 const CAR_DATABASE = {
-  "Aston Martin": ["DBX", "Vantage", "DB11", "DBS"],
-  "Audi": ["A3", "A4", "A6", "A8", "Q3", "Q5", "Q7", "Q8", "RS Q8", "e-tron", "R8"],
+  "Acura": ["MDX", "RDX", "TLX", "Integra", "NSX"],
+  "Alfa Romeo": ["Giulia", "Stelvio", "Tonale"],
+  "Aston Martin": ["DBX", "Vantage", "DB11", "DBS", "Valhalla"],
+  "Audi": ["A-Series (A3-A8)", "Q-Series (Q3-Q8)", "RS Models", "e-tron", "R8"],
   "Bentley": ["Bentayga", "Continental GT", "Flying Spur"],
-  "BMW": ["3 Series", "5 Series", "7 Series", "X3", "X5", "X6", "X7", "M3", "M4", "M5", "M8", "iX"],
-  "Cadillac": ["Escalade", "CT4", "CT5", "XT5", "Lyriq"],
-  "Chevrolet": ["Tahoe", "Suburban", "Corvette", "Camaro", "Silverado"],
-  "Ferrari": ["Roma", "F8 Tributo", "SF90", "Purosangue", "812 Superfast"],
-  "Ford": ["Mustang", "Explorer", "Expedition", "F-150", "Bronco"],
-  "Genesis": ["G70", "G80", "G90", "GV70", "GV80"],
-  "Lamborghini": ["Urus", "Huracan", "Aventador", "Revuelto"],
-  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Velar", "Evoque"],
-  "Lexus": ["IS", "ES", "LS", "NX", "RX", "GX", "LX"],
+  "BMW": ["1-4 Series", "5-8 Series", "X-Series (SUVs)", "M Models", "i-Series (EV)"],
+  "Bugatti": ["Chiron", "Veyron", "Bolide"],
+  "Buick": ["Enclave", "Encore", "Envision"],
+  "Cadillac": ["Escalade", "CT-Series", "XT-Series", "Lyriq"],
+  "Chevrolet": ["Tahoe/Suburban", "Corvette", "Camaro", "Silverado", "Equinox"],
+  "Chrysler": ["300", "Pacifica"],
+  "Dodge": ["Charger", "Challenger", "Durango", "Ram"],
+  "Ferrari": ["Roma", "F8", "SF90", "Purosangue", "812", "296"],
+  "Fiat": ["500", "Panda", "Tipo"],
+  "Ford": ["Mustang", "Explorer", "Expedition", "F-Series", "Bronco"],
+  "Genesis": ["G-Series (Sedans)", "GV-Series (SUVs)"],
+  "GMC": ["Yukon", "Sierra", "Hummer EV", "Acadia"],
+  "Honda": ["Accord", "Civic", "CR-V", "Pilot", "Odyssey"],
+  "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Ioniq"],
+  "Infiniti": ["Q-Series", "QX-Series (SUVs)"],
+  "Jaguar": ["F-PACE", "E-PACE", "I-PACE", "F-TYPE", "XF"],
+  "Jeep": ["Wrangler", "Grand Cherokee", "Wagoneer", "Compass"],
+  "Kia": ["Telluride", "Sportage", "Sorento", "K-Series", "EV-Series"],
+  "Koenigsegg": ["Jesko", "Gemera", "Regera"],
+  "Lamborghini": ["Urus", "Huracan", "Revuelto", "Aventador"],
+  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Velar", "Discovery"],
+  "Lexus": ["IS/ES/LS (Sedans)", "RX/NX/UX (Crossovers)", "GX/LX (SUVs)", "LC"],
+  "Lincoln": ["Navigator", "Aviator", "Corsair", "Nautilus"],
+  "Lotus": ["Emira", "Eletre", "Evija"],
+  "Lucid": ["Air", "Gravity"],
   "Maserati": ["Ghibli", "Quattroporte", "Levante", "Grecale", "MC20"],
-  "McLaren": ["Artura", "720S", "750S", "GT"],
-  "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "G-Class (G63)", "GLE", "GLS", "Maybach", "AMG GT", "EQS"],
-  "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne"],
+  "Mazda": ["CX-Series (SUVs)", "Mazda3", "MX-5 Miata"],
+  "McLaren": ["750S", "Artura", "GT", "720S", "Senna"],
+  "Mercedes-Benz": ["C/E/S-Class", "G-Class (G-Wagon)", "GL-Series (SUVs)", "AMG Models", "EQ-Series (EV)"],
+  "MINI": ["Cooper", "Countryman", "Clubman"],
+  "Mitsubishi": ["Outlander", "Eclipse Cross", "Pajero"],
+  "Nissan": ["Altima", "Maxima", "Rogue", "Armada", "GT-R", "Z"],
+  "Pagani": ["Huayra", "Utopia", "Zonda"],
+  "Peugeot": ["208", "3008", "5008", "508"],
+  "Polestar": ["Polestar 2", "Polestar 3", "Polestar 4"],
+  "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne", "718"],
+  "Ram": ["1500", "2500", "3500", "TRX"],
+  "Renault": ["Clio", "Megane", "Captur", "Arkana"],
+  "Rivian": ["R1T", "R1S"],
   "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Spectre"],
+  "Skoda": ["Octavia", "Superb", "Kodiaq"],
+  "Subaru": ["Outback", "Forester", "Crosstrek", "WRX"],
+  "Suzuki": ["Jimny", "Swift", "Vitara"],
   "Tesla": ["Model S", "Model 3", "Model X", "Model Y", "Cybertruck"],
-  "Toyota": ["Land Cruiser", "Camry", "Corolla", "RAV4", "Highlander"]
+  "Toyota": ["Land Cruiser", "Camry/Corolla", "RAV4", "Highlander", "Tacoma/Tundra", "Supra"],
+  "Volkswagen": ["Golf", "Passat", "Tiguan", "Touareg", "ID-Series"],
+  "Volvo": ["XC40", "XC60", "XC90", "S-Series", "V-Series"]
 };
 
+// Top ~100 Global Country Codes
 const COUNTRY_CODES = [
-  { label: "🇦🇪 UAE (+971)", value: "+971" },
-  { label: "🇮🇱 Israel (+972)", value: "+972" },
-  { label: "🇺🇸 USA (+1)", value: "+1" },
-  { label: "🇬🇧 UK (+44)", value: "+44" },
-  { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" },
-  { label: "🇶🇦 Qatar (+974)", value: "+974" },
-  { label: "🇰🇼 Kuwait (+965)", value: "+965" },
-  { label: "🇧🇭 Bahrain (+973)", value: "+973" },
-  { label: "🇴🇲 Oman (+968)", value: "+968" },
-  { label: "🇯🇴 Jordan (+962)", value: "+962" },
-  { label: "🇪🇬 Egypt (+20)", value: "+20" },
-  { label: "🇫🇷 France (+33)", value: "+33" },
-  { label: "🇩🇪 Germany (+49)", value: "+49" }
+  { label: "🇦🇪 UAE (+971)", value: "+971" }, { label: "🇮🇱 Israel (+972)", value: "+972" }, { label: "🇺🇸 USA/Canada (+1)", value: "+1" }, { label: "🇬🇧 UK (+44)", value: "+44" },
+  { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" }, { label: "🇶🇦 Qatar (+974)", value: "+974" }, { label: "🇰🇼 Kuwait (+965)", value: "+965" }, { label: "🇧🇭 Bahrain (+973)", value: "+973" },
+  { label: "🇴🇲 Oman (+968)", value: "+968" }, { label: "🇯🇴 Jordan (+962)", value: "+962" }, { label: "🇪🇬 Egypt (+20)", value: "+20" }, { label: "🇱🇧 Lebanon (+961)", value: "+961" },
+  { label: "🇫🇷 France (+33)", value: "+33" }, { label: "🇩🇪 Germany (+49)", value: "+49" }, { label: "🇮🇹 Italy (+39)", value: "+39" }, { label: "🇪🇸 Spain (+34)", value: "+34" },
+  { label: "🇨🇭 Switzerland (+41)", value: "+41" }, { label: "🇳🇱 Netherlands (+31)", value: "+31" }, { label: "🇧🇪 Belgium (+32)", value: "+32" }, { label: "🇸🇪 Sweden (+46)", value: "+46" },
+  { label: "🇷🇺 Russia (+7)", value: "+7" }, { label: "🇮🇳 India (+91)", value: "+91" }, { label: "🇨🇳 China (+86)", value: "+86" }, { label: "🇯🇵 Japan (+81)", value: "+81" },
+  { label: "🇰🇷 South Korea (+82)", value: "+82" }, { label: "🇦🇺 Australia (+61)", value: "+61" }, { label: "🇳🇿 New Zealand (+64)", value: "+64" }, { label: "🇧🇷 Brazil (+55)", value: "+55" },
+  { label: "🇲🇽 Mexico (+52)", value: "+52" }, { label: "🇿🇦 South Africa (+27)", value: "+27" }, { label: "🇹🇷 Turkey (+90)", value: "+90" }, { label: "🇬🇷 Greece (+30)", value: "+30" },
+  { label: "🇵🇹 Portugal (+351)", value: "+351" }, { label: "🇦🇹 Austria (+43)", value: "+43" }, { label: "🇮🇪 Ireland (+353)", value: "+353" }, { label: "🇵🇱 Poland (+48)", value: "+48" }
 ];
+
+// Generate 150 predefined spots (Matches venue capacity)
+const PARKING_MAP_SPOTS = [
+  { zone: 'VIP Front', spots: Array.from({length: 20}, (_, i) => `VIP-${i + 1}`) },
+  { zone: 'Zone A', spots: Array.from({length: 50}, (_, i) => `A-${i + 1}`) },
+  { zone: 'Zone B', spots: Array.from({length: 50}, (_, i) => `B-${i + 1}`) },
+  { zone: 'Zone C', spots: Array.from({length: 30}, (_, i) => `C-${i + 1}`) },
+];
+
 
 // ------------------------------------------------------------------
 // REUSABLE AUTOCOMPLETE COMPONENT
@@ -112,7 +157,6 @@ function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isOb
   const [searchTerm, setSearchTerm] = useState('');
   const wrapperRef = useRef(null);
 
-  // Sync internal search term with provided value initially
   useEffect(() => {
     if (isObject) {
       const match = options.find(o => o.value === value);
@@ -122,12 +166,9 @@ function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isOb
     }
   }, [value, options, isObject]);
 
-  // Close dropdown if clicked outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -137,7 +178,6 @@ function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isOb
     const val = e.target.value;
     setSearchTerm(val);
     setIsOpen(true);
-    // If not using object options, update parent state immediately so custom typing is captured
     if (!isObject) onChange(val); 
   };
 
@@ -172,11 +212,7 @@ function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isOb
       {isOpen && filteredOptions.length > 0 && (
         <ul className="autocomplete-dropdown">
           {filteredOptions.map((opt, i) => (
-            <li 
-              key={i} 
-              className="autocomplete-item"
-              onClick={() => handleSelect(opt)}
-            >
+            <li key={i} className="autocomplete-item" onClick={() => handleSelect(opt)}>
               {isObject ? opt.label : opt}
             </li>
           ))}
@@ -188,7 +224,7 @@ function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isOb
 
 
 // ------------------------------------------------------------------
-// 1. GUEST VIEW COMPONENT (PUBLIC)
+// 1. GUEST VIEW COMPONENT
 // ------------------------------------------------------------------
 function GuestTicketView({ ticketId }) {
   const [ticket, setTicket] = useState(null);
@@ -246,12 +282,8 @@ function LoginView() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      setError('Invalid credentials. Access denied.');
-    }
+    try { await signInWithEmailAndPassword(auth, email, password); } 
+    catch (err) { setError('Invalid credentials.'); }
   };
 
   return (
@@ -270,17 +302,20 @@ function LoginView() {
 }
 
 // ------------------------------------------------------------------
-// 3. VALET DASHBOARD COMPONENT (RUNNERS)
+// 3. VALET DASHBOARD COMPONENT (WITH PARKING MAP)
 // ------------------------------------------------------------------
 function ValetDashboardView() {
   const [tickets, setTickets] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
-  const [qrModalTicket, setQrModalTicket] = useState(null);
   
+  // Modals
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [qrModalTicket, setQrModalTicket] = useState(null);
+  const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
+  
+  // Form State - Note countryCode is completely blank by default now
   const [formData, setFormData] = useState({ 
-    make: '', model: '', color: '', plate: '', spot: '', 
-    countryCode: '+971', phone: '' 
+    make: '', model: '', color: '', plate: '', spot: '', countryCode: '', phone: '' 
   });
 
   const currentVenueId = "venue_001";
@@ -291,9 +326,7 @@ function ValetDashboardView() {
       if (snapshot.exists()) {
         const data = snapshot.val();
         setTickets(Object.keys(data).map(key => ({ id: key, ...data[key] })).filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
-      } else {
-        setTickets([]);
-      }
+      } else { setTickets([]); }
     });
     return () => unsubscribe();
   }, []);
@@ -305,9 +338,7 @@ function ValetDashboardView() {
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     const ticketId = `ticket_${Date.now()}`;
-    
-    // Combine Country Code and Phone Number
-    const fullPhone = `${formData.countryCode} ${formData.phone}`;
+    const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
 
     await set(ref(db, `tickets/${ticketId}`), {
       venueId: currentVenueId, 
@@ -319,12 +350,19 @@ function ValetDashboardView() {
     setNewlyCreatedTicket(ticketId);
   };
 
+  // Helper for interactive floor map logic
+  const handleSpotClick = (spot) => {
+    setFormData({ ...formData, spot: spot });
+    setShowMapModal(false);
+    setShowLogModal(true);
+  };
+
   const requestedCars = tickets.filter(t => t.status === "requested");
   const parkedCars = tickets.filter(t => t.status === "parked");
+  const occupiedSpots = parkedCars.map(t => t.parkingSpot);
 
-  // Dynamically determine the available models based on selected Make
   const availableMakes = Object.keys(CAR_DATABASE);
-  const availableModels = CAR_DATABASE[formData.make] || []; // Empty if custom make is typed
+  const availableModels = CAR_DATABASE[formData.make] || []; 
 
   return (
     <div className="app-container">
@@ -334,7 +372,10 @@ function ValetDashboardView() {
             <h1 className="heading-dashboard">Live Queue</h1>
             <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.8rem'}}>Logout</button>
           </div>
-          <button onClick={() => setShowModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
+          <div style={{display: 'flex', gap: '12px'}}>
+            <button onClick={() => setShowMapModal(true)} className="btn-outline">View Parking Map</button>
+            <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
+          </div>
         </div>
 
         <div className="dashboard-grid">
@@ -367,9 +408,7 @@ function ValetDashboardView() {
                     <h3 style={{margin: '0 0 4px 0', fontSize: '1.1rem'}}>{t.vehicle.make} {t.vehicle.model}</h3>
                     <p style={{margin: '0', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{t.vehicle.licensePlate}</p>
                   </div>
-                  <div style={{color: 'var(--accent-gold)', fontWeight: '500', textAlign: 'right'}}>
-                    {t.parkingSpot}
-                  </div>
+                  <div style={{color: 'var(--accent-gold)', fontWeight: '500', textAlign: 'right'}}>{t.parkingSpot}</div>
                 </div>
                 <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{marginTop: '12px', padding: '8px', fontSize: '0.85rem'}}>
                   Show QR Code
@@ -379,6 +418,39 @@ function ValetDashboardView() {
           </div>
         </div>
       </div>
+
+      {/* PARKING MAP MODAL (Interactive Floor Map Logic) */}
+      {showMapModal && (
+        <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && setShowMapModal(false)}>
+          <div className="luxury-card" style={{width: '90%', maxWidth: '800px', padding: '24px', textAlign: 'left'}}>
+            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '8px'}}>LOT INVENTORY MAP</h2>
+            <p style={{color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px'}}>Select any green spot to begin parking a vehicle there.</p>
+            
+            <div className="parking-map">
+              {PARKING_MAP_SPOTS.map((section, idx) => (
+                <div key={idx} style={{display: 'contents'}}>
+                  <div className="zone-title">{section.zone}</div>
+                  {section.spots.map(spot => {
+                    const isOccupied = occupiedSpots.includes(spot);
+                    return (
+                      <div 
+                        key={spot} 
+                        className={`spot-box ${isOccupied ? 'spot-occupied' : 'spot-empty'}`}
+                        onClick={() => !isOccupied && handleSpotClick(spot)}
+                        title={isOccupied ? "Occupied" : "Click to park here"}
+                      >
+                        {spot}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            
+            <button onClick={() => setShowMapModal(false)} className="btn-outline" style={{width: '100%', marginTop: '24px'}}>Close Map</button>
+          </div>
+        </div>
+      )}
 
       {/* RE-VIEW QR MODAL */}
       {qrModalTicket && (
@@ -393,8 +465,8 @@ function ValetDashboardView() {
         </div>
       )}
 
-      {/* NEW ARRIVAL MODAL (UPDATED WITH AUTOCOMPLETE) */}
-      {showModal && (
+      {/* NEW ARRIVAL MODAL WITH AUTOCOMPLETE */}
+      {showLogModal && (
         <div className="modal-overlay">
           <div className="luxury-card" style={{width: '90%', padding: '24px', maxHeight: '90vh', overflowY: 'visible'}}>
             {!newlyCreatedTicket ? (
@@ -402,7 +474,6 @@ function ValetDashboardView() {
                 <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '16px'}}>LOG ARRIVAL</h2>
                 
                 <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  {/* Make Search */}
                   <LuxuryAutocomplete 
                     options={availableMakes} 
                     value={formData.make} 
@@ -410,7 +481,6 @@ function ValetDashboardView() {
                     placeholder="Search Make (e.g. BMW)" 
                     isObject={false}
                   />
-                  {/* Model Search (Dependent on Make) */}
                   <LuxuryAutocomplete 
                     options={availableModels} 
                     value={formData.model} 
@@ -421,27 +491,27 @@ function ValetDashboardView() {
                 </div>
                 
                 <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  <input required placeholder="Color" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, color: e.target.value})} />
-                  <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, plate: e.target.value})} />
+                  <input required placeholder="Color" className="luxury-input" style={{marginBottom: '16px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
+                  <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} />
                 </div>
                 
-                <input required placeholder="Parking Spot" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, spot: e.target.value})} />
+                <input required placeholder="Parking Spot" className="luxury-input" style={{marginBottom: '16px'}} value={formData.spot} onChange={e => setFormData({...formData, spot: e.target.value})} />
                 
-                {/* Phone Component: Code Search + Number */}
+                {/* Blank Country Code Search + Phone Number */}
                 <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', alignItems: 'start'}}>
                   <LuxuryAutocomplete 
                     options={COUNTRY_CODES} 
                     value={formData.countryCode} 
                     onChange={(val) => setFormData({...formData, countryCode: val})} 
-                    placeholder="+ Code" 
+                    placeholder="Search + Code" 
                     isObject={true}
                   />
-                  <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '16px'}} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                  <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '16px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
                 </div>
 
                 <div style={{display: 'flex', gap: '12px', marginTop: '8px'}}>
                   <button type="submit" className="btn-gold">Generate</button>
-                  <button type="button" onClick={() => setShowModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
+                  <button type="button" onClick={() => setShowLogModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
                 </div>
               </form>
             ) : (
@@ -450,7 +520,7 @@ function ValetDashboardView() {
                 <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
                 </div>
-                <button onClick={() => { setShowModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
+                <button onClick={() => { setShowLogModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', countryCode: '', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
               </div>
             )}
           </div>
@@ -461,7 +531,7 @@ function ValetDashboardView() {
 }
 
 // ------------------------------------------------------------------
-// 4. MASTER ADMIN DASHBOARD (MANAGEMENT)
+// 4. MASTER ADMIN DASHBOARD
 // ------------------------------------------------------------------
 function MasterAdminView() {
   const [history, setHistory] = useState([]);
