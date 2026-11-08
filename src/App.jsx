@@ -17,6 +17,8 @@ const luxuryStyles = `
     --text-muted: #a3a3a3;
     --accent-gold: #c5a059;
     --accent-gold-hover: #d4af37;
+    --danger-red: #7f1d1d;
+    --success-green: #14532d;
     --font-heading: 'Playfair Display', serif;
     --font-ui: 'Inter', sans-serif;
   }
@@ -42,14 +44,13 @@ const luxuryStyles = `
 
   .luxury-input { background: #000; border: 1px solid var(--card-border); color: var(--text-main); padding: 14px; width: 100%; border-radius: 4px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; }
   .luxury-input:focus { outline: none; border-color: var(--accent-gold); }
+  .luxury-input[readonly] { cursor: pointer; background: #1a1a1a; }
   
-  /* Autocomplete Dropdown Styles */
   .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
   .autocomplete-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1a1a1a; border: 1px solid var(--accent-gold); border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.8); list-style: none; padding: 0; margin: 0; text-align: left; }
   .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--card-border); transition: background 0.2s; font-size: 0.95rem; }
   .autocomplete-item:hover { background: #262626; color: var(--accent-gold); }
 
-  /* Parking Grid Styles */
   .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
   .spot-box { padding: 16px 4px; border-radius: 6px; text-align: center; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--card-border); transition: all 0.2s; }
   .spot-empty { background: rgba(20, 83, 45, 0.15); color: #86efac; border-color: #14532d; cursor: pointer; }
@@ -64,13 +65,18 @@ const luxuryStyles = `
   .status-box { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 6px; margin-bottom: 32px; }
   .ticket-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 6px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+  
   .luxury-table { width: 100%; border-collapse: collapse; text-align: left; }
   .luxury-table th { padding: 16px; border-bottom: 1px solid var(--card-border); color: var(--text-muted); font-weight: 500; }
   .luxury-table td { padding: 16px; border-bottom: 1px solid var(--card-border); }
+
+  .editor-card { background: #000; border: 1px solid var(--card-border); padding: 20px; border-radius: 8px; margin-bottom: 16px; }
+  .editor-textarea { background: #1a1a1a; border: 1px solid var(--card-border); color: #fff; width: 100%; padding: 12px; border-radius: 4px; box-sizing: border-box; min-height: 80px; font-family: var(--font-ui); font-size: 0.9rem; resize: vertical; margin-bottom: 12px; }
+  .editor-textarea:focus { outline: none; border-color: var(--accent-gold); }
 `;
 
 // ------------------------------------------------------------------
-// MASSIVE DATABASES
+// DATABASES & DEFAULTS
 // ------------------------------------------------------------------
 const CAR_DATABASE = {
   "Acura": ["MDX", "RDX", "TLX", "Integra", "NSX"],
@@ -127,7 +133,6 @@ const CAR_DATABASE = {
   "Volvo": ["XC40", "XC60", "XC90", "S-Series", "V-Series"]
 };
 
-// Top ~100 Global Country Codes
 const COUNTRY_CODES = [
   { label: "🇦🇪 UAE (+971)", value: "+971" }, { label: "🇮🇱 Israel (+972)", value: "+972" }, { label: "🇺🇸 USA/Canada (+1)", value: "+1" }, { label: "🇬🇧 UK (+44)", value: "+44" },
   { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" }, { label: "🇶🇦 Qatar (+974)", value: "+974" }, { label: "🇰🇼 Kuwait (+965)", value: "+965" }, { label: "🇧🇭 Bahrain (+973)", value: "+973" },
@@ -140,17 +145,15 @@ const COUNTRY_CODES = [
   { label: "🇵🇹 Portugal (+351)", value: "+351" }, { label: "🇦🇹 Austria (+43)", value: "+43" }, { label: "🇮🇪 Ireland (+353)", value: "+353" }, { label: "🇵🇱 Poland (+48)", value: "+48" }
 ];
 
-// Generate 150 predefined spots (Matches venue capacity)
-const PARKING_MAP_SPOTS = [
-  { zone: 'VIP Front', spots: Array.from({length: 20}, (_, i) => `VIP-${i + 1}`) },
-  { zone: 'Zone A', spots: Array.from({length: 50}, (_, i) => `A-${i + 1}`) },
-  { zone: 'Zone B', spots: Array.from({length: 50}, (_, i) => `B-${i + 1}`) },
-  { zone: 'Zone C', spots: Array.from({length: 30}, (_, i) => `C-${i + 1}`) },
+const DEFAULT_PARKING_MAP = [
+  { zone: 'VIP Front', spots: Array.from({length: 12}, (_, i) => `VIP-${i + 1}`) },
+  { zone: 'Zone A', spots: Array.from({length: 30}, (_, i) => `A-${i + 1}`) },
+  { zone: 'Zone B', spots: Array.from({length: 30}, (_, i) => `B-${i + 1}`) }
 ];
 
 
 // ------------------------------------------------------------------
-// REUSABLE AUTOCOMPLETE COMPONENT
+// REUSABLE COMPONENTS
 // ------------------------------------------------------------------
 function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isObject }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -222,6 +225,116 @@ function LuxuryAutocomplete({ options, value, onChange, placeholder, style, isOb
   );
 }
 
+// ------------------------------------------------------------------
+// SHARED LOG ARRIVAL MODAL (Used by Valet and Admin)
+// ------------------------------------------------------------------
+function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots }) {
+  const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', countryCode: '', phone: '' });
+
+  const currentDomain = window.location.origin;
+  const availableMakes = Object.keys(CAR_DATABASE);
+  const availableModels = CAR_DATABASE[formData.make] || [];
+
+  const handleCreateTicket = async (e) => {
+    e.preventDefault();
+    const ticketId = `ticket_${Date.now()}`;
+    const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
+
+    await set(ref(db, `tickets/${ticketId}`), {
+      venueId: venueId, 
+      guestPhone: fullPhone,
+      vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate },
+      parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
+      timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
+    });
+    setNewlyCreatedTicket(ticketId);
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="luxury-card" style={{width: '90%', maxWidth: isMapOpen ? '800px' : '420px', padding: '24px', maxHeight: '90vh', overflowY: 'visible', transition: 'max-width 0.3s'}}>
+        
+        {newlyCreatedTicket ? (
+          <div>
+            <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>TICKET ACTIVE</h2>
+            <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            </div>
+            <button onClick={onClose} className="btn-outline" style={{width: '100%'}}>Return to Dashboard</button>
+          </div>
+        ) : isMapOpen ? (
+          <div style={{textAlign: 'left'}}>
+            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
+            <p style={{color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px'}}>Tap an empty green spot to assign it.</p>
+            
+            <div className="parking-map">
+              {parkingMap.map((section, idx) => (
+                <div key={idx} style={{display: 'contents'}}>
+                  <div className="zone-title">{section.zone}</div>
+                  {section.spots.map(spot => {
+                    const isOccupied = occupiedSpots.includes(spot);
+                    return (
+                      <div 
+                        key={spot} 
+                        className={`spot-box ${isOccupied ? 'spot-occupied' : 'spot-empty'}`}
+                        onClick={() => {
+                          if(!isOccupied) {
+                            setFormData({...formData, spot: spot});
+                            setIsMapOpen(false);
+                          }
+                        }}
+                      >
+                        {spot}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setIsMapOpen(false)} className="btn-outline" style={{width: '100%', marginTop: '24px'}}>Cancel Selection</button>
+          </div>
+        ) : (
+          <form onSubmit={handleCreateTicket}>
+            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '16px'}}>LOG ARRIVAL</h2>
+            
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+              <LuxuryAutocomplete options={availableMakes} value={formData.make} onChange={(val) => setFormData({...formData, make: val, model: ''})} placeholder="Search Make" isObject={false} />
+              <LuxuryAutocomplete options={availableModels} value={formData.model} onChange={(val) => setFormData({...formData, model: val})} placeholder="Search Model" isObject={false} />
+            </div>
+            
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+              <input required placeholder="Color" className="luxury-input" style={{marginBottom: '16px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
+              <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} />
+            </div>
+            
+            {/* The interactive spot selector */}
+            <input 
+              required 
+              readOnly
+              placeholder="Tap to Select Parking Spot" 
+              className="luxury-input" 
+              style={{marginBottom: '16px', textAlign: 'center', color: 'var(--accent-gold)', fontWeight: 'bold'}} 
+              value={formData.spot} 
+              onClick={() => setIsMapOpen(true)} 
+            />
+            
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', alignItems: 'start'}}>
+              <LuxuryAutocomplete options={COUNTRY_CODES} value={formData.countryCode} onChange={(val) => setFormData({...formData, countryCode: val})} placeholder="+ Code" isObject={true} />
+              <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '16px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+            </div>
+
+            <div style={{display: 'flex', gap: '12px', marginTop: '8px'}}>
+              <button type="submit" className="btn-gold">Generate Ticket</button>
+              <button type="button" onClick={onClose} className="btn-outline" style={{flex: 1}}>Cancel</button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ------------------------------------------------------------------
 // 1. GUEST VIEW COMPONENT
@@ -302,22 +415,13 @@ function LoginView() {
 }
 
 // ------------------------------------------------------------------
-// 3. VALET DASHBOARD COMPONENT (WITH PARKING MAP)
+// 3. VALET DASHBOARD COMPONENT
 // ------------------------------------------------------------------
-function ValetDashboardView() {
+function ValetDashboardView({ parkingMap }) {
   const [tickets, setTickets] = useState([]);
-  
-  // Modals
   const [showLogModal, setShowLogModal] = useState(false);
-  const [showMapModal, setShowMapModal] = useState(false);
   const [qrModalTicket, setQrModalTicket] = useState(null);
-  const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
   
-  // Form State - Note countryCode is completely blank by default now
-  const [formData, setFormData] = useState({ 
-    make: '', model: '', color: '', plate: '', spot: '', countryCode: '', phone: '' 
-  });
-
   const currentVenueId = "venue_001";
   const currentDomain = window.location.origin;
 
@@ -335,34 +439,9 @@ function ValetDashboardView() {
     await update(ref(db, `tickets/${ticketId}`), { status: "retrieved", "timestamps/retrievedAt": Date.now() });
   };
 
-  const handleCreateTicket = async (e) => {
-    e.preventDefault();
-    const ticketId = `ticket_${Date.now()}`;
-    const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
-
-    await set(ref(db, `tickets/${ticketId}`), {
-      venueId: currentVenueId, 
-      guestPhone: fullPhone,
-      vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate },
-      parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
-      timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
-    });
-    setNewlyCreatedTicket(ticketId);
-  };
-
-  // Helper for interactive floor map logic
-  const handleSpotClick = (spot) => {
-    setFormData({ ...formData, spot: spot });
-    setShowMapModal(false);
-    setShowLogModal(true);
-  };
-
   const requestedCars = tickets.filter(t => t.status === "requested");
   const parkedCars = tickets.filter(t => t.status === "parked");
   const occupiedSpots = parkedCars.map(t => t.parkingSpot);
-
-  const availableMakes = Object.keys(CAR_DATABASE);
-  const availableModels = CAR_DATABASE[formData.make] || []; 
 
   return (
     <div className="app-container">
@@ -372,10 +451,7 @@ function ValetDashboardView() {
             <h1 className="heading-dashboard">Live Queue</h1>
             <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.8rem'}}>Logout</button>
           </div>
-          <div style={{display: 'flex', gap: '12px'}}>
-            <button onClick={() => setShowMapModal(true)} className="btn-outline">View Parking Map</button>
-            <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
-          </div>
+          <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
         </div>
 
         <div className="dashboard-grid">
@@ -419,40 +495,8 @@ function ValetDashboardView() {
         </div>
       </div>
 
-      {/* PARKING MAP MODAL (Interactive Floor Map Logic) */}
-      {showMapModal && (
-        <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && setShowMapModal(false)}>
-          <div className="luxury-card" style={{width: '90%', maxWidth: '800px', padding: '24px', textAlign: 'left'}}>
-            <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '8px'}}>LOT INVENTORY MAP</h2>
-            <p style={{color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px'}}>Select any green spot to begin parking a vehicle there.</p>
-            
-            <div className="parking-map">
-              {PARKING_MAP_SPOTS.map((section, idx) => (
-                <div key={idx} style={{display: 'contents'}}>
-                  <div className="zone-title">{section.zone}</div>
-                  {section.spots.map(spot => {
-                    const isOccupied = occupiedSpots.includes(spot);
-                    return (
-                      <div 
-                        key={spot} 
-                        className={`spot-box ${isOccupied ? 'spot-occupied' : 'spot-empty'}`}
-                        onClick={() => !isOccupied && handleSpotClick(spot)}
-                        title={isOccupied ? "Occupied" : "Click to park here"}
-                      >
-                        {spot}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-            
-            <button onClick={() => setShowMapModal(false)} className="btn-outline" style={{width: '100%', marginTop: '24px'}}>Close Map</button>
-          </div>
-        </div>
-      )}
+      {showLogModal && <LogArrivalModal onClose={() => setShowLogModal(false)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} />}
 
-      {/* RE-VIEW QR MODAL */}
       {qrModalTicket && (
         <div className="modal-overlay">
           <div className="luxury-card" style={{width: '90%'}}>
@@ -464,68 +508,6 @@ function ValetDashboardView() {
           </div>
         </div>
       )}
-
-      {/* NEW ARRIVAL MODAL WITH AUTOCOMPLETE */}
-      {showLogModal && (
-        <div className="modal-overlay">
-          <div className="luxury-card" style={{width: '90%', padding: '24px', maxHeight: '90vh', overflowY: 'visible'}}>
-            {!newlyCreatedTicket ? (
-              <form onSubmit={handleCreateTicket}>
-                <h2 className="heading-brand" style={{color: '#fff', fontSize: '1.5rem', marginBottom: '16px'}}>LOG ARRIVAL</h2>
-                
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  <LuxuryAutocomplete 
-                    options={availableMakes} 
-                    value={formData.make} 
-                    onChange={(val) => setFormData({...formData, make: val, model: ''})} 
-                    placeholder="Search Make (e.g. BMW)" 
-                    isObject={false}
-                  />
-                  <LuxuryAutocomplete 
-                    options={availableModels} 
-                    value={formData.model} 
-                    onChange={(val) => setFormData({...formData, model: val})} 
-                    placeholder="Search Model" 
-                    isObject={false}
-                  />
-                </div>
-                
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  <input required placeholder="Color" className="luxury-input" style={{marginBottom: '16px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
-                  <input required placeholder="License Plate" className="luxury-input" style={{marginBottom: '16px'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} />
-                </div>
-                
-                <input required placeholder="Parking Spot" className="luxury-input" style={{marginBottom: '16px'}} value={formData.spot} onChange={e => setFormData({...formData, spot: e.target.value})} />
-                
-                {/* Blank Country Code Search + Phone Number */}
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', alignItems: 'start'}}>
-                  <LuxuryAutocomplete 
-                    options={COUNTRY_CODES} 
-                    value={formData.countryCode} 
-                    onChange={(val) => setFormData({...formData, countryCode: val})} 
-                    placeholder="Search + Code" 
-                    isObject={true}
-                  />
-                  <input required type="tel" placeholder="Phone Number" className="luxury-input" style={{marginBottom: '16px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                </div>
-
-                <div style={{display: 'flex', gap: '12px', marginTop: '8px'}}>
-                  <button type="submit" className="btn-gold">Generate</button>
-                  <button type="button" onClick={() => setShowLogModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
-                </div>
-              </form>
-            ) : (
-              <div>
-                <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>TICKET ACTIVE</h2>
-                <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
-                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
-                </div>
-                <button onClick={() => { setShowLogModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', countryCode: '', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -533,10 +515,20 @@ function ValetDashboardView() {
 // ------------------------------------------------------------------
 // 4. MASTER ADMIN DASHBOARD
 // ------------------------------------------------------------------
-function MasterAdminView() {
+function MasterAdminView({ parkingMap }) {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
   const [activeTab, setActiveTab] = useState('parked');
+  
+  // Shared Arrival Modal for Admin
+  const [showLogModal, setShowLogModal] = useState(false);
+  
+  // Map Editor State
+  const [editingMap, setEditingMap] = useState([]);
+
+  useEffect(() => {
+    setEditingMap(parkingMap || []);
+  }, [parkingMap]);
 
   useEffect(() => {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
@@ -553,81 +545,168 @@ function MasterAdminView() {
   const formatDateTime = (timestamp) => {
     if (!timestamp) return { date: '-', time: '-' };
     const dateObj = new Date(timestamp);
-    return {
-      date: dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }),
-      time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+    return { date: dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }), time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+  };
+
+  const occupiedSpots = parkedCars.map(t => t.parkingSpot);
+
+  // Editor Functions
+  const handleSaveMap = async () => {
+    await set(ref(db, 'parkingMap'), editingMap);
+    alert('Parking Map Updated Successfully');
+  };
+
+  const moveZone = (index, direction) => {
+    const newMap = [...editingMap];
+    if (direction === 'up' && index > 0) {
+      [newMap[index - 1], newMap[index]] = [newMap[index], newMap[index - 1]];
+    } else if (direction === 'down' && index < newMap.length - 1) {
+      [newMap[index + 1], newMap[index]] = [newMap[index], newMap[index + 1]];
+    }
+    setEditingMap(newMap);
+  };
+
+  const addZone = () => {
+    setEditingMap([...editingMap, { zone: 'New Zone', spots: [] }]);
+  };
+
+  const removeZone = (index) => {
+    if(window.confirm("Are you sure you want to delete this entire zone?")) {
+      const newMap = [...editingMap];
+      newMap.splice(index, 1);
+      setEditingMap(newMap);
+    }
   };
 
   return (
     <div className="app-container">
       <div className="dashboard-wrapper">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <h1 className="heading-dashboard">Management Overview</h1>
-          <button onClick={() => signOut(auth)} className="btn-outline">Logout</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <h1 className="heading-dashboard">Management Overview</h1>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.8rem'}}>Logout</button>
+          </div>
+          <button onClick={() => setShowLogModal(true)} className="btn-gold" style={{width: 'auto'}}>+ Log Arrival</button>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-          <button className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('parked')} style={{ padding: '12px 24px' }}>
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+          <button className={activeTab === 'parked' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('parked')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
             Currently Parked ({parkedCars.length})
           </button>
-          <button className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 24px' }}>
+          <button className={activeTab === 'metrics' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
             Performance Metrics
+          </button>
+          <button className={activeTab === 'map' ? 'btn-gold' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
+            Map Editor
           </button>
         </div>
 
         <div className="queue-column">
-          <h2 className="queue-title">{activeTab === 'parked' ? 'Active Lot Inventory' : 'Retrieval Time History'}</h2>
+          <h2 className="queue-title">
+            {activeTab === 'parked' ? 'Active Lot Inventory' : activeTab === 'metrics' ? 'Retrieval Time History' : 'Live Floor Plan Editor'}
+          </h2>
+          
           <div style={{ overflowX: 'auto' }}>
-            <table className="luxury-table">
-              {activeTab === 'parked' && (
-                <>
-                  <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th></tr></thead>
-                  <tbody>
-                    {parkedCars.map(t => {
-                      const { date, time } = formatDateTime(t.timestamps?.parkedAt);
-                      return (
-                        <tr key={t.id}>
-                          <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
-                          <td>{t.vehicle.licensePlate}</td>
-                          <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
-                          <td style={{ color: 'var(--accent-gold)' }}>{t.parkingSpot}</td>
-                          <td>{date}</td><td>{time}</td>
-                        </tr>
-                      );
-                    })}
-                    {parkedCars.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>}
-                  </tbody>
-                </>
-              )}
+            {/* PARKED OR METRICS TABS */}
+            {activeTab !== 'map' ? (
+              <table className="luxury-table">
+                {activeTab === 'parked' && (
+                  <>
+                    <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th></tr></thead>
+                    <tbody>
+                      {parkedCars.map(t => {
+                        const { date, time } = formatDateTime(t.timestamps?.parkedAt);
+                        return (
+                          <tr key={t.id}>
+                            <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                            <td>{t.vehicle.licensePlate}</td>
+                            <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
+                            <td style={{ color: 'var(--accent-gold)' }}>{t.parkingSpot}</td>
+                            <td>{date}</td><td>{time}</td>
+                          </tr>
+                        );
+                      })}
+                      {parkedCars.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center'}}>Lot is completely empty.</td></tr>}
+                    </tbody>
+                  </>
+                )}
 
-              {activeTab === 'metrics' && (
-                <>
-                  <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Arrival Date</th><th>Retrieval Time</th></tr></thead>
-                  <tbody>
-                    {history.map(t => {
-                      const { date } = formatDateTime(t.timestamps?.parkedAt);
-                      const ms = t.timestamps.retrievedAt - t.timestamps.requestedAt;
-                      const mins = Math.floor(ms / 60000);
-                      const secs = ((ms % 60000) / 1000).toFixed(0);
-                      return (
-                        <tr key={t.id}>
-                          <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
-                          <td>{t.vehicle.licensePlate}</td>
-                          <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
-                          <td>{date}</td>
-                          <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>{mins}m {secs}s</td>
-                        </tr>
-                      );
-                    })}
-                    {history.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>}
-                  </tbody>
-                </>
-              )}
-            </table>
+                {activeTab === 'metrics' && (
+                  <>
+                    <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Arrival Date</th><th>Retrieval Time</th></tr></thead>
+                    <tbody>
+                      {history.map(t => {
+                        const { date } = formatDateTime(t.timestamps?.parkedAt);
+                        const ms = t.timestamps.retrievedAt - t.timestamps.requestedAt;
+                        const mins = Math.floor(ms / 60000);
+                        const secs = ((ms % 60000) / 1000).toFixed(0);
+                        return (
+                          <tr key={t.id}>
+                            <td style={{ color: '#fff' }}>{t.vehicle.make} {t.vehicle.model}</td>
+                            <td>{t.vehicle.licensePlate}</td>
+                            <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
+                            <td>{date}</td>
+                            <td style={{ color: mins > 5 ? '#fca5a5' : 'var(--accent-gold)' }}>{mins}m {secs}s</td>
+                          </tr>
+                        );
+                      })}
+                      {history.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center'}}>No completed retrieval data.</td></tr>}
+                    </tbody>
+                  </>
+                )}
+              </table>
+            ) : (
+              
+              /* MAP EDITOR TAB */
+              <div style={{maxWidth: '800px', margin: '0 auto'}}>
+                <p style={{color: 'var(--text-muted)', marginBottom: '24px'}}>Changes made here will instantly update the interactive floor map for all valets.</p>
+                
+                {editingMap.map((section, idx) => (
+                  <div key={idx} className="editor-card">
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                      <input 
+                        type="text" 
+                        value={section.zone} 
+                        onChange={(e) => {
+                          const newMap = [...editingMap];
+                          newMap[idx].zone = e.target.value;
+                          setEditingMap(newMap);
+                        }} 
+                        className="luxury-input" 
+                        style={{width: '60%', marginBottom: 0, fontSize: '1.25rem', color: 'var(--accent-gold)'}} 
+                      />
+                      <div style={{display: 'flex', gap: '8px'}}>
+                        <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 12px'}}>↑</button>
+                        <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 12px'}}>↓</button>
+                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 12px', width: 'auto'}}>X</button>
+                      </div>
+                    </div>
+                    
+                    <p style={{margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--text-muted)'}}>Parking Spots (Comma Separated)</p>
+                    <textarea 
+                      className="editor-textarea"
+                      value={section.spots.join(', ')}
+                      onChange={(e) => {
+                        const newMap = [...editingMap];
+                        newMap[idx].spots = e.target.value.split(',').map(s => s.trim()).filter(s => s !== '');
+                        setEditingMap(newMap);
+                      }}
+                      placeholder="e.g. VIP-1, VIP-2, VIP-3"
+                    />
+                  </div>
+                ))}
+
+                <div style={{display: 'flex', gap: '16px', marginTop: '32px'}}>
+                  <button onClick={addZone} className="btn-outline" style={{flex: 1}}>+ Add New Zone</button>
+                  <button onClick={handleSaveMap} className="btn-gold" style={{flex: 2}}>Save Map to Live Database</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      
+      {showLogModal && <LogArrivalModal onClose={() => setShowLogModal(false)} venueId="venue_001" parkingMap={parkingMap} occupiedSpots={occupiedSpots} />}
     </div>
   );
 }
@@ -639,6 +718,7 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
+  const [globalParkingMap, setGlobalParkingMap] = useState([]);
 
   const searchParams = new URLSearchParams(window.location.search);
   const requestedTicketId = searchParams.get('ticket');
@@ -654,7 +734,8 @@ function App() {
       return () => document.head.removeChild(styleSheet);
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    // Listen for Auth Role
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const snapshot = await get(ref(db, `users/${currentUser.uid}`));
         setUserRole(snapshot.exists() ? snapshot.val().role : "valet_runner");
@@ -664,14 +745,25 @@ function App() {
       setAuthLoading(false);
     });
 
-    return () => { unsubscribe(); document.head.removeChild(styleSheet); };
+    // Listen for global parking map changes
+    const unsubscribeMap = onValue(ref(db, 'parkingMap'), (snapshot) => {
+      if (snapshot.exists()) {
+        setGlobalParkingMap(snapshot.val());
+      } else {
+        // Seed default map if database is empty
+        set(ref(db, 'parkingMap'), DEFAULT_PARKING_MAP);
+        setGlobalParkingMap(DEFAULT_PARKING_MAP);
+      }
+    });
+
+    return () => { unsubscribeAuth(); unsubscribeMap(); document.head.removeChild(styleSheet); };
   }, [requestedTicketId]);
 
   if (authLoading) return <div className="app-container center-wrapper">Authenticating...</div>;
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   if (!userRole) return <LoginView />;
-  if (userRole === "master_admin") return <MasterAdminView />;
-  return <ValetDashboardView />;
+  if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} />;
+  return <ValetDashboardView parkingMap={globalParkingMap} />;
 }
 
 export default App;
