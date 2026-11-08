@@ -251,7 +251,7 @@ function GuestTicketView({ ticketId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onValue(ref(db, \`tickets/\${ticketId}\`), (snapshot) => {
+    const unsubscribe = onValue(ref(db, `tickets/${ticketId}`), (snapshot) => {
       if (snapshot.exists()) setTicket(snapshot.val());
       setLoading(false);
     });
@@ -260,7 +260,7 @@ function GuestTicketView({ ticketId }) {
 
   const requestVehicle = async () => {
     if (!ticket) return;
-    await update(ref(db, \`tickets/\${ticketId}\`), {
+    await update(ref(db, `tickets/${ticketId}`), {
       status: "requested",
       "timestamps/requestedAt": Date.now()
     });
@@ -366,13 +366,13 @@ function ValetDashboardView() {
   }, []);
 
   const markAsRetrieved = async (ticketId) => {
-    await update(ref(db, \`tickets/\${ticketId}\`), { status: "retrieved", "timestamps/retrievedAt": Date.now() });
+    await update(ref(db, `tickets/${ticketId}`), { status: "retrieved", "timestamps/retrievedAt": Date.now() });
   };
 
   const handleCreateTicket = async (e) => {
     e.preventDefault();
-    const ticketId = \`ticket_\${Date.now()}\`;
-    await set(ref(db, \`tickets/\${ticketId}\`), {
+    const ticketId = `ticket_${Date.now()}`;
+    await set(ref(db, `tickets/${ticketId}`), {
       venueId: currentVenueId, guestPhone: formData.phone,
       vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate },
       parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
@@ -464,7 +464,7 @@ function ValetDashboardView() {
               <div>
                 <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>TICKET ACTIVE</h2>
                 <div style={{background: '#fff', padding: '16px', borderRadius: '8px', display: 'inline-block', margin: '20px 0'}}>
-                  <img src={\`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=\${encodeURIComponent(\`\${currentDomain}/?ticket=\${newlyCreatedTicket}\`)}\`} alt="QR Code" style={{display: 'block'}} />
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
                 </div>
                 <button onClick={() => { setShowModal(false); setNewlyCreatedTicket(null); setFormData({make: '', model: '', color: '', plate: '', spot: '', phone: ''}); }} className="btn-outline" style={{width: '100%'}}>Return to Queue</button>
               </div>
@@ -563,7 +563,7 @@ function App() {
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        const snapshot = await get(ref(db, \`users/\${currentUser.uid}\`));
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
         setUserRole(snapshot.exists() ? snapshot.val().role : "valet_runner");
       } else {
         setUserRole(null);
