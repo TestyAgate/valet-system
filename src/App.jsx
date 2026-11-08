@@ -75,9 +75,7 @@ const luxuryStyles = `
   .spot-occupied { background: rgba(239, 68, 68, 0.05); color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3); cursor: not-allowed; opacity: 0.6; }
   .zone-title { width: 100%; grid-column: 1 / -1; margin: 24px 0 12px 0; color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.35rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 8px;}
 
-  /* -------------------------------------------------------------
-     MAP EDITOR MOBILE FIXES (Zones stack on mobile)
-     ------------------------------------------------------------- */
+  /* Editor specific styling */
   .editor-zone-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; }
   .editor-zone-input { width: 60%; margin-bottom: 0 !important; font-size: 1.35rem; color: var(--accent-gold); font-family: var(--font-heading); background: transparent; border: none; border-bottom: 1px solid var(--card-border); padding: 8px 0; border-radius: 0; transition: border-color 0.3s ease; }
   .editor-zone-input:focus { outline: none; border-color: #fff; background: transparent; box-shadow: none; }
@@ -120,61 +118,95 @@ const luxuryStyles = `
 `;
 
 // ------------------------------------------------------------------
-// DATABASES & DEFAULTS
+// MASSIVE GLOBAL CAR DATABASE
 // ------------------------------------------------------------------
 const CAR_DATABASE = {
+  "Abarth": ["595", "695", "124 Spider"],
   "Acura": ["MDX", "RDX", "TLX", "Integra", "NSX"],
   "Alfa Romeo": ["Giulia", "Stelvio", "Tonale"],
+  "Alpine": ["A110"],
   "Aston Martin": ["DBX", "Vantage", "DB11", "DBS", "Valhalla"],
-  "Audi": ["A-Series (A3-A8)", "Q-Series (Q3-Q8)", "RS Models", "e-tron", "R8"],
+  "Audi": ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q4", "Q5", "Q7", "Q8", "RS Models", "e-tron", "R8"],
+  "BAIC": ["BJ40", "BJ80", "X35", "X55"],
   "Bentley": ["Bentayga", "Continental GT", "Flying Spur"],
-  "BMW": ["1-4 Series", "5-8 Series", "X-Series (SUVs)", "M Models", "i-Series (EV)"],
-  "Bugatti": ["Chiron", "Veyron", "Bolide"],
+  "BMW": ["1-Series", "2-Series", "3-Series", "4-Series", "5-Series", "6-Series", "7-Series", "8-Series", "X1", "X2", "X3", "X4", "X5", "X6", "X7", "M Models", "i-Series"],
+  "Bugatti": ["Chiron", "Veyron", "Bolide", "Tourbillon"],
   "Buick": ["Enclave", "Encore", "Envision"],
-  "Cadillac": ["Escalade", "CT-Series", "XT-Series", "Lyriq"],
-  "Chevrolet": ["Tahoe/Suburban", "Corvette", "Camaro", "Silverado", "Equinox"],
+  "BYD": ["Atto 3", "Seal", "Dolphin", "Han", "Tang", "Song"],
+  "Cadillac": ["Escalade", "CT4", "CT5", "XT4", "XT5", "XT6", "Lyriq"],
+  "Changan": ["CS35", "CS75", "CS85", "CS95", "UNI-T", "UNI-K"],
+  "Chery": ["Tiggo 2", "Tiggo 4", "Tiggo 7", "Tiggo 8", "Arrizo"],
+  "Chevrolet": ["Tahoe", "Suburban", "Corvette", "Camaro", "Silverado", "Equinox", "Trax", "Blazer"],
   "Chrysler": ["300", "Pacifica"],
+  "Citroen": ["C3", "C4", "C5 Aircross", "Berlingo"],
+  "Cupra": ["Formentor", "Leon", "Ateca", "Born", "Tavascan"],
+  "Dacia": ["Duster", "Sandero", "Logan", "Jogger"],
+  "Daihatsu": ["Terios", "Sirion"],
   "Dodge": ["Charger", "Challenger", "Durango", "Ram"],
-  "Ferrari": ["Roma", "F8", "SF90", "Purosangue", "812", "296"],
-  "Fiat": ["500", "Panda", "Tipo"],
-  "Ford": ["Mustang", "Explorer", "Expedition", "F-Series", "Bronco"],
-  "Genesis": ["G-Series (Sedans)", "GV-Series (SUVs)"],
-  "GMC": ["Yukon", "Sierra", "Hummer EV", "Acadia"],
-  "Honda": ["Accord", "Civic", "CR-V", "Pilot", "Odyssey"],
-  "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Ioniq"],
-  "Infiniti": ["Q-Series", "QX-Series (SUVs)"],
+  "Dongfeng": ["Glory", "AX7"],
+  "DS Automobiles": ["DS 3", "DS 4", "DS 7", "DS 9"],
+  "Exeed": ["LX", "TXL", "VX"],
+  "Ferrari": ["Roma", "F8", "SF90", "Purosangue", "812", "296", "Daytona SP3"],
+  "Fiat": ["500", "Panda", "Tipo", "Ducato"],
+  "Ford": ["Mustang", "Explorer", "Expedition", "F-150", "Bronco", "Escape", "Focus", "Edge"],
+  "GAC": ["GS3", "GS4", "GS8", "GA4"],
+  "Geely": ["Coolray", "Azkarra", "Tugella", "Monjaro", "Emgrand"],
+  "Genesis": ["G70", "G80", "G90", "GV60", "GV70", "GV80"],
+  "GMC": ["Yukon", "Sierra", "Hummer EV", "Acadia", "Terrain"],
+  "Great Wall (GWM)": ["Poer", "Wingle", "Tank 300", "Tank 500"],
+  "Haval": ["Jolion", "H6", "Dargo", "H9"],
+  "Honda": ["Accord", "Civic", "CR-V", "Pilot", "Odyssey", "HR-V", "City"],
+  "Hongqi": ["H5", "H9", "HS5", "HS7", "E-HS9"],
+  "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Ioniq 5", "Ioniq 6", "Kona", "Creta"],
+  "Infiniti": ["Q50", "QX50", "QX55", "QX60", "QX80"],
+  "Isuzu": ["D-Max", "MU-X"],
+  "JAC": ["J7", "JS4", "JS6", "T8"],
   "Jaguar": ["F-PACE", "E-PACE", "I-PACE", "F-TYPE", "XF"],
-  "Jeep": ["Wrangler", "Grand Cherokee", "Wagoneer", "Compass"],
-  "Kia": ["Telluride", "Sportage", "Sorento", "K-Series", "EV-Series"],
-  "Koenigsegg": ["Jesko", "Gemera", "Regera"],
+  "Jeep": ["Wrangler", "Grand Cherokee", "Wagoneer", "Compass", "Renegade", "Gladiator"],
+  "Jetour": ["X70", "X90", "Dashing"],
+  "Kia": ["Telluride", "Sportage", "Sorento", "K5", "EV6", "EV9", "Carnival", "Seltos", "Picanto"],
+  "Koenigsegg": ["Jesko", "Gemera", "Regera", "CC850"],
   "Lamborghini": ["Urus", "Huracan", "Revuelto", "Aventador"],
-  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Velar", "Discovery"],
-  "Lexus": ["IS/ES/LS (Sedans)", "RX/NX/UX (Crossovers)", "GX/LX (SUVs)", "LC"],
+  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Velar", "Discovery", "Evoque"],
+  "Lexus": ["IS", "ES", "LS", "NX", "RX", "UX", "GX", "LX", "LC"],
+  "Li Auto": ["L7", "L8", "L9"],
   "Lincoln": ["Navigator", "Aviator", "Corsair", "Nautilus"],
-  "Lotus": ["Emira", "Eletre", "Evija"],
+  "Lotus": ["Emira", "Eletre", "Evija", "Emeya"],
   "Lucid": ["Air", "Gravity"],
-  "Maserati": ["Ghibli", "Quattroporte", "Levante", "Grecale", "MC20"],
-  "Mazda": ["CX-Series (SUVs)", "Mazda3", "MX-5 Miata"],
-  "McLaren": ["750S", "Artura", "GT", "720S", "Senna"],
-  "Mercedes-Benz": ["C/E/S-Class", "G-Class (G-Wagon)", "GL-Series (SUVs)", "AMG Models", "EQ-Series (EV)"],
+  "Lynk & Co": ["01", "03", "05", "09"],
+  "Maserati": ["Ghibli", "Quattroporte", "Levante", "Grecale", "MC20", "GranTurismo"],
+  "Maxus": ["D90", "T60", "V80"],
+  "Mazda": ["Mazda3", "Mazda6", "CX-30", "CX-5", "CX-50", "CX-9", "CX-90", "MX-5 Miata"],
+  "McLaren": ["750S", "Artura", "GT", "720S", "Senna", "P1"],
+  "Mercedes-Benz": ["A-Class", "C-Class", "E-Class", "S-Class", "G-Class", "GLA", "GLC", "GLE", "GLS", "AMG GT", "EQE", "EQS"],
+  "MG": ["MG5", "MG6", "MG RX5", "MG HS", "MG ZS", "MG One"],
   "MINI": ["Cooper", "Countryman", "Clubman"],
-  "Mitsubishi": ["Outlander", "Eclipse Cross", "Pajero"],
-  "Nissan": ["Altima", "Maxima", "Rogue", "Armada", "GT-R", "Z"],
+  "Mitsubishi": ["Outlander", "Eclipse Cross", "Pajero", "L200", "ASX", "Attrage"],
+  "NIO": ["ES6", "ES8", "ET5", "ET7"],
+  "Nissan": ["Altima", "Maxima", "Rogue/X-Trail", "Armada", "Patrol", "Pathfinder", "Sunny", "Kicks", "GT-R", "Z"],
+  "Omoda": ["C5", "S5"],
+  "Opel": ["Corsa", "Astra", "Mokka", "Crossland", "Grandland"],
   "Pagani": ["Huayra", "Utopia", "Zonda"],
-  "Peugeot": ["208", "3008", "5008", "508"],
+  "Peugeot": ["208", "2008", "308", "3008", "508", "5008", "Landtrek"],
   "Polestar": ["Polestar 2", "Polestar 3", "Polestar 4"],
-  "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne", "718"],
+  "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne", "718 Boxster/Cayman"],
   "Ram": ["1500", "2500", "3500", "TRX"],
-  "Renault": ["Clio", "Megane", "Captur", "Arkana"],
+  "Renault": ["Clio", "Megane", "Captur", "Arkana", "Koleos", "Duster"],
   "Rivian": ["R1T", "R1S"],
-  "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Spectre"],
-  "Skoda": ["Octavia", "Superb", "Kodiaq"],
-  "Subaru": ["Outback", "Forester", "Crosstrek", "WRX"],
-  "Suzuki": ["Jimny", "Swift", "Vitara"],
+  "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Spectre", "Dawn"],
+  "SEAT": ["Leon", "Ibiza", "Ateca", "Arona", "Tarraco"],
+  "Skoda": ["Octavia", "Superb", "Kodiaq", "Karoq", "Kamiq", "Fabia"],
+  "Smart": ["#1", "#3"],
+  "SsangYong": ["Rexton", "Tivoli", "Korando", "Musso"],
+  "Subaru": ["Outback", "Forester", "Crosstrek", "WRX", "BRZ"],
+  "Suzuki": ["Jimny", "Swift", "Vitara", "Ertiga", "Baleno"],
+  "Tank": ["300", "500"],
   "Tesla": ["Model S", "Model 3", "Model X", "Model Y", "Cybertruck"],
-  "Toyota": ["Land Cruiser", "Camry/Corolla", "RAV4", "Highlander", "Tacoma/Tundra", "Supra"],
-  "Volkswagen": ["Golf", "Passat", "Tiguan", "Touareg", "ID-Series"],
-  "Volvo": ["XC40", "XC60", "XC90", "S-Series", "V-Series"]
+  "Toyota": ["Land Cruiser", "Camry", "Corolla", "RAV4", "Highlander", "Tacoma", "Tundra", "Supra", "Yaris", "Hilux", "Prado"],
+  "Vauxhall": ["Corsa", "Astra", "Mokka"],
+  "Volkswagen": ["Golf", "Passat", "Tiguan", "Touareg", "Polo", "ID.3", "ID.4", "ID.buzz", "Arteon", "Amarok"],
+  "Volvo": ["XC40", "XC60", "XC90", "S60", "S90", "V60", "EX90", "EX30"],
+  "Zeekr": ["001", "009", "X"]
 };
 
 const COUNTRY_CODES = [
@@ -592,9 +624,12 @@ function MasterAdminView({ parkingMap }) {
   const [activeTab, setActiveTab] = useState('parked');
   const [showLogModal, setShowLogModal] = useState(false);
   const [editingMap, setEditingMap] = useState([]);
+  const [qrModalTicket, setQrModalTicket] = useState(null);
   
   // Custom Confirm Dialog State
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
+
+  const currentDomain = window.location.origin;
 
   useEffect(() => {
     setEditingMap(JSON.parse(JSON.stringify(parkingMap || [])));
@@ -747,7 +782,7 @@ function MasterAdminView({ parkingMap }) {
               <table className="luxury-table animate-slide-up">
                 {activeTab === 'parked' && (
                   <>
-                    <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th></tr></thead>
+                    <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th><th>QR Ticket</th></tr></thead>
                     <tbody>
                       {parkedCars.map(t => {
                         const { date, time } = formatDateTime(t.timestamps?.parkedAt);
@@ -758,10 +793,15 @@ function MasterAdminView({ parkingMap }) {
                             <td style={{ color: 'var(--text-muted)' }}>{t.guestPhone || '-'}</td>
                             <td style={{ color: 'var(--accent-gold)', fontWeight: '600' }}>{t.parkingSpot}</td>
                             <td>{date}</td><td>{time}</td>
+                            <td>
+                              <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem'}}>
+                                View QR
+                              </button>
+                            </td>
                           </tr>
                         );
                       })}
-                      {parkedCars.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>Lot is completely empty.</td></tr>}
+                      {parkedCars.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>Lot is completely empty.</td></tr>}
                     </tbody>
                   </>
                 )}
@@ -852,6 +892,18 @@ function MasterAdminView({ parkingMap }) {
       
       {showLogModal && <LogArrivalModal onClose={() => setShowLogModal(false)} venueId="venue_001" parkingMap={parkingMap} occupiedSpots={occupiedSpots} />}
       
+      {qrModalTicket && (
+        <div className="modal-overlay">
+          <div className="luxury-card animate-scale-in" style={{width: '90%'}}>
+            <h2 className="heading-brand" style={{color: 'var(--accent-gold)'}}>DIGITAL TICKET</h2>
+            <div style={{background: '#fff', padding: '20px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            </div>
+            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Ticket</button>
+          </div>
+        </div>
+      )}
+
       <CustomConfirmWidget 
         isOpen={confirmConfig.isOpen} 
         title={confirmConfig.title} 
