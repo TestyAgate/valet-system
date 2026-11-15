@@ -214,8 +214,7 @@ const COUNTRY_CODES = [
   { label: "🇦🇪 UAE (+971)", value: "+971" }, { label: "🇮🇱 Israel (+972)", value: "+972" }, { label: "🇺🇸 USA/Canada (+1)", value: "+1" }, { label: "🇬🇧 UK (+44)", value: "+44" },
   { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" }, { label: "🇶🇦 Qatar (+974)", value: "+974" }, { label: "🇰🇼 Kuwait (+965)", value: "+965" }, { label: "🇧🇭 Bahrain (+973)", value: "+973" },
   { label: "🇴🇲 Oman (+968)", value: "+968" }, { label: "🇯🇴 Jordan (+962)", value: "+962" }, { label: "🇪🇬 Egypt (+20)", value: "+20" }, { label: "🇱🇧 Lebanon (+961)", value: "+961" },
-  { label: "🇫🇷 France (+33)", value: "+33" }, { label: "🇩🇪 Germany (+49)", value: "+49" }, { label: "🇮🇹 Italy (+39)", value: "+39" }, { label: "🇪🇸 Spain (+34)", value: "+34" },
-  { label: "🇨🇭 Switzerland (+41)", value: "+41" }, { label: "🇳🇱 Netherlands (+31)", value: "+31" }, { label: "🇧🇪 Belgium (+32)", value: "+32" }, { label: "🇸🇪 Sweden (+46)", value: "+46" }
+  { label: "🇫🇷 France (+33)", value: "+33" }, { label: "🇩🇪 Germany (+49)", value: "+49" }, { label: "🇮🇹 Italy (+39)", value: "+39" }, { label: "🇪🇸 Spain (+34)", value: "+34" }
 ];
 
 const DEFAULT_PARKING_MAP = [
@@ -233,7 +232,7 @@ const getZonePrefix = (zoneName) => {
 };
 
 // ------------------------------------------------------------------
-// CUSTOM CONFIRM MODAL (Replaces window.confirm)
+// CUSTOM CONFIRM MODAL
 // ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
@@ -363,9 +362,9 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       setFormData({
         ...formData,
         plate: plate,
-        make: past.vehicle.make || '',
-        model: past.vehicle.model || '',
-        color: past.vehicle.color || '',
+        make: past.vehicle?.make || '',
+        model: past.vehicle?.model || '',
+        color: past.vehicle?.color || '',
         countryCode: phoneParts[0] || '+971',
         phone: phoneParts[1] || ''
       });
@@ -517,8 +516,8 @@ function GuestTicketView({ ticketId }) {
           <p style={{margin: '4px 0 0 0', opacity: 0.9, fontSize: '0.9rem', fontWeight: 500}}>Digital Parking Pass</p>
         </div>
 
-        <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle.make} {vehicle.model}</h3>
-        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle.licensePlate} • {vehicle.color}</p>
+        <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
+        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || 'N/A'} • {vehicle?.color || 'N/A'}</p>
 
         <div style={{background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px'}}>
           <p style={{margin: '0 0 12px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Live Status</p>
@@ -626,7 +625,7 @@ function ValetDashboardView({ parkingMap }) {
         setTickets(all.filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
         
         const memory = {};
-        all.forEach(t => { if(t && t.vehicle && t.vehicle.licensePlate) memory[t.vehicle.licensePlate.toUpperCase()] = t; });
+        all.forEach(t => { if(t.vehicle?.licensePlate) memory[t.vehicle?.licensePlate.toUpperCase()] = t; });
         setKnownPlates(memory);
       } else { setTickets([]); }
     });
@@ -639,7 +638,7 @@ function ValetDashboardView({ parkingMap }) {
     await update(ref(db, `tickets/${ticketId}`), updates);
   };
 
-  // Quick Drop-Off
+  // Quick Drop-Off with dummy vehicle data to prevent crashes
   const handleQuickDropOff = async () => {
     const ticketId = `ticket_${Date.now()}`;
     await set(ref(db, `tickets/${ticketId}`), {
@@ -648,6 +647,7 @@ function ValetDashboardView({ parkingMap }) {
       parkedByUserId: auth.currentUser.uid,
       parkedByName: "Valet Team",
       parkedByPhone: "+971501234567",
+      vehicle: { make: 'Pending', model: 'Details', licensePlate: 'N/A', color: 'N/A' },
       timestamps: { created: Date.now() }
     });
     setQuickQrId(ticketId); 
@@ -679,9 +679,9 @@ function ValetDashboardView({ parkingMap }) {
       setFormData({
         ...formData,
         plate: plate,
-        make: past.vehicle.make || '',
-        model: past.vehicle.model || '',
-        color: past.vehicle.color || '',
+        make: past.vehicle?.make || '',
+        model: past.vehicle?.model || '',
+        color: past.vehicle?.color || '',
         countryCode: phoneParts[0] || '+971',
         phone: phoneParts[1] || ''
       });
@@ -731,7 +731,7 @@ function ValetDashboardView({ parkingMap }) {
             {requested.map((t, i) => (
               <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
                 <span className="status-badge status-requested">Needs Retrieval</span>
-                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle.licensePlate}</span></h3>
+                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || 'N/A'}</span></h3>
                 <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
                 <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
                   📍 To: {t.returnLocation}
@@ -750,14 +750,14 @@ function ValetDashboardView({ parkingMap }) {
                 <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
                   {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
                 </span>
-                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle.licensePlate}</span></h3>
+                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || 'N/A'}</span></h3>
                 
                 {t.status === 'incoming' ? (
                   <button onClick={() => changeStatus(t.id, 'ready')} className="btn-green">Mark "Ready at Door"</button>
                 ) : (
                   <button onClick={() => {
                     const plateMatch = prompt(`Verify Plate before handing keys over.\nType the plate number to confirm handover:`);
-                    if (plateMatch && plateMatch.toUpperCase() === t.vehicle.licensePlate.toUpperCase()) changeStatus(t.id, 'retrieved');
+                    if (plateMatch && plateMatch.toUpperCase() === t.vehicle?.licensePlate?.toUpperCase()) changeStatus(t.id, 'retrieved');
                     else if (plateMatch) alert("Plate does not match! Do not hand over keys.");
                   }} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)'}}>
                     Verify Plate & Handover
@@ -773,10 +773,10 @@ function ValetDashboardView({ parkingMap }) {
             {parked.map((t, i) => (
               <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle.make}</h3>
+                  <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
                   <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
                 </div>
-                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle.licensePlate}</p>
+                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || 'N/A'}</p>
               </div>
             ))}
           </div>
@@ -885,7 +885,6 @@ function MasterAdminView({ parkingMap }) {
   const [qrModalTicket, setQrModalTicket] = useState(null);
   const [knownPlates, setKnownPlates] = useState({});
   
-  // Custom Confirm Dialog State
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
 
   const currentDomain = window.location.origin;
@@ -899,8 +898,8 @@ function MasterAdminView({ parkingMap }) {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => b.timestamps.parkedAt - a.timestamps.parkedAt));
-        setHistory(allTickets.filter(t => t.status === "retrieved" && t.timestamps.requestedAt && t.timestamps.retrievedAt).sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt));
+        setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => (b.timestamps?.parkedAt || 0) - (a.timestamps?.parkedAt || 0)));
+        setHistory(allTickets.filter(t => t.status === "retrieved" && t.timestamps?.requestedAt && t.timestamps?.retrievedAt).sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt));
         
         const memory = {};
         allTickets.forEach(t => { if(t.vehicle?.licensePlate) memory[t.vehicle.licensePlate.toUpperCase()] = t; });
@@ -1051,8 +1050,8 @@ function MasterAdminView({ parkingMap }) {
                         const { date, time } = formatDateTime(t.timestamps?.parkedAt);
                         return (
                           <tr key={t.id}>
-                            <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle.make} {t.vehicle.model}</td>
-                            <td style={{ fontWeight: 600 }}>{t.vehicle.licensePlate}</td>
+                            <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
+                            <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || 'N/A'}</td>
                             <td style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.guestPhone || '-'}</td>
                             <td style={{ color: 'var(--accent-green)', fontWeight: '800' }}>{t.parkingSpot}</td>
                             <td style={{ fontWeight: 500 }}>{date}</td><td style={{ fontWeight: 500 }}>{time}</td>
@@ -1080,8 +1079,8 @@ function MasterAdminView({ parkingMap }) {
                         const secs = ((ms % 60000) / 1000).toFixed(0);
                         return (
                           <tr key={t.id}>
-                            <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle.make} {t.vehicle.model}</td>
-                            <td style={{ fontWeight: 600 }}>{t.vehicle.licensePlate}</td>
+                            <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
+                            <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || 'N/A'}</td>
                             <td style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.guestPhone || '-'}</td>
                             <td style={{ fontWeight: 500 }}>{date}</td>
                             <td style={{ color: mins > 5 ? 'var(--danger-red)' : 'var(--accent-green)', fontWeight: '800' }}>{mins}m {secs}s</td>
