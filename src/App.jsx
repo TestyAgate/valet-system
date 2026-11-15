@@ -641,6 +641,10 @@ function CustomerGarageView({ userProfile, uid, onOpenLiveTicket }) {
   const [selectedPassCar, setSelectedPassCar] = useState(null);
   const [showVipModal, setShowVipModal] = useState(false);
 const isSubscribed = Boolean(userProfile?.isVipMember);
+const getPassDisplay = (code) => {
+  const digits = (code || userProfile?.vipCode || '0000').replace(/\D/g, '');
+  return isSubscribed ? `VIP-${digits}` : digits;
+};
 
 const handleSubscribeVip = async (method) => {
   const subRecord = {
@@ -716,7 +720,7 @@ const handleSubscribeVip = async (method) => {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '28px' }}>
           <div>
-            <span style={{ color: 'var(--accent-green)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>VIP Member Garage</span>
+            <span style={{ color: 'var(--accent-green)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>{isSubscribed ? '👑 VIP Member Garage' : 'Member Garage'}</span>
             <h1 className="heading-dashboard">Welcome, {userProfile?.name || 'VIP Guest'}</h1>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -800,7 +804,7 @@ const handleSubscribeVip = async (method) => {
                     </button>
                   </div>
                   <h3 style={{ fontSize: '1.65rem', fontWeight: 900, margin: '0 0 4px 0' }}>{car.make} {car.model}</h3>
-                  <p style={{ margin: 0, color: '#94a3b8', fontWeight: 600 }}>Exterior: {car.color} • Pass: <span style={{ color: '#34d399', fontFamily: 'monospace' }}>{car.vipCode || userProfile?.vipCode}</span></p>
+                  <p style={{ margin: 0, color: '#94a3b8', fontWeight: 600 }}>Exterior: {car.color} • Pass: <span style={{ color: isSubscribed ? '#f59e0b' : '#34d399', fontFamily: 'monospace', fontWeight: 800 }}>{getPassDisplay(car.vipCode)}</span></p>
                 </div>
 
                 <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', gap: '10px' }}>
@@ -911,7 +915,7 @@ const handleSubscribeVip = async (method) => {
 
             <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', display: 'inline-block', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-md)', marginBottom: '16px' }}>
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(selectedPassCar.vipCode || selectedPassCar.licensePlate)}`}
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(getPassDisplay(selectedPassCar.vipCode))}`}
                 alt="VIP Car QR"
                 style={{ display: 'block' }}
               />
@@ -920,7 +924,7 @@ const handleSubscribeVip = async (method) => {
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '2px dashed #cbd5e1', marginBottom: '24px' }}>
               <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Valet Express Code / Plate</span>
               <strong style={{ fontSize: '1.5rem', fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--text-main)' }}>
-                {selectedPassCar.vipCode || selectedPassCar.licensePlate}
+                {getPassDisplay(selectedPassCar.vipCode)}
               </strong>
             </div>
 
@@ -1769,12 +1773,14 @@ function ValetDashboardView({ parkingMap, venueId }) {
           const u = usersObj[uid];
           if (u.garage) {
             Object.values(u.garage).forEach(car => {
+              const rawDigits = (car.vipCode || u.vipCode || '').replace(/\D/g, '');
               vipList.push({
                 ...car,
+                vipCode: u.isVipMember ? `VIP-${rawDigits}` : rawDigits,
                 customerId: uid,
-                ownerName: u.name || 'VIP Member',
-phone: u.phone || '+971 500000000',
-isVipMember: Boolean(u.isVipMember)
+                ownerName: u.name || (u.isVipMember ? 'VIP Member' : 'Member'),
+                phone: u.phone || '+971 500000000',
+                isVipMember: Boolean(u.isVipMember)
               });
             });
           }
