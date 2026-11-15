@@ -153,12 +153,14 @@ const vibrantStyles = `
   .toggle-switch input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
 
   /* LANDING PAGE & VIP GARAGE STYLES */
-  .landing-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-  .landing-hero { position: relative; border-radius: 28px; overflow: hidden; max-width: 1350px; margin: 0 auto 64px auto; min-height: 580px; display: flex; align-items: center; padding: 64px; box-sizing: border-box; background: #0f172a; color: white; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.25); }
+  .landing-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; gap: 12px; }
+  .landing-hero { position: relative; border-radius: 28px; overflow: hidden; max-width: 1350px; width: 100%; margin: 0 auto 64px auto; min-height: 560px; display: flex; align-items: center; padding: 56px; box-sizing: border-box; background: #0f172a; color: white; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.25); }
   .landing-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.42; filter: contrast(1.1); }
-  .landing-hero-gradient { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.75) 55%, rgba(15,23,42,0.25) 100%); }
-  .landing-hero-content { position: relative; z-index: 2; max-width: 640px; text-align: left; }
-  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 24px; backdrop-filter: blur(8px); }
+  .landing-hero-gradient { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.8) 60%, rgba(15,23,42,0.35) 100%); }
+  .landing-hero-content { position: relative; z-index: 2; width: 100%; max-width: 640px; min-width: 0; box-sizing: border-box; text-align: left; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; backdrop-filter: blur(8px); max-width: 100%; box-sizing: border-box; }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; width: 100%; }
+  .hero-ticket-form { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); padding: 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); display: flex; gap: 8px; width: 100%; max-width: 480px; box-sizing: border-box; }
   .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1350px; margin: 0 auto 80px auto; padding: 0 24px; box-sizing: border-box; }
   .feature-card { background: #fff; border: 1px solid var(--card-border); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-md); transition: all 0.3s ease; display: flex; flex-direction: column; text-align: left; }
   .feature-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
@@ -168,8 +170,13 @@ const vibrantStyles = `
 
   @media (max-width: 768px) {
     .app-container { padding: 14px; }
-    .landing-nav { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
-    .landing-hero { padding: 28px 20px; margin: 0 12px 40px 12px; border-radius: 20px; min-height: auto; }
+    .landing-nav { padding: 14px 16px; }
+    .landing-hero { padding: 28px 20px; margin: 0 auto 36px auto; border-radius: 22px; min-height: auto; }
+    .hero-badge { font-size: 0.7rem; padding: 6px 12px; white-space: normal; line-height: 1.3; }
+    .hero-actions { flex-direction: column; gap: 10px; }
+    .hero-actions button { width: 100% !important; justify-content: center; padding: 15px 20px !important; }
+    .hero-ticket-form { flex-direction: column; padding: 10px; }
+    .hero-ticket-form button { width: 100% !important; padding: 12px !important; }
     .feature-grid { grid-template-columns: 1fr !important; padding: 0 16px; margin-bottom: 48px; }
     .vibrant-card { padding: 24px 18px; }
     .heading-dashboard { font-size: 1.6rem; }
@@ -337,53 +344,53 @@ function LandingPageView({ onNavigateAuth, onOpenTicket }) {
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
       {/* Top Navbar */}
       <nav className="landing-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '1.3rem', boxShadow: 'var(--shadow-btn)' }}>S</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '1.2rem', boxShadow: 'var(--shadow-btn)', flexShrink: 0 }}>S</div>
           <div>
-            <span style={{ fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.5px', color: 'var(--text-main)' }}>SKY VALET</span>
-            <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-green)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>VIP Mobility & Fleet</span>
+            <span style={{ fontWeight: 900, fontSize: '1.25rem', letterSpacing: '-0.5px', color: 'var(--text-main)', display: 'block', lineHeight: 1.1 }}>SKY VALET</span>
+            <span style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: 'var(--accent-green)', letterSpacing: '1.2px', textTransform: 'uppercase' }}>VIP Mobility & Fleet</span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.95rem' }}>Login</button>
-          <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.95rem' }}>Register</button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '8px 16px', fontSize: '0.9rem' }}>Login</button>
+          <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '8px 16px', fontSize: '0.9rem' }}>Register</button>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div style={{ padding: '0 20px' }}>
+      <div style={{ padding: '0 16px', width: '100%', boxSizing: 'border-box' }}>
         <section className="landing-hero animate-scale-in">
           <img className="landing-hero-bg" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1800&q=80" alt="Luxury Porsche at Hotel Valet" />
           <div className="landing-hero-gradient" />
           
           <div className="landing-hero-content">
             <div className="hero-badge">✨ Zero-Wait Digital Valet Ecosystem</div>
-            <h1 style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)', fontWeight: 900, margin: '0 0 20px 0', lineHeight: 1.08, letterSpacing: '-1.5px' }}>
+            <h1 style={{ fontSize: 'clamp(1.85rem, 5vw, 3.8rem)', fontWeight: 900, margin: '0 0 16px 0', lineHeight: 1.1, letterSpacing: '-1px', color: '#ffffff', wordBreak: 'break-word' }}>
               Arrive Like Royalty. Leave Without Waiting.
             </h1>
-            <p style={{ fontSize: '1.15rem', color: '#cbd5e1', lineHeight: 1.6, marginBottom: '32px', fontWeight: 400 }}>
+            <p style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.15rem)', color: '#cbd5e1', lineHeight: 1.55, marginBottom: '28px', fontWeight: 400 }}>
               Register your vehicles once in the Sky Valet VIP Garage. Flash your digital pass at any partner 5-star hotel or restaurant, track live wash bay progress, and summon your car to the front door with a single tap.
             </p>
             
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '36px' }}>
-              <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '18px 32px', fontSize: '1.1rem' }}>
+            <div className="hero-actions">
+              <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '16px 28px', fontSize: '1.05rem' }}>
                 🚘 Register Your Car — Free
               </button>
-              <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '18px 28px', background: 'rgba(255,255,255,0.1)', color: 'white', borderColor: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)' }}>
+              <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '16px 24px', background: 'rgba(255,255,255,0.1)', color: 'white', borderColor: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)' }}>
                 Open My VIP Pass
               </button>
             </div>
 
             {/* Instant Ticket Lookup Bar */}
-            <form onSubmit={handleTicketLookup} style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', gap: '10px', maxWidth: '480px' }}>
+            <form onSubmit={handleTicketLookup} className="hero-ticket-form">
               <input
                 type="text"
                 placeholder="Have a paper/QR ticket ID? (e.g. ticket_173...)"
                 value={ticketCodeInput}
                 onChange={(e) => setTicketCodeInput(e.target.value)}
-                style={{ background: 'transparent', border: 'none', color: 'white', padding: '10px 14px', flex: 1, fontSize: '0.95rem', outline: 'none', fontFamily: 'var(--font-ui)' }}
+                style={{ background: 'transparent', border: 'none', color: 'white', padding: '10px 12px', flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box', fontSize: '0.95rem', outline: 'none', fontFamily: 'var(--font-ui)' }}
               />
-              <button type="submit" className="btn-blue" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Track Car</button>
+              <button type="submit" className="btn-blue" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}>Track Car</button>
             </form>
           </div>
         </section>
