@@ -245,10 +245,67 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
 
   useEffect(() => { setVal(''); setErrorMsg(''); }, [isOpen]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (val.trim().toUpperCase() === expectedValue.toUpperCase()) { onMatch(); } 
-    else { setErrorMsg('Incorrect License Plate. Do not hand over keys.'); }
+    setErrorMsg('');
+
+    if (!formData.plate || !formData.make || !formData.color || !formData.spot || !formData.phone) {
+      setErrorMsg('⚠️ Please fill in all details and select a parking spot.');
+      return;
+    }
+
+    const normalizedPlate = formData.plate.trim().toUpperCase();
+
+    // Prevent parking the same vehicle twice while it still has an active ticket
+    const activeSnap = await get(ref(db, 'tickets'));
+    if (activeSnap.exists()) {
+      const allTickets = activeSnap.val();
+      const duplicateId = Object.keys(allTickets).find(id => {
+        const t = allTickets[id];
+        const samePlate = t.vehicle?.licensePlate?.trim().toUpperCase() === normalizedPlate;
+        const isStillParked = t.status !== 'retrieved';
+        const isNotCurrentEdit = !editingTicket || id !== editingTicket.id;
+        return samePlate && isStillParked && isNotCurrentEdit;
+      });
+
+      if (duplicateId) {
+        const dup = allTickets[duplicateId];
+        setErrorMsg(`⚠️ ${normalizedPlate} is already parked (${dup.parkingSpot || 'Draft'})!`);
+        return;
+      }
+    }
+
+    const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
+    
+    if (editingTicket) {
+      await update(ref(db, `tickets/${editingTicket.id}`), {
+        guestPhone: fullPhone,
+        customerId: formData.customerId || null,
+        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: normalizedPlate },
+        parkingSpot: formData.spot,
+        status: editingTicket.status === "draft" ? "parked" : editingTicket.status, 
+        "timestamps/parkedAt": editingTicket.status === "draft" ? Date.now() : (editingTicket.timestamps?.parkedAt || Date.now())
+      });
+      onClose();
+    } else {
+      const ticketId = `ticket_${Date.now()}`;
+      await set(ref(db, `tickets/${ticketId}`), {
+        venueId: venueId,
+        guestPhone: fullPhone,
+        customerId: formData.customerId || null,
+        isVipMember: Boolean(formData.isVipMember),
+        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: normalizedPlate },
+        parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
+        timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
+      });
+
+      // Registered guests get the ticket straight in their app—close modal instead of showing a QR popup
+      if (formData.customerId || prefillVipData) {
+        onClose();
+      } else {
+        setNewlyCreatedTicket(ticketId);
+      }
+    }
   };
 
   if (!isOpen) return null;
@@ -1100,7 +1157,9 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
             </div>
 
             <div style={{display: 'flex', gap: '16px'}}>
-              <button type="submit" className="btn-green" style={{flex: 2}}>{editingTicket && editingTicket.id !== 'new' ? 'Save Update' : 'Generate Ticket'}</button>
+              <button type="submit" className="btn-green" style={{flex: 2}}>
+  {editingTicket && editingTicket.id !== 'new' ? 'Save Update' : (prefillVipData || formData.customerId) ? 'Park Vehicle' : 'Generate Ticket'}
+</button>
               <button type="button" onClick={onClose} className="btn-outline" style={{flex: 1}}>Cancel</button>
             </div>
           </form>
@@ -1818,6 +1877,14 @@ function ValetDashboardView({ parkingMap, venueId }) {
     );
 
     if (match) {
+      const alreadyParked = tickets.find(
+        t => t.vehicle?.licensePlate && t.vehicle.licensePlate.toUpperCase() === match.licensePlate.toUpperCase()
+      );
+      if (alreadyParked) {
+        setScanError(`⚠️ ${match.make} (${match.licensePlate}) is already parked in ${alreadyParked.parkingSpot || 'Draft'}!`);
+        return true;
+      }
+
       setShowScannerModal(false);
       setScanInputCode('');
       setScannedVipPrefill(match);
@@ -2075,23 +2142,42 @@ function ValetDashboardView({ parkingMap, venueId }) {
               <button type="submit" className="btn-green" style={{ width: 'auto', padding: '0 20px' }}>Load</button>
             </form>
 
-            {registeredVipCars.length > 0 && (
-              <div style={{ textAlign: 'left', marginBottom: '20px', maxHeight: '140px', overflowY: 'auto', background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Registered Guest Vehicles:</span>
-                {registeredVipCars.map((c, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => { setShowScannerModal(false); setScannedVipPrefill(c); }}
-                    style={{ padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 700, fontSize: '0.9rem', borderBottom: '1px solid #e2e8f0' }}
-                  >
-                    <span>{c.make} {c.model} ({c.licensePlate})</span>
-                    <span style={{ color: c.isVipMember ? '#f59e0b' : 'var(--accent-green)', fontFamily: 'monospace', fontWeight: 800 }}>
-                      {c.isVipMember ? `👑 ${c.vipCode}` : c.rawCode}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {registeredVipCars.map((c, idx) => {
+                  const activeTicket = tickets.find(
+                    t => t.vehicle?.licensePlate && t.vehicle.licensePlate.toUpperCase() === c.licensePlate?.toUpperCase()
+                  );
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        if (activeTicket) {
+                          setScanError(`⚠️ ${c.make} (${c.licensePlate}) is already parked in ${activeTicket.parkingSpot || 'Draft'}!`);
+                          return;
+                        }
+                        setShowScannerModal(false);
+                        setScannedVipPrefill(c);
+                      }}
+                      style={{
+                        padding: '8px 10px', borderRadius: '8px',
+                        cursor: activeTicket ? 'not-allowed' : 'pointer',
+                        opacity: activeTicket ? 0.55 : 1,
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        fontWeight: 700, fontSize: '0.9rem', borderBottom: '1px solid #e2e8f0'
+                      }}
+                    >
+                      <span>{c.make} {c.model} ({c.licensePlate})</span>
+                      {activeTicket ? (
+                        <span style={{ color: 'var(--danger-red)', fontSize: '0.8rem', fontWeight: 800 }}>
+                          Parked ({activeTicket.parkingSpot || 'Draft'})
+                        </span>
+                      ) : (
+                        <span style={{ color: c.isVipMember ? '#f59e0b' : 'var(--accent-green)', fontFamily: 'monospace', fontWeight: 800 }}>
+                          {c.isVipMember ? `👑 ${c.vipCode}` : c.rawCode}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
 
             <button onClick={() => setShowScannerModal(false)} className="btn-outline" style={{width: '100%', padding: '14px'}}>Close Scanner</button>
           </div>
