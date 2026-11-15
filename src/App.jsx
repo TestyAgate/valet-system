@@ -437,7 +437,7 @@ function GuestTicketView({ ticketId }) {
 
   // Custom Tip State
   const [customTipAmount, setCustomTipAmount] = useState('');
-  const [tipStep, setTipStep] = useState(1); // 1 = select amount, 2 = payment method
+  const [tipStep, setTipStep] = useState(1); 
   const [selectedTip, setSelectedTip] = useState(0);
 
   useEffect(() => {
@@ -507,7 +507,7 @@ function GuestTicketView({ ticketId }) {
         </div>
 
         <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
-        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || 'N/A'} • {vehicle?.color || 'N/A'}</p>
+        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || ''} • {vehicle?.color || ''}</p>
 
         {/* DUAL TRACKERS */}
         <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px'}}>
@@ -527,7 +527,7 @@ function GuestTicketView({ ticketId }) {
             {status === 'incoming' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--warning-yellow)', fontWeight: 800}}>On the Way!</h4>}
             {status === 'ready' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--accent-green)', fontWeight: 800}}>Ready at Door!</h4>}
             {status === 'retrieved' && <h4 style={{margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800}}>Delivered</h4>}
-            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>Parked for {hoursParked}h {minsParked}m</p>}
+            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>{hoursParked}h {minsParked}m</p>}
           </div>
         </div>
 
@@ -651,20 +651,19 @@ function LoginView() {
 // ------------------------------------------------------------------
 // WASH BAY STAFF DASHBOARD (Exclusive)
 // ------------------------------------------------------------------
-function WashBayView() {
+function WashBayView({ venueId }) {
   const [tickets, setTickets] = useState([]);
-  const currentVenueId = "venue_001";
 
   useEffect(() => {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        setTickets(all.filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
+        setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
       } else { setTickets([]); }
     });
     return () => unsubscribe();
-  }, []);
+  }, [venueId]);
 
   const changeStatus = async (ticketId, field, newStatus) => {
     await update(ref(db, `tickets/${ticketId}`), { [field]: newStatus });
@@ -722,7 +721,7 @@ function WashBayView() {
 // ------------------------------------------------------------------
 // VALET DISPATCHER DASHBOARD (Exclusive)
 // ------------------------------------------------------------------
-function ValetDashboardView({ parkingMap }) {
+function ValetDashboardView({ parkingMap, venueId }) {
   const [tickets, setTickets] = useState([]);
   
   const [showLogModal, setShowLogModal] = useState(false);
@@ -732,7 +731,6 @@ function ValetDashboardView({ parkingMap }) {
   const [knownPlates, setKnownPlates] = useState({});
   const [promptConfig, setPromptConfig] = useState({ isOpen: false, ticketId: null, expectedPlate: '' });
 
-  const currentVenueId = "venue_001";
   const currentDomain = window.location.origin;
 
   useEffect(() => {
@@ -740,7 +738,7 @@ function ValetDashboardView({ parkingMap }) {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        setTickets(all.filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
+        setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
         
         const memory = {};
         all.forEach(t => { if(t.vehicle?.licensePlate) memory[t.vehicle?.licensePlate.toUpperCase()] = t; });
@@ -748,7 +746,7 @@ function ValetDashboardView({ parkingMap }) {
       } else { setTickets([]); }
     });
     return () => unsubscribe();
-  }, []);
+  }, [venueId]);
 
   const changeStatus = async (ticketId, field, newStatus) => {
     const updates = { [field]: newStatus };
@@ -759,7 +757,7 @@ function ValetDashboardView({ parkingMap }) {
   const handleQuickDropOff = async () => {
     const ticketId = `ticket_${Date.now()}`;
     await set(ref(db, `tickets/${ticketId}`), {
-      venueId: currentVenueId, status: "draft", parkedByUserId: auth.currentUser.uid, parkedByName: "Valet Team", parkedByPhone: "+971501234567",
+      venueId: venueId, status: "draft", parkedByUserId: auth.currentUser.uid, parkedByName: "Valet Team", parkedByPhone: "+971501234567",
       vehicle: { make: '', model: '', licensePlate: '', color: '' }, timestamps: { created: Date.now() }
     });
     setQuickQrId(ticketId); 
@@ -870,7 +868,7 @@ function ValetDashboardView({ parkingMap }) {
         </div>
       </div>
       
-      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
+      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
 
       {quickQrId && (
         <div className="modal-overlay">
@@ -885,12 +883,11 @@ function ValetDashboardView({ parkingMap }) {
         </div>
       )}
 
-      {/* CUSTOM PROMPT WIDGET FOR PLATE VERIFICATION */}
       <CustomPromptWidget 
         isOpen={promptConfig.isOpen}
         title="Verify Handover"
         message="Type the license plate number of this vehicle to confirm you are handing the keys to the correct guest."
-        expectedValue={promptConfig.expectedPlate}
+        expectedValue={promptConfig.expectedPlate || 'N/A'}
         onMatch={() => {
           changeStatus(promptConfig.ticketId, 'status', 'retrieved');
           setPromptConfig({ ...promptConfig, isOpen: false });
@@ -918,7 +915,7 @@ function ValetDashboardView({ parkingMap }) {
 // ------------------------------------------------------------------
 // MASTER ADMIN DASHBOARD
 // ------------------------------------------------------------------
-function MasterAdminView({ parkingMap }) {
+function MasterAdminView({ parkingMap, venueId }) {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
   const [activeTab, setActiveTab] = useState('operations');
@@ -932,7 +929,6 @@ function MasterAdminView({ parkingMap }) {
   const [newLocationInput, setNewLocationInput] = useState('');
 
   const currentDomain = window.location.origin;
-  const currentVenueId = "venue_001";
 
   useEffect(() => {
     setEditingMap(JSON.parse(JSON.stringify(parkingMap || [])));
@@ -942,7 +938,7 @@ function MasterAdminView({ parkingMap }) {
     const unsubscribeTickets = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] })).filter(t => t.venueId === venueId);
         setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => (b.timestamps?.parkedAt || 0) - (a.timestamps?.parkedAt || 0)));
         setHistory(allTickets.filter(t => t.status === "retrieved" && t.timestamps?.requestedAt && t.timestamps?.retrievedAt).sort((a, b) => b.timestamps.retrievedAt - a.timestamps.retrievedAt));
         
@@ -952,13 +948,13 @@ function MasterAdminView({ parkingMap }) {
       }
     });
 
-    const unsubscribeSettings = onValue(ref(db, `venues/${currentVenueId}/settings`), (snapshot) => {
+    const unsubscribeSettings = onValue(ref(db, `venues/${venueId}/settings`), (snapshot) => {
       if (snapshot.exists()) setVenueSettings(snapshot.val());
-      else { set(ref(db, `venues/${currentVenueId}/settings`), DEFAULT_VENUE_SETTINGS); setVenueSettings(DEFAULT_VENUE_SETTINGS); }
+      else { set(ref(db, `venues/${venueId}/settings`), DEFAULT_VENUE_SETTINGS); setVenueSettings(DEFAULT_VENUE_SETTINGS); }
     });
 
     return () => { unsubscribeTickets(); unsubscribeSettings(); };
-  }, []);
+  }, [venueId]);
 
   const formatDateTime = (timestamp) => {
     if (!timestamp) return { date: '-', time: '-' };
@@ -1040,21 +1036,21 @@ function MasterAdminView({ parkingMap }) {
   };
 
   const handleToggleWash = async (e) => {
-    await update(ref(db, `venues/${currentVenueId}/settings`), { carWashEnabled: e.target.checked });
+    await update(ref(db, `venues/${venueId}/settings`), { carWashEnabled: e.target.checked });
   };
   const handlePriceChange = async (e) => {
-    await update(ref(db, `venues/${currentVenueId}/settings`), { carWashPrice: Number(e.target.value) });
+    await update(ref(db, `venues/${venueId}/settings`), { carWashPrice: Number(e.target.value) });
   };
   const handleAddLocation = async () => {
     if (!newLocationInput.trim()) return;
     const locs = [...(venueSettings.returnLocations || []), newLocationInput.trim()];
-    await update(ref(db, `venues/${currentVenueId}/settings`), { returnLocations: locs });
+    await update(ref(db, `venues/${venueId}/settings`), { returnLocations: locs });
     setNewLocationInput('');
   };
   const handleRemoveLocation = async (index) => {
     const locs = [...(venueSettings.returnLocations || [])];
     locs.splice(index, 1);
-    await update(ref(db, `venues/${currentVenueId}/settings`), { returnLocations: locs });
+    await update(ref(db, `venues/${venueId}/settings`), { returnLocations: locs });
   };
   
   const handleAdminDelete = (id) => {
@@ -1176,7 +1172,7 @@ function MasterAdminView({ parkingMap }) {
             {activeTab === 'settings' && (
               <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
                 
-                <div className="editor-card" style={{borderColor: venueSettings.tier === 1 ? 'var(--card-border)' : 'var(--accent-gold)'}}>
+                <div className="editor-card" style={{borderColor: venueSettings.tier === 1 ? 'var(--card-border)' : 'var(--warning-yellow)', borderWidth: venueSettings.tier === 2 ? '2px' : '1px'}}>
                   <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
                     <h3 style={{margin: 0, fontWeight: 800, fontSize: '1.5rem'}}>Service Options</h3>
                     <span style={{background: venueSettings.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: venueSettings.tier === 1 ? '#475569' : '#fff', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase'}}>
@@ -1300,7 +1296,7 @@ function MasterAdminView({ parkingMap }) {
         </div>
       </div>
       
-      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit.id === 'new' ? null : draftToEdit} />}
+      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit.id === 'new' ? null : draftToEdit} />}
       
       {qrModalTicket && (
         <div className="modal-overlay">
@@ -1331,6 +1327,7 @@ function MasterAdminView({ parkingMap }) {
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
+  const [userVenueId, setUserVenueId] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
   const [globalParkingMap, setGlobalParkingMap] = useState([]);
@@ -1352,9 +1349,14 @@ function App() {
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const snapshot = await get(ref(db, `users/${currentUser.uid}`));
-        setUserRole(snapshot.exists() ? snapshot.val().role : "valet_runner"); // Default fallback
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setUserRole(userData.role || "valet_runner"); 
+          setUserVenueId(userData.venueId || "venue_001");
+        }
       } else {
         setUserRole(null);
+        setUserVenueId(null);
       }
       setAuthLoading(false);
     });
@@ -1374,12 +1376,11 @@ function App() {
   if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>AUTHENTICATING...</div></div>;
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   
-  if (!userRole) return <LoginView />;
-  if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} />;
-  if (userRole === "wash_team") return <WashBayView />;
+  if (!userRole || !userVenueId) return <LoginView />;
+  if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} venueId={userVenueId} />;
+  if (userRole === "wash_team") return <WashBayView venueId={userVenueId} />;
   
-  // Default for "valet_runner"
-  return <ValetDashboardView parkingMap={globalParkingMap} />;
+  return <ValetDashboardView parkingMap={globalParkingMap} venueId={userVenueId} />;
 }
 
 export default App;
