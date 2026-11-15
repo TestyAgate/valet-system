@@ -4,7 +4,7 @@ import { ref, onValue, update, set, get } from 'firebase/database';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // ------------------------------------------------------------------
-// INJECTED CSS FOR VIBRANT, ENERGETIC APP UI
+// INJECTED CSS FOR VIBRANT, ENERGETIC APP UI & SHADOWS
 // ------------------------------------------------------------------
 const vibrantStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
@@ -21,6 +21,12 @@ const vibrantStyles = `
     --warning-yellow: #f59e0b;
     --draft-purple: #8b5cf6;
     --font-ui: 'Outfit', sans-serif;
+    
+    /* New Shadow Variables for Depth */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+    --shadow-btn: 0 4px 14px rgba(16, 185, 129, 0.3);
   }
 
   body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -31,88 +37,70 @@ const vibrantStyles = `
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  @keyframes scanLaser { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
   
   .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-  .vibrant-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; }
+  .vibrant-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); text-align: center; position: relative; overflow: hidden; }
   
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+  /* Buttons with Shadows */
+  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); }
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
   
-  .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+  .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
   .btn-purple:hover { transform: translateY(-2px); filter: brightness(1.1); }
   
-  .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-  .btn-action:hover { background: var(--danger-red); color: white; transform: translateY(-1px); }
+  .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
+  .btn-action:hover { background: var(--danger-red); color: white; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-  .btn-outline { background: transparent; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-  .btn-outline:hover { background: #f1f5f9; border-color: #cbd5e1; }
+  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+  .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
   
   /* Mobile Wallet Buttons */
-  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-md); }
   .btn-apple-pay:hover { background: #333; transform: translateY(-2px); }
-  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-  .btn-google-pay:hover { background: #f8f9fa; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-  .btn-card-pay { background: #2563eb; color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-card-pay:hover { background: #1d4ed8; transform: translateY(-2px); }
+  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-md); }
+  .btn-google-pay:hover { background: #f8f9fa; transform: translateY(-2px); }
 
-  .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; }
+  /* Inputs */
+  .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
   .vibrant-input:focus { outline: none; border-color: var(--accent-green); background: #fff; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
   
-  .error-banner { background: #fef2f2; color: var(--danger-red); border: 2px solid #fecaca; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; animation: scaleIn 0.2s ease-out; text-align: left; }
-
-  .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
-  .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 2px solid var(--accent-green); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.1); list-style: none; padding: 8px; margin: 0; text-align: left; }
-  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-radius: 8px; font-weight: 500; }
-  .autocomplete-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
-
   /* Map Editor & Spot Selector Styles */
   .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
-  .spot-box { padding: 16px 4px; border-radius: 10px; text-align: center; font-size: 0.85rem; font-weight: 700; border: 2px solid var(--card-border); transition: all 0.2s; box-sizing: border-box; }
+  .spot-box { padding: 16px 4px; border-radius: 10px; text-align: center; font-size: 0.85rem; font-weight: 700; border: 2px solid var(--card-border); transition: all 0.2s; box-sizing: border-box; box-shadow: var(--shadow-sm); }
   .spot-empty { background: #ecfdf5; color: var(--accent-green); border-color: #a7f3d0; cursor: pointer; }
-  .spot-empty:hover { background: var(--accent-green); color: #fff; transform: scale(1.05); border-color: var(--accent-green); }
+  .spot-empty:hover { background: var(--accent-green); color: #fff; transform: scale(1.05); border-color: var(--accent-green); box-shadow: var(--shadow-md); }
   .spot-occupied { background: #fef2f2; color: var(--danger-red); border-color: #fecaca; cursor: not-allowed; opacity: 0.7; }
   .zone-title { width: 100%; grid-column: 1 / -1; margin: 16px 0 8px 0; color: var(--text-main); font-weight: 800; font-size: 1.25rem; padding-bottom: 8px; border-bottom: 2px solid var(--card-border);}
 
-  .editor-card { background: #fff; border: 1px solid var(--card-border); padding: 24px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+  .editor-card { background: #fff; border: 1px solid var(--card-border); padding: 24px; border-radius: 16px; margin-bottom: 24px; box-shadow: var(--shadow-md); }
   .spot-edit-input { background: #f8fafc; color: var(--text-main); border: 2px dashed #cbd5e1; text-align: center; border-radius: 10px; padding: 16px 4px; font-size: 0.85rem; font-weight: 700; width: 100%; box-sizing: border-box; font-family: var(--font-ui); transition: all 0.2s;}
-  .spot-edit-input:focus { outline: none; background: #fff; border-style: solid; border-color: var(--accent-green); }
-  .spot-delete-btn { position: absolute; top: -6px; right: -6px; background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; opacity: 0;}
+  .spot-edit-input:focus { outline: none; background: #fff; border-style: solid; border-color: var(--accent-green); box-shadow: var(--shadow-sm); }
+  .spot-delete-btn { position: absolute; top: -6px; right: -6px; background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: var(--shadow-md); transition: transform 0.2s; opacity: 0;}
   div[style*="position: relative"]:hover .spot-delete-btn { opacity: 1; }
   .spot-delete-btn:hover { transform: scale(1.15); background: #b91c1c; }
   .spot-add-btn { background: #f1f5f9; color: var(--text-muted); border: 2px dashed #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 10px; min-height: 52px; transition: all 0.2s; box-sizing: border-box;}
-  .spot-add-btn:hover { background: #e2e8f0; color: var(--text-main); border-style: solid;}
+  .spot-add-btn:hover { background: #e2e8f0; color: var(--text-main); border-style: solid; box-shadow: var(--shadow-sm);}
   
-  .editor-zone-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; }
-  .editor-zone-input { width: 60%; margin-bottom: 0 !important; font-size: 1.35rem; color: var(--text-main); font-weight: 800; background: transparent; border: none; border-bottom: 2px solid var(--card-border); padding: 8px 0; border-radius: 0; }
-  .editor-zone-input:focus { outline: none; border-color: var(--accent-green); background: transparent; box-shadow: none; }
-  .editor-zone-actions { display: flex; gap: 12px; }
-
-  @media (max-width: 768px) {
-    .editor-zone-header { flex-direction: column; align-items: stretch; gap: 16px; }
-    .editor-zone-input { width: 100%; text-align: center; }
-    .editor-zone-actions { flex-wrap: wrap; }
-    .editor-zone-actions > button { flex: 1; }
-  }
-
   .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 32px; align-items: start; }
   @media (min-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
   
   .queue-title { font-size: 1.35rem; margin: 0 0 20px 0; font-weight: 800; color: var(--text-main); }
   
-  .ticket-card { background: #fff; border: 1px solid var(--card-border); padding: 20px; border-radius: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; }
-  .ticket-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+  .ticket-card { background: #fff; border: 1px solid var(--card-border); padding: 20px; border-radius: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.2s ease; box-shadow: var(--shadow-md); position: relative; }
+  .ticket-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
   .edit-icon-btn { position: absolute; top: 16px; right: 16px; background: transparent; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; transition: all 0.2s; }
   .edit-icon-btn:hover { background: #f1f5f9; color: var(--accent-green); }
 
-  .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: fit-content; }
+  .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: fit-content; box-shadow: var(--shadow-sm); }
   .status-draft { background: #f3e8ff; color: var(--draft-purple); border: 1px solid #d8b4fe; }
-  .status-parked { background: #f1f5f9; color: #475569; }
+  .status-parked { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
   .status-requested { background: #fef2f2; color: var(--danger-red); border: 1px solid #fecaca; }
   .status-incoming { background: #fffbeb; color: var(--warning-yellow); border: 1px solid #fde68a; }
   .status-ready { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
@@ -120,11 +108,11 @@ const vibrantStyles = `
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease-out; overflow-y: auto;}
   
   .contact-bar { display: flex; gap: 12px; margin-top: 16px; }
-  .btn-contact { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; transition: transform 0.2s; }
-  .btn-contact:hover { transform: translateY(-2px); }
-  .btn-whatsapp { background: #25D366; color: white; }
+  .btn-contact { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; transition: transform 0.2s; box-shadow: var(--shadow-sm); border: 1px solid var(--card-border); }
+  .btn-contact:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .btn-whatsapp { background: #25D366; color: white; border-color: #25D366; }
   
-  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); }
   .luxury-table th { padding: 16px; border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; background: #f8fafc;}
   .luxury-table td { padding: 20px 16px; border-bottom: 1px solid var(--card-border); }
 
@@ -132,14 +120,20 @@ const vibrantStyles = `
   .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--card-border); }
   .toggle-switch { position: relative; width: 50px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
-  .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+  .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: var(--shadow-sm); }
   input:checked + .toggle-slider { background-color: var(--accent-green); }
   input:checked + .toggle-slider:before { transform: translateX(24px); }
+
+  /* Autocomplete Specific */
+  .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
+  .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 2px solid var(--accent-green); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: var(--shadow-lg); list-style: none; padding: 8px; margin: 0; text-align: left; }
+  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-radius: 8px; font-weight: 500; }
+  .autocomplete-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
 `;
 
 // ------------------------------------------------------------------
-// DATABASES
+// MASSIVE GLOBAL CAR DATABASE
 // ------------------------------------------------------------------
 const CAR_DATABASE = {
   "Abarth": ["595", "695", "124 Spider"], "Acura": ["MDX", "RDX", "TLX", "Integra", "NSX"],
@@ -173,6 +167,7 @@ const DEFAULT_PARKING_MAP = [
 
 const DEFAULT_VENUE_SETTINGS = {
   carWashEnabled: true,
+  carWashPrice: 25,
   returnLocations: ["Main Entrance", "Sky Address View", "Nearby Restaurant"]
 };
 
@@ -266,6 +261,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
   });
 
   useEffect(() => {
+    // If we are editing an existing draft or ticket, auto-fill it
     if (editingTicket && editingTicket.vehicle) {
       const phoneParts = (editingTicket.guestPhone || "").split(' ');
       setFormData({
@@ -288,9 +284,8 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
     e.preventDefault();
     setErrorMsg('');
 
-    // Strict Validation
     if (!formData.plate || !formData.make || !formData.color || !formData.spot || !formData.phone) {
-      setErrorMsg('⚠️ Please fill in all required fields and select a parking spot.');
+      setErrorMsg('⚠️ Please fill in all details and select a parking spot.');
       return;
     }
 
@@ -303,8 +298,9 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
         parkingSpot: formData.spot,
         status: editingTicket.status === "draft" ? "parked" : editingTicket.status, 
+        "timestamps/parkedAt": editingTicket.status === "draft" ? Date.now() : editingTicket.timestamps?.parkedAt
       });
-      onClose(); // Just close on edit
+      onClose();
     } else {
       // Create Mode
       const ticketId = `ticket_${Date.now()}`;
@@ -320,7 +316,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
   };
 
   const handlePlateBlur = (e) => {
-    if(editingTicket) return; // Don't auto-fill if we are manually editing an existing ticket
+    if(editingTicket) return; // Disable auto-fill if we are actively editing
     const plate = e.target.value.toUpperCase();
     if (knownPlates && knownPlates[plate]) {
       const past = knownPlates[plate];
@@ -344,7 +340,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         {newlyCreatedTicket ? (
           <div className="animate-slide-up">
             <h2 className="heading-brand" style={{color: 'var(--accent-green)'}}>TICKET ACTIVE</h2>
-            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)'}}>
+            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
               <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
             <button onClick={onClose} className="btn-outline" style={{width: '100%', padding: '16px'}}>Return to Dashboard</button>
@@ -359,7 +355,8 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
                 <div key={idx} style={{display: 'contents'}}>
                   <div className="zone-title">{section.zone}</div>
                   {section.spots.map(spot => {
-                    const isOccupied = occupiedSpots.includes(spot) && spot !== formData.spot; // Allow picking current spot if editing
+                    // Spot is occupied if it's in the list AND it's not the spot we are currently editing
+                    const isOccupied = occupiedSpots.includes(spot) && spot !== formData.spot; 
                     return (
                       <div 
                         key={spot} 
@@ -387,7 +384,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
               {editingTicket ? 'EDIT DETAILS' : 'LOG ARRIVAL'}
             </h2>
             
-            {errorMsg && <div className="error-banner">{errorMsg}</div>}
+            {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '2px solid #fecaca'}}>{errorMsg}</div>}
 
             <input placeholder="License Plate (Auto-fills if known)" className="vibrant-input" style={{marginBottom: '16px', textTransform: 'uppercase', borderColor: 'var(--warning-yellow)'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} onBlur={handlePlateBlur} />
 
@@ -414,7 +411,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
             </div>
 
             <div style={{display: 'flex', gap: '16px'}}>
-              <button type="submit" className="btn-green" style={{flex: 2}}>{editingTicket ? 'Update Ticket' : 'Generate Ticket'}</button>
+              <button type="submit" className="btn-green" style={{flex: 2}}>{editingTicket ? 'Save Update' : 'Generate Ticket'}</button>
               <button type="button" onClick={onClose} className="btn-outline" style={{flex: 1}}>Cancel</button>
             </div>
           </form>
@@ -461,10 +458,9 @@ function GuestTicketView({ ticketId }) {
 
   const handleRequestClick = () => {
     if (requestDetails.wantsWash) {
-      setShowRequestModal(false);
-      setShowPaymentModal(true); // Proceed to checkout
+      setShowPaymentModal(true); // Open payment gateway first
     } else {
-      submitRequest();
+      setShowRequestModal(true); // Open location select
     }
   };
 
@@ -516,7 +512,7 @@ function GuestTicketView({ ticketId }) {
   return (
     <div className="app-container center-wrapper">
       <div className="vibrant-card animate-slide-up">
-        <div style={{background: 'var(--accent-green)', padding: '24px', margin: '-32px -32px 32px -32px', color: 'white'}}>
+        <div style={{background: 'var(--accent-green)', padding: '24px', margin: '-32px -32px 32px -32px', color: 'white', boxShadow: 'var(--shadow-sm)'}}>
           <h2 style={{margin: 0, fontSize: '1.5rem', fontWeight: 800}}>SKY VALET</h2>
           <p style={{margin: '4px 0 0 0', opacity: 0.9, fontSize: '0.9rem', fontWeight: 500}}>Digital Parking Pass</p>
         </div>
@@ -524,7 +520,7 @@ function GuestTicketView({ ticketId }) {
         <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
         <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || 'N/A'} • {vehicle?.color || 'N/A'}</p>
 
-        <div style={{background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px'}}>
+        <div style={{background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
           <p style={{margin: '0 0 12px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Live Status</p>
           {status === 'parked' && <h4 style={{margin: 0, fontSize: '1.75rem', color: '#0f172a', fontWeight: 800}}>Safely Parked</h4>}
           {status === 'requested' && <h4 style={{margin: 0, fontSize: '1.75rem', color: 'var(--danger-red)', fontWeight: 800}}>Preparing Vehicle...</h4>}
@@ -534,7 +530,6 @@ function GuestTicketView({ ticketId }) {
           {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: 600}}>Parked for {hoursParked}h {minsParked}m</p>}
         </div>
 
-        {/* Removed Call Button per constraints. Kept Chat. */}
         {status !== 'retrieved' && (
           <div style={{textAlign: 'left', marginBottom: '32px'}}>
             <p style={{margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)'}}>Your Valet: <span style={{color: 'var(--text-main)'}}>{parkedByName || 'Team Member'}</span></p>
@@ -545,58 +540,60 @@ function GuestTicketView({ ticketId }) {
         )}
 
         {status === 'parked' && (
-          <button onClick={() => setShowRequestModal(true)} className="btn-green" style={{ padding: '20px' }}>
-            Request My Vehicle
-          </button>
-        )}
-      </div>
-
-      {/* REQUEST VEHICLE MODAL */}
-      {showRequestModal && (
-        <div className="modal-overlay">
-          <div className="vibrant-card animate-slide-up">
-            <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 24px 0'}}>Request Vehicle</h3>
-            
-            <p style={{textAlign: 'left', fontWeight: 600, marginBottom: '8px'}}>Deliver to:</p>
-            <select className="vibrant-input" style={{marginBottom: '24px'}} value={requestDetails.location} onChange={(e) => setRequestDetails({...requestDetails, location: e.target.value})}>
-              {venueSettings.returnLocations.map(loc => <option key={loc}>{loc}</option>)}
-            </select>
-
-            <button onClick={handleRequestClick} className="btn-green" style={{marginBottom: '16px'}}>Request Now</button>
-
-            {/* Car Wash Toggle below Request button */}
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '2px solid var(--card-border)'}}>
-              <label style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: venueSettings.carWashEnabled ? 'pointer' : 'not-allowed', fontWeight: 600, opacity: venueSettings.carWashEnabled ? 1 : 0.5}}>
+          <div className="animate-scale-in">
+            {/* Car Wash Toggle on Main Page */}
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', padding: '16px', borderRadius: '12px', border: '2px solid var(--card-border)', marginBottom: '16px', boxShadow: 'var(--shadow-md)'}}>
+              <label style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: venueSettings.carWashEnabled ? 'pointer' : 'not-allowed', fontWeight: 700, opacity: venueSettings.carWashEnabled ? 1 : 0.5}}>
                 <input type="checkbox" style={{width: '20px', height: '20px', accentColor: 'var(--accent-green)'}} checked={requestDetails.wantsWash} disabled={!venueSettings.carWashEnabled} onChange={(e) => setRequestDetails({...requestDetails, wantsWash: e.target.checked})} />
-                🫧 Add Car Wash ($25)
+                🫧 Add Car Wash (${venueSettings.carWashPrice || 25})
               </label>
-              <span style={{fontSize: '0.85rem', fontWeight: 700, color: venueSettings.carWashEnabled ? 'var(--accent-green)' : 'var(--danger-red)'}}>
+              <span style={{fontSize: '0.85rem', fontWeight: 800, color: venueSettings.carWashEnabled ? 'var(--accent-green)' : 'var(--danger-red)'}}>
                 {venueSettings.carWashEnabled ? 'AVAILABLE' : 'UNAVAILABLE'}
               </span>
             </div>
 
-            <button onClick={() => setShowRequestModal(false)} className="btn-outline" style={{width: '100%', marginTop: '24px'}}>Cancel</button>
+            <button onClick={handleRequestClick} className="btn-green" style={{ padding: '20px' }}>
+              Request My Vehicle
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* REQUEST VEHICLE MODAL (Location Select) */}
+      {showRequestModal && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-slide-up">
+            <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 24px 0'}}>Confirm Return Details</h3>
+            
+            <p style={{textAlign: 'left', fontWeight: 600, marginBottom: '8px'}}>Deliver my car to:</p>
+            <select className="vibrant-input" style={{marginBottom: '24px', cursor: 'pointer'}} value={requestDetails.location} onChange={(e) => setRequestDetails({...requestDetails, location: e.target.value})}>
+              {venueSettings.returnLocations.map(loc => <option key={loc}>{loc}</option>)}
+            </select>
+
+            <div style={{display: 'flex', gap: '12px'}}>
+              <button onClick={submitRequest} className="btn-green" style={{flex: 2}}>Confirm Request</button>
+              <button onClick={() => setShowRequestModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* PAYMENT MODAL (Car Wash) */}
+      {/* PAYMENT MODAL (Car Wash Checkout) */}
       {showPaymentModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0'}}>Complete Payment</h3>
-            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>$25.00</strong></p>
+            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>${venueSettings.carWashPrice || 25}.00</strong></p>
             
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
-              <button onClick={submitRequest} className="btn-apple-pay"> Pay</button>
-              <button onClick={submitRequest} className="btn-google-pay">
+              <button onClick={() => setShowRequestModal(true)} className="btn-apple-pay"> Pay</button>
+              <button onClick={() => setShowRequestModal(true)} className="btn-google-pay">
                 <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Pay
               </button>
-              <button onClick={submitRequest} className="btn-card-pay">💳 Credit Card</button>
             </div>
             
-            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel</button>
+            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel Wash</button>
           </div>
         </div>
       )}
@@ -609,17 +606,12 @@ function GuestTicketView({ ticketId }) {
             <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>If you enjoyed your service, consider leaving a tip for your valet team.</p>
             
             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '24px'}}>
-              <button onClick={() => submitTip(2)} className="btn-outline" style={{padding: '12px'}}>$2</button>
-              <button onClick={() => submitTip(5)} className="btn-outline" style={{padding: '12px'}}>$5</button>
-              <button onClick={() => submitTip(10)} className="btn-outline" style={{padding: '12px'}}>$10</button>
+              <button onClick={() => submitTip(2)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$2</button>
+              <button onClick={() => submitTip(5)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$5</button>
+              <button onClick={() => submitTip(10)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$10</button>
             </div>
             
-            <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
-              <button onClick={() => submitTip(5)} className="btn-apple-pay"> Pay</button>
-              <button onClick={() => submitTip(5)} className="btn-google-pay">G Pay</button>
-            </div>
-            
-            <button onClick={() => setShowTipModal(false)} className="btn-outline" style={{width: '100%', border: 'none'}}>No Tip / Skip</button>
+            <button onClick={() => setShowTipModal(false)} className="btn-outline" style={{width: '100%', border: 'none', background: 'transparent', boxShadow: 'none', color: 'var(--text-muted)'}}>No Tip / Skip</button>
           </div>
         </div>
       )}
@@ -662,9 +654,11 @@ function LoginView() {
 function ValetDashboardView({ parkingMap }) {
   const [tickets, setTickets] = useState([]);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showScannerModal, setShowScannerModal] = useState(false);
   const [quickQrId, setQuickQrId] = useState(null);
-  const [draftToEdit, setDraftToEdit] = useState(null); // Passing ticket object enables Edit Mode
+  const [draftToEdit, setDraftToEdit] = useState(null); 
   const [knownPlates, setKnownPlates] = useState({});
+  const [venueSettings, setVenueSettings] = useState(DEFAULT_VENUE_SETTINGS);
 
   const currentVenueId = "venue_001";
   const currentDomain = window.location.origin;
@@ -681,6 +675,11 @@ function ValetDashboardView({ parkingMap }) {
         setKnownPlates(memory);
       } else { setTickets([]); }
     });
+    
+    get(ref(db, `venues/${currentVenueId}/settings`)).then(snap => {
+      if (snap.exists()) setVenueSettings(snap.val());
+    });
+
     return () => unsubscribe();
   }, []);
 
@@ -698,7 +697,7 @@ function ValetDashboardView({ parkingMap }) {
       parkedByUserId: auth.currentUser.uid,
       parkedByName: "Valet Team",
       parkedByPhone: "+971501234567",
-      vehicle: { make: 'Pending', model: 'Details', licensePlate: 'N/A', color: 'N/A' },
+      vehicle: { make: '', model: '', licensePlate: '', color: '' },
       timestamps: { created: Date.now() }
     });
     setQuickQrId(ticketId); 
@@ -716,10 +715,10 @@ function ValetDashboardView({ parkingMap }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <h1 className="heading-dashboard">Dispatcher</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
           </div>
-          <div style={{display: 'flex', gap: '12px'}}>
-            <button onClick={() => setShowLogModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>+ Full Log Entry</button>
+          <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
+            <button onClick={() => setShowScannerModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
             <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
           </div>
         </div>
@@ -743,11 +742,11 @@ function ValetDashboardView({ parkingMap }) {
             {requested.map((t, i) => (
               <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
                 <span className="status-badge status-requested">Needs Retrieval</span>
-                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || 'N/A'}</span></h3>
+                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
                 <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
                 <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
                   📍 To: {t.returnLocation}
-                  {t.wantsWash && <div style={{color: '#0ea5e9', marginTop: '4px'}}>🫧 PAID CAR WASH</div>}
+                  {t.wantsWash && <div style={{color: '#0ea5e9', marginTop: '4px'}}>🫧 PAID CAR WASH (${venueSettings.carWashPrice})</div>}
                 </div>
                 <button onClick={() => changeStatus(t.id, 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px'}}>Bring Car</button>
               </div>
@@ -762,7 +761,7 @@ function ValetDashboardView({ parkingMap }) {
                 <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
                   {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
                 </span>
-                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || 'N/A'}</span></h3>
+                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
                 
                 {t.status === 'incoming' ? (
                   <button onClick={() => changeStatus(t.id, 'ready')} className="btn-green">Mark "Ready at Door"</button>
@@ -789,14 +788,12 @@ function ValetDashboardView({ parkingMap }) {
                   <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
                   <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
                 </div>
-                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || 'N/A'}</p>
+                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
-
-      {showLogModal && <LogArrivalModal onClose={() => setShowLogModal(false)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} />}
       
       {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
 
@@ -805,10 +802,25 @@ function ValetDashboardView({ parkingMap }) {
           <div className="vibrant-card animate-scale-in">
             <h2 className="heading-brand" style={{color: 'var(--draft-purple)'}}>TICKET READY</h2>
             <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Guest can scan this now. You can fill out the car details later from the "Needs Info" queue.</p>
-            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '0 0 24px 0', border: '2px solid var(--card-border)'}}>
+            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '0 0 24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-md)'}}>
               <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${quickQrId}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
             <button onClick={() => setQuickQrId(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close & Return</button>
+          </div>
+        </div>
+      )}
+
+      {/* SCANNER MODAL PLACEHOLDER */}
+      {showScannerModal && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in" style={{maxWidth: '400px'}}>
+            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest QR</h3>
+            <div style={{background: '#000', height: '220px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '24px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
+              <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite'}}></div>
+              <p style={{fontWeight: 600, letterSpacing: '1px'}}>Camera Active...</p>
+            </div>
+            <p style={{color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', fontWeight: 500}}>Point camera at the guest's Sky Valet App to instantly retrieve their vehicle and membership details.</p>
+            <button onClick={() => setShowScannerModal(false)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Scanner</button>
           </div>
         </div>
       )}
@@ -823,7 +835,6 @@ function MasterAdminView({ parkingMap }) {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
   const [activeTab, setActiveTab] = useState('parked');
-  const [showLogModal, setShowLogModal] = useState(false);
   const [draftToEdit, setDraftToEdit] = useState(null);
   const [editingMap, setEditingMap] = useState([]);
   const [qrModalTicket, setQrModalTicket] = useState(null);
@@ -880,10 +891,7 @@ function MasterAdminView({ parkingMap }) {
   // --- Map Editor Functions ---
   const handleSaveMap = async () => {
     setConfirmConfig({
-      isOpen: true,
-      title: "Save Floor Plan",
-      message: "Push these changes to the live database?",
-      isDanger: false,
+      isOpen: true, title: "Save Floor Plan", message: "Push these changes to the live database?", isDanger: false,
       onConfirm: async () => {
         await set(ref(db, 'parkingMap'), editingMap);
         setConfirmConfig({ ...confirmConfig, isOpen: false });
@@ -894,11 +902,8 @@ function MasterAdminView({ parkingMap }) {
 
   const moveZone = (index, direction) => {
     const newMap = [...editingMap];
-    if (direction === 'up' && index > 0) {
-      [newMap[index - 1], newMap[index]] = [newMap[index], newMap[index - 1]];
-    } else if (direction === 'down' && index < newMap.length - 1) {
-      [newMap[index + 1], newMap[index]] = [newMap[index], newMap[index + 1]];
-    }
+    if (direction === 'up' && index > 0) [newMap[index - 1], newMap[index]] = [newMap[index], newMap[index - 1]];
+    else if (direction === 'down' && index < newMap.length - 1) [newMap[index + 1], newMap[index]] = [newMap[index], newMap[index + 1]];
     setEditingMap(newMap);
   };
 
@@ -959,14 +964,17 @@ function MasterAdminView({ parkingMap }) {
   const handleToggleWash = async (e) => {
     await update(ref(db, `venues/${currentVenueId}/settings`), { carWashEnabled: e.target.checked });
   };
+  const handlePriceChange = async (e) => {
+    await update(ref(db, `venues/${currentVenueId}/settings`), { carWashPrice: Number(e.target.value) });
+  };
   const handleAddLocation = async () => {
     if (!newLocationInput.trim()) return;
-    const locs = [...venueSettings.returnLocations, newLocationInput.trim()];
+    const locs = [...(venueSettings.returnLocations || []), newLocationInput.trim()];
     await update(ref(db, `venues/${currentVenueId}/settings`), { returnLocations: locs });
     setNewLocationInput('');
   };
   const handleRemoveLocation = async (index) => {
-    const locs = [...venueSettings.returnLocations];
+    const locs = [...(venueSettings.returnLocations || [])];
     locs.splice(index, 1);
     await update(ref(db, `venues/${currentVenueId}/settings`), { returnLocations: locs });
   };
@@ -977,9 +985,9 @@ function MasterAdminView({ parkingMap }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <h1 className="heading-dashboard">Management Overview</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
           </div>
-          <button onClick={() => setShowLogModal(true)} className="btn-green" style={{width: 'auto', padding: '12px 32px'}}>+ Full Log Arrival</button>
+          <button onClick={() => setDraftToEdit({ id: 'new' })} className="btn-green" style={{width: 'auto', padding: '12px 32px'}}>+ Add Vehicle</button>
         </div>
 
         <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
@@ -1016,13 +1024,13 @@ function MasterAdminView({ parkingMap }) {
                     return (
                       <tr key={t.id}>
                         <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
-                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || 'N/A'}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || ''}</td>
                         <td style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.guestPhone || '-'}</td>
                         <td style={{ color: 'var(--accent-green)', fontWeight: '800' }}>{t.parkingSpot || 'Draft'}</td>
                         <td style={{ fontWeight: 500 }}>{date}</td><td style={{ fontWeight: 500 }}>{time}</td>
                         <td style={{ display: 'flex', gap: '8px' }}>
-                          <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem'}}>Edit</button>
-                          <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem'}}>View QR</button>
+                          <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Edit</button>
+                          <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>View QR</button>
                         </td>
                       </tr>
                     );
@@ -1045,7 +1053,7 @@ function MasterAdminView({ parkingMap }) {
                     return (
                       <tr key={t.id}>
                         <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
-                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || 'N/A'}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || ''}</td>
                         <td style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.guestPhone || '-'}</td>
                         <td style={{ fontWeight: 500 }}>{date}</td>
                         <td style={{ fontWeight: 700, color: t.washPaid ? '#0ea5e9' : 'var(--text-muted)' }}>{t.washPaid ? 'Yes' : 'No'}</td>
@@ -1063,24 +1071,31 @@ function MasterAdminView({ parkingMap }) {
             {activeTab === 'settings' && (
               <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
                 <div className="editor-card">
-                  <h3 style={{marginTop: 0, fontWeight: 800}}>Service Options</h3>
+                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Service Options</h3>
                   <div className="settings-row">
                     <div>
                       <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Enable Car Wash Service</p>
-                      <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)'}}>Allow guests to pay $25 for a wash before requesting their car.</p>
+                      <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash before checkout.</p>
                     </div>
                     <label className="toggle-switch">
                       <input type="checkbox" checked={venueSettings.carWashEnabled} onChange={handleToggleWash} />
                       <span className="toggle-slider"></span>
                     </label>
                   </div>
+                  
+                  <div className="settings-row" style={{borderBottom: 'none'}}>
+                    <div>
+                      <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Car Wash Price ($)</p>
+                    </div>
+                    <input type="number" className="vibrant-input" style={{width: '100px', marginBottom: 0, padding: '12px', textAlign: 'center'}} value={venueSettings.carWashPrice || 25} onChange={handlePriceChange} />
+                  </div>
                 </div>
 
                 <div className="editor-card">
-                  <h3 style={{marginTop: 0, fontWeight: 800}}>Return Locations (Deliver To)</h3>
-                  <p style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px'}}>These are the physical places a guest can request their car be brought to.</p>
+                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Return Locations (Deliver To)</h3>
+                  <p style={{fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '16px', fontWeight: 500}}>These are the physical places a guest can request their car be brought to.</p>
                   
-                  {venueSettings.returnLocations.map((loc, i) => (
+                  {(venueSettings.returnLocations || []).map((loc, i) => (
                     <div key={i} className="settings-row" style={{padding: '12px 0'}}>
                       <span style={{fontWeight: 600}}>{loc}</span>
                       <button onClick={() => handleRemoveLocation(i)} style={{background: 'transparent', border: 'none', color: 'var(--danger-red)', cursor: 'pointer', fontWeight: 'bold'}}>Remove</button>
@@ -1089,7 +1104,7 @@ function MasterAdminView({ parkingMap }) {
                   
                   <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
                     <input type="text" className="vibrant-input" placeholder="e.g. Back Entrance" value={newLocationInput} onChange={e => setNewLocationInput(e.target.value)} style={{marginBottom: 0}} />
-                    <button onClick={handleAddLocation} className="btn-outline">Add</button>
+                    <button onClick={handleAddLocation} className="btn-green" style={{width: '120px'}}>Add</button>
                   </div>
                 </div>
               </div>
@@ -1116,7 +1131,7 @@ function MasterAdminView({ parkingMap }) {
                       <div className="editor-zone-actions">
                         <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
                         <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
-                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto'}}>Delete Zone</button>
+                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto', boxShadow: 'none'}}>Delete Zone</button>
                       </div>
                     </div>
                     
@@ -1155,15 +1170,13 @@ function MasterAdminView({ parkingMap }) {
         </div>
       </div>
       
-      {showLogModal && <LogArrivalModal onClose={() => setShowLogModal(false)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} />}
-      
-      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
+      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit.id === 'new' ? null : draftToEdit} />}
       
       {qrModalTicket && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-scale-in" style={{width: '90%'}}>
             <h2 className="heading-brand" style={{color: 'var(--accent-green)'}}>DIGITAL TICKET</h2>
-            <div style={{background: '#fff', padding: '20px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)'}}>
+            <div style={{background: '#fff', padding: '20px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
               <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
             <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Ticket</button>
@@ -1184,7 +1197,7 @@ function MasterAdminView({ parkingMap }) {
 }
 
 // ------------------------------------------------------------------
-// APP ROUTER
+// 5. MAIN ROUTER & APP SHELL
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
