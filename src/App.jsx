@@ -51,6 +51,7 @@ const vibrantStyles = `
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
+  /* Buttons */
   .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px;}
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
@@ -67,9 +68,9 @@ const vibrantStyles = `
   .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
   .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
   
-  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-md); }
-  .btn-apple-pay:hover { background: #333; transform: translateY(-2px); }
-  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-md); }
+  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 14px; border-radius: 8px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
+  .btn-apple-pay:hover { background: #222; transform: translateY(-2px); }
+  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 14px; border-radius: 8px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
   .btn-google-pay:hover { background: #f8f9fa; transform: translateY(-2px); }
 
   .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -162,6 +163,7 @@ const DEFAULT_PARKING_MAP = [
 ];
 
 const DEFAULT_VENUE_SETTINGS = {
+  tier: 2, 
   carWashEnabled: true,
   carWashPrice: 25,
   returnLocations: ["Main Entrance", "Sky Address View", "Nearby Restaurant"]
@@ -176,7 +178,7 @@ const getZonePrefix = (zoneName) => {
 };
 
 // ------------------------------------------------------------------
-// WIDGETS (Confirm & Verification Prompt)
+// WIDGETS
 // ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
@@ -229,6 +231,20 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
     </div>
   );
 }
+
+const ApplePayLogo = () => (
+  <svg width="40" height="16" viewBox="0 0 40 16" fill="white" style={{marginRight: '4px'}}>
+    <path d="M13.4,7.4c0-1.7,1.4-2.8,1.5-2.8c-0.8-1.2-2.1-1.3-2.5-1.4c-1.1-0.1-2.1,0.6-2.7,0.6c-0.6,0-1.4-0.6-2.3-0.6 C6.1,3.2,4.8,4,4,5.4C2.5,8,3.6,11.8,5,13.8c0.7,1,1.5,2.1,2.6,2.1c1,0,1.4-0.6,2.6-0.6c1.2,0,1.6,0.6,2.7,0.6 c1.1,0,1.8-1.2,2.5-2.2c0.8-1.2,1.1-2.4,1.1-2.4C16.4,11.3,13.4,10.1,13.4,7.4z M11.8,2.1c0.6-0.7,0.9-1.6,0.8-2.6 c-0.8,0-1.8,0.5-2.4,1.2C9.7,1.3,9.3,2.2,9.4,3.2C10.4,3.3,11.3,2.7,11.8,2.1z" />
+    <text x="19" y="14" fontFamily="-apple-system, sans-serif" fontSize="14" fontWeight="600" fill="white">Pay</text>
+  </svg>
+);
+
+const GooglePayLogo = () => (
+  <svg width="45" height="18" viewBox="0 0 45 18" fill="none" style={{marginRight: '4px'}}>
+    <path d="M16.9 8.2h-3.6v-3h3.6c.7 0 1.3.2 1.8.6.5.4.7 1 .7 1.6 0 .6-.2 1.2-.7 1.6-.4.4-1 .6-1.8.6zm.3 2.1c1.1-.3 1.9-.8 2.5-1.6.6-.8.9-1.8.9-2.9 0-1.1-.3-2-.9-2.8-.6-.8-1.5-1.3-2.5-1.6C16.2.2 15 0 13.5 0H9v17.5h3.2v-6.6h1.3c1.5 0 2.7-.2 3.7-.6z" fill="#5F6368"/>
+    <text x="18" y="14" fontFamily="sans-serif" fontSize="14" fontWeight="600" fill="#3c4043">Pay</text>
+  </svg>
+);
 
 function Autocomplete({ options, value, onChange, placeholder, style, isObject }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -418,11 +434,11 @@ function GuestTicketView({ ticketId }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
   const [requestDetails, setRequestDetails] = useState({ location: 'Main Entrance' });
-  
-  // Tip Flow State
-  const [selectedTip, setSelectedTip] = useState(null);
-  const [customTip, setCustomTip] = useState('');
-  const [isTipPaymentStep, setIsTipPaymentStep] = useState(false);
+
+  // Custom Tip State
+  const [customTipAmount, setCustomTipAmount] = useState('');
+  const [tipStep, setTipStep] = useState(1); // 1 = select amount, 2 = payment method
+  const [selectedTip, setSelectedTip] = useState(0);
 
   useEffect(() => {
     const unsubscribeTicket = onValue(ref(db, `tickets/${ticketId}`), (snapshot) => {
@@ -447,9 +463,9 @@ function GuestTicketView({ ticketId }) {
     setShowRequestModal(false);
   };
 
-  const handleTipSelection = (amount) => {
+  const proceedToTipPayment = (amount) => {
     setSelectedTip(amount);
-    setIsTipPaymentStep(true);
+    setTipStep(2);
   };
 
   const submitTip = async () => {
@@ -491,7 +507,7 @@ function GuestTicketView({ ticketId }) {
         </div>
 
         <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
-        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || ''} • {vehicle?.color || ''}</p>
+        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || 'N/A'} • {vehicle?.color || 'N/A'}</p>
 
         {/* DUAL TRACKERS */}
         <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px'}}>
@@ -511,7 +527,7 @@ function GuestTicketView({ ticketId }) {
             {status === 'incoming' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--warning-yellow)', fontWeight: 800}}>On the Way!</h4>}
             {status === 'ready' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--accent-green)', fontWeight: 800}}>Ready at Door!</h4>}
             {status === 'retrieved' && <h4 style={{margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800}}>Delivered</h4>}
-            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>{hoursParked}h {minsParked}m</p>}
+            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>Parked for {hoursParked}h {minsParked}m</p>}
           </div>
         </div>
 
@@ -526,9 +542,9 @@ function GuestTicketView({ ticketId }) {
 
         {status === 'parked' && (
           <div className="animate-scale-in">
-            {!wantsWash && venueSettings.carWashEnabled && (
+            {!wantsWash && venueSettings.tier === 2 && venueSettings.carWashEnabled && (
               <button onClick={() => setShowPaymentModal(true)} className="btn-blue" style={{ marginBottom: '16px' }}>
-                🫧 Buy Premium Car Wash (${venueSettings.carWashPrice || 25})
+                🫧 Premium Car Wash (${venueSettings.carWashPrice || 25})
               </button>
             )}
             <button onClick={() => setShowRequestModal(true)} className="btn-green">Request My Vehicle</button>
@@ -558,10 +574,10 @@ function GuestTicketView({ ticketId }) {
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0'}}>Complete Payment</h3>
             <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>${venueSettings.carWashPrice || 25}.00</strong></p>
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
-              <button onClick={handleWashCheckout} className="btn-apple-pay"> Pay</button>
-              <button onClick={handleWashCheckout} className="btn-google-pay">G Pay</button>
+              <button onClick={handleWashCheckout} className="btn-apple-pay"><ApplePayLogo/></button>
+              <button onClick={handleWashCheckout} className="btn-google-pay"><GooglePayLogo/></button>
             </div>
-            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel Wash</button>
+            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel</button>
           </div>
         </div>
       )}
@@ -572,28 +588,28 @@ function GuestTicketView({ ticketId }) {
           <div className="vibrant-card animate-slide-up">
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0'}}>Vehicle Delivered</h3>
             
-            {!isTipPaymentStep ? (
-              <>
+            {tipStep === 1 ? (
+              <div className="animate-scale-in">
                 <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>If you enjoyed your service, consider leaving a tip for your valet team.</p>
                 <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px'}}>
-                  <button onClick={() => handleTipSelection(2)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$2</button>
-                  <button onClick={() => handleTipSelection(5)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$5</button>
-                  <button onClick={() => handleTipSelection(10)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$10</button>
+                  <button onClick={() => proceedToTipPayment(2)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem'}}>$2</button>
+                  <button onClick={() => proceedToTipPayment(5)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem'}}>$5</button>
+                  <button onClick={() => proceedToTipPayment(10)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem'}}>$10</button>
                 </div>
                 <div style={{display: 'flex', gap: '8px', marginBottom: '24px'}}>
-                  <input type="number" placeholder="Custom Tip ($)" className="vibrant-input" style={{marginBottom: 0}} value={customTip} onChange={(e) => setCustomTip(e.target.value)} />
-                  <button onClick={() => {if(customTip) handleTipSelection(Number(customTip))}} className="btn-green" style={{width: 'auto', padding: '0 24px'}}>Pay</button>
+                  <input type="number" placeholder="Custom Tip ($)" className="vibrant-input" style={{marginBottom: 0, width: '100%'}} value={customTipAmount} onChange={(e) => setCustomTipAmount(e.target.value)} />
+                  <button onClick={() => {if(customTipAmount) proceedToTipPayment(Number(customTipAmount))}} className="btn-green" style={{width: 'auto', padding: '0 24px'}}>Tip</button>
                 </div>
                 <button onClick={() => setShowTipModal(false)} className="btn-outline" style={{width: '100%', border: 'none', background: 'transparent', boxShadow: 'none', color: 'var(--text-muted)'}}>No Tip / Skip</button>
-              </>
+              </div>
             ) : (
-              <div className="animate-scale-in">
+              <div className="animate-slide-up">
                 <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Gratuity Amount: <strong style={{color: 'var(--accent-green)', fontSize: '1.2rem'}}>${selectedTip}.00</strong></p>
                 <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
-                  <button onClick={submitTip} className="btn-apple-pay"> Pay</button>
-                  <button onClick={submitTip} className="btn-google-pay">G Pay</button>
+                  <button onClick={submitTip} className="btn-apple-pay"><ApplePayLogo/></button>
+                  <button onClick={submitTip} className="btn-google-pay"><GooglePayLogo/></button>
                 </div>
-                <button onClick={() => setIsTipPaymentStep(false)} className="btn-outline" style={{width: '100%'}}>Back</button>
+                <button onClick={() => setTipStep(1)} className="btn-outline" style={{width: '100%'}}>Back</button>
               </div>
             )}
           </div>
@@ -633,11 +649,81 @@ function LoginView() {
 }
 
 // ------------------------------------------------------------------
-// VALET DASHBOARD & WASH BAY (DUAL MODE)
+// WASH BAY STAFF DASHBOARD (Exclusive)
+// ------------------------------------------------------------------
+function WashBayView() {
+  const [tickets, setTickets] = useState([]);
+  const currentVenueId = "venue_001";
+
+  useEffect(() => {
+    const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        setTickets(all.filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
+      } else { setTickets([]); }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const changeStatus = async (ticketId, field, newStatus) => {
+    await update(ref(db, `tickets/${ticketId}`), { [field]: newStatus });
+  };
+
+  const washQueued = tickets.filter(t => t.wantsWash && t.washStatus === 'queued');
+  const washWashing = tickets.filter(t => t.wantsWash && t.washStatus === 'washing');
+  const washCompleted = tickets.filter(t => t.wantsWash && t.washStatus === 'completed' && t.status !== 'requested');
+
+  return (
+    <div className="app-container">
+      <div className="dashboard-wrapper">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+          <h1 className="heading-dashboard" style={{color: 'var(--accent-blue)'}}>Wash Bay Operations</h1>
+          <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
+        </div>
+
+        <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
+          <div className="queue-column">
+            <h2 className="queue-title">Wash Queue ({washQueued.length})</h2>
+            {washQueued.map(t => (
+              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--warning-yellow)' }}>
+                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                <p style={{margin: '0 0 12px 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                <button onClick={() => changeStatus(t.id, 'washStatus', 'washing')} className="btn-blue" style={{boxShadow: 'none'}}>Bring to Wash Bay</button>
+              </div>
+            ))}
+          </div>
+          
+          <div className="queue-column">
+            <h2 className="queue-title">Currently Washing ({washWashing.length})</h2>
+            {washWashing.map(t => (
+              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-blue)' }}>
+                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                <button onClick={() => changeStatus(t.id, 'washStatus', 'completed')} className="btn-green" style={{boxShadow: 'none'}}>Mark Wash Complete</button>
+              </div>
+            ))}
+          </div>
+          
+          <div className="queue-column">
+            <h2 className="queue-title">Completed ({washCompleted.length})</h2>
+            {washCompleted.map(t => (
+              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-green)' }}>
+                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                <p style={{margin: 0, color: 'var(--accent-green)', fontWeight: 700}}>✨ Cleaned & Ready</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// VALET DISPATCHER DASHBOARD (Exclusive)
 // ------------------------------------------------------------------
 function ValetDashboardView({ parkingMap }) {
   const [tickets, setTickets] = useState([]);
-  const [viewMode, setViewMode] = useState('dispatcher'); 
   
   const [showLogModal, setShowLogModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
@@ -685,143 +771,103 @@ function ValetDashboardView({ parkingMap }) {
   const parked = tickets.filter(t => t.status === "parked");
   const occupiedSpots = parked.map(t => t.parkingSpot);
 
-  const washQueued = tickets.filter(t => t.wantsWash && t.washStatus === 'queued');
-  const washWashing = tickets.filter(t => t.wantsWash && t.washStatus === 'washing');
-  const washCompleted = tickets.filter(t => t.wantsWash && t.washStatus === 'completed' && t.status !== 'requested');
-
   return (
     <div className="app-container">
       <div className="dashboard-wrapper">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={() => setViewMode('dispatcher')} className={viewMode === 'dispatcher' ? 'btn-green' : 'btn-outline'} style={{width: 'auto', padding: '12px 24px'}}>Dispatcher</button>
-            <button onClick={() => setViewMode('wash_bay')} className={viewMode === 'wash_bay' ? 'btn-blue' : 'btn-outline'} style={{width: 'auto', padding: '12px 24px'}}>Wash Bay</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <h1 className="heading-dashboard">Dispatcher</h1>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
           </div>
           
           <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
             <button onClick={() => setShowScannerModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
             <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{width: 'auto', padding: '12px 24px', boxShadow: 'none'}}>Logout</button>
           </div>
         </div>
 
-        {viewMode === 'dispatcher' ? (
-          <div className="dashboard-grid">
-            {/* DRAFTS */}
-            <div className="queue-column">
-              <h2 className="queue-title">Needs Info ({drafts.length})</h2>
-              {drafts.map((t, i) => (
-                <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--draft-purple)', animationDelay: `${i * 0.05}s` }}>
-                  <span className="status-badge status-draft">Draft Ticket</span>
-                  <p style={{margin: '8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500}}>Guest has QR code. Car needs parking spot and details.</p>
-                  <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{borderColor: 'var(--draft-purple)', color: 'var(--draft-purple)', marginTop: '8px', boxShadow: 'none'}}>Complete Details</button>
-                </div>
-              ))}
-            </div>
-
-            {/* REQUESTED */}
-            <div className="queue-column">
-              <h2 className="queue-title">Requested ({requested.length})</h2>
-              {requested.map((t, i) => (
-                <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
-                  <span className="status-badge status-requested">Needs Retrieval</span>
-                  <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
-                  <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
-                  
-                  {t.wantsWash && (
-                    <div style={{marginTop: '8px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
-                      {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
-                      {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
-                      {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
-                    </div>
-                  )}
-                  
-                  <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
-                    📍 To: {t.returnLocation}
-                  </div>
-                  <button onClick={() => changeStatus(t.id, 'status', 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px', boxShadow: 'none'}}>Bring Car</button>
-                </div>
-              ))}
-            </div>
-
-            {/* TRANSIT/READY */}
-            <div className="queue-column">
-              <h2 className="queue-title">Transit/Ready ({incomingReady.length})</h2>
-              {incomingReady.map((t, i) => (
-                <div key={t.id} className="ticket-card" style={{ borderLeft: `6px solid ${t.status === 'ready' ? 'var(--accent-green)' : 'var(--warning-yellow)'}`, animationDelay: `${i * 0.05}s` }}>
-                  <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
-                    {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
-                  </span>
-                  <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
-                  
-                  {t.status === 'incoming' ? (
-                    <button onClick={() => changeStatus(t.id, 'status', 'ready')} className="btn-green" style={{boxShadow: 'none'}}>Mark "Ready at Door"</button>
-                  ) : (
-                    <button onClick={() => setPromptConfig({ isOpen: true, ticketId: t.id, expectedPlate: t.vehicle?.licensePlate })} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
-                      Verify Plate & Handover
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* PARKED */}
-            <div className="queue-column">
-              <h2 className="queue-title">Parked ({parked.length})</h2>
-              {parked.map((t, i) => (
-                <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
-                  <button className="edit-icon-btn" onClick={() => setDraftToEdit(t)}>✏️</button>
-                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                    <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
-                    <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
-                  </div>
-                  <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
-                  {t.wantsWash && (
-                    <div style={{marginTop: '4px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
-                      {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
-                      {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
-                      {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+        <div className="dashboard-grid">
+          {/* DRAFTS */}
+          <div className="queue-column">
+            <h2 className="queue-title">Needs Info ({drafts.length})</h2>
+            {drafts.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--draft-purple)', animationDelay: `${i * 0.05}s` }}>
+                <span className="status-badge status-draft">Draft Ticket</span>
+                <p style={{margin: '8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500}}>Guest has QR code. Car needs parking spot and details.</p>
+                <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{borderColor: 'var(--draft-purple)', color: 'var(--draft-purple)', marginTop: '8px', boxShadow: 'none'}}>Complete Details</button>
+              </div>
+            ))}
           </div>
-        ) : (
-          
-          /* WASH BAY VIEW */
-          <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
-            <div className="queue-column">
-              <h2 className="queue-title">Wash Queue ({washQueued.length})</h2>
-              {washQueued.map(t => (
-                <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--warning-yellow)' }}>
-                  <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
-                  <p style={{margin: '0 0 12px 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
-                  <button onClick={() => changeStatus(t.id, 'washStatus', 'washing')} className="btn-blue" style={{boxShadow: 'none'}}>Bring to Wash Bay</button>
+
+          {/* REQUESTED */}
+          <div className="queue-column">
+            <h2 className="queue-title">Requested ({requested.length})</h2>
+            {requested.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
+                <span className="status-badge status-requested">Needs Retrieval</span>
+                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
+                <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                
+                {t.wantsWash && (
+                  <div style={{marginTop: '8px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
+                    {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
+                    {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
+                    {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
+                  </div>
+                )}
+                
+                <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
+                  📍 To: {t.returnLocation}
                 </div>
-              ))}
-            </div>
-            <div className="queue-column">
-              <h2 className="queue-title">Currently Washing ({washWashing.length})</h2>
-              {washWashing.map(t => (
-                <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-blue)' }}>
-                  <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
-                  <button onClick={() => changeStatus(t.id, 'washStatus', 'completed')} className="btn-green" style={{boxShadow: 'none'}}>Mark Wash Complete</button>
-                </div>
-              ))}
-            </div>
-            <div className="queue-column">
-              <h2 className="queue-title">Completed ({washCompleted.length})</h2>
-              {washCompleted.map(t => (
-                <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-green)' }}>
-                  <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
-                  <p style={{margin: 0, color: 'var(--accent-green)', fontWeight: 700}}>✨ Cleaned & Parked</p>
-                </div>
-              ))}
-            </div>
+                <button onClick={() => changeStatus(t.id, 'status', 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px', boxShadow: 'none'}}>Bring Car</button>
+              </div>
+            ))}
           </div>
-        )}
+
+          {/* TRANSIT/READY */}
+          <div className="queue-column">
+            <h2 className="queue-title">Transit/Ready ({incomingReady.length})</h2>
+            {incomingReady.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: `6px solid ${t.status === 'ready' ? 'var(--accent-green)' : 'var(--warning-yellow)'}`, animationDelay: `${i * 0.05}s` }}>
+                <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
+                  {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
+                </span>
+                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
+                
+                {t.status === 'incoming' ? (
+                  <button onClick={() => changeStatus(t.id, 'status', 'ready')} className="btn-green" style={{boxShadow: 'none'}}>Mark "Ready at Door"</button>
+                ) : (
+                  <button onClick={() => setPromptConfig({ isOpen: true, ticketId: t.id, expectedPlate: t.vehicle?.licensePlate })} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
+                    Verify Plate & Handover
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* PARKED */}
+          <div className="queue-column">
+            <h2 className="queue-title">Parked ({parked.length})</h2>
+            {parked.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
+                <button className="edit-icon-btn" onClick={() => setDraftToEdit(t)}>✏️</button>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
+                  <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
+                </div>
+                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
+                {t.wantsWash && (
+                  <div style={{marginTop: '4px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
+                    {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
+                    {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
+                    {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       
       {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
@@ -1011,10 +1057,9 @@ function MasterAdminView({ parkingMap }) {
     await update(ref(db, `venues/${currentVenueId}/settings`), { returnLocations: locs });
   };
   
-  // ADMIN DELETE TICKET
   const handleAdminDelete = (id) => {
     setConfirmConfig({
-      isOpen: true, title: "Delete Ticket?", message: "Are you sure you want to permanently delete this active ticket?", isDanger: true,
+      isOpen: true, title: "Delete Ticket?", message: "Are you sure you want to permanently delete this active ticket from the system?", isDanger: true,
       onConfirm: async () => {
         await set(ref(db, `tickets/${id}`), null);
         setConfirmConfig({ ...confirmConfig, isOpen: false });
@@ -1047,18 +1092,22 @@ function MasterAdminView({ parkingMap }) {
           <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
             Venue Settings
           </button>
+          <button className={activeTab === 'staff' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('staff')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
+            Staff Management
+          </button>
         </div>
 
         <div>
           <h2 className="queue-title">
             {activeTab === 'operations' ? 'Live Valet & Wash Progress' : 
              activeTab === 'metrics' ? 'Retrieval Time History' : 
-             activeTab === 'map' ? 'Live Floor Plan Editor' : 'Venue Configuration'}
+             activeTab === 'map' ? 'Live Floor Plan Editor' : 
+             activeTab === 'staff' ? 'Staff Account Setup Guide' : 'Venue Configuration'}
           </h2>
           
           <div style={{ overflowX: 'auto' }}>
             
-            {/* LIVE OPERATIONS (DUAL TRACKING) */}
+            {/* LIVE OPERATIONS */}
             {activeTab === 'operations' && (
               <table className="luxury-table animate-slide-up">
                 <thead><tr><th>Vehicle</th><th>Plate</th><th>Spot</th><th>Valet Status</th><th>Wash Status</th><th>Time Parked</th><th>Actions</th></tr></thead>
@@ -1126,24 +1175,32 @@ function MasterAdminView({ parkingMap }) {
             {/* SETTINGS TAB */}
             {activeTab === 'settings' && (
               <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
-                <div className="editor-card">
-                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Service Options</h3>
-                  <div className="settings-row">
+                
+                <div className="editor-card" style={{borderColor: venueSettings.tier === 1 ? 'var(--card-border)' : 'var(--accent-gold)'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                    <h3 style={{margin: 0, fontWeight: 800, fontSize: '1.5rem'}}>Service Options</h3>
+                    <span style={{background: venueSettings.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: venueSettings.tier === 1 ? '#475569' : '#fff', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase'}}>
+                      {venueSettings.tier === 1 ? 'Standard Tier' : 'Premium Tier'}
+                    </span>
+                  </div>
+                  
+                  <div className="settings-row" style={{opacity: venueSettings.tier === 1 ? 0.5 : 1}}>
                     <div>
                       <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Enable Car Wash Service</p>
                       <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash on their ticket.</p>
+                      {venueSettings.tier === 1 && <p style={{margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--danger-red)', fontWeight: 700}}>Requires Premium Upgrade.</p>}
                     </div>
                     <label className="toggle-switch">
-                      <input type="checkbox" checked={venueSettings.carWashEnabled} onChange={handleToggleWash} />
-                      <span className="toggle-slider"></span>
+                      <input type="checkbox" checked={venueSettings.tier === 1 ? false : venueSettings.carWashEnabled} onChange={handleToggleWash} disabled={venueSettings.tier === 1} />
+                      <span className="toggle-slider" style={{cursor: venueSettings.tier === 1 ? 'not-allowed' : 'pointer'}}></span>
                     </label>
                   </div>
                   
-                  <div className="settings-row" style={{borderBottom: 'none'}}>
+                  <div className="settings-row" style={{borderBottom: 'none', opacity: venueSettings.tier === 1 ? 0.5 : 1}}>
                     <div>
                       <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Car Wash Price ($)</p>
                     </div>
-                    <input type="number" className="vibrant-input" style={{width: '100px', marginBottom: 0, padding: '12px', textAlign: 'center'}} value={venueSettings.carWashPrice || 25} onChange={handlePriceChange} />
+                    <input type="number" className="vibrant-input" style={{width: '100px', marginBottom: 0, padding: '12px', textAlign: 'center'}} value={venueSettings.carWashPrice || 25} onChange={handlePriceChange} disabled={venueSettings.tier === 1} />
                   </div>
                 </div>
 
@@ -1174,16 +1231,7 @@ function MasterAdminView({ parkingMap }) {
                 {editingMap.map((section, idx) => (
                   <div key={idx} className="editor-card" style={{ animationDelay: `${idx * 0.1}s` }}>
                     <div className="editor-zone-header">
-                      <input 
-                        type="text" 
-                        value={section.zone} 
-                        onChange={(e) => {
-                          const newMap = [...editingMap];
-                          newMap[idx].zone = e.target.value;
-                          setEditingMap(newMap);
-                        }} 
-                        className="vibrant-input editor-zone-input" 
-                      />
+                      <input type="text" value={section.zone} onChange={(e) => { const newMap = [...editingMap]; newMap[idx].zone = e.target.value; setEditingMap(newMap); }} className="vibrant-input editor-zone-input" />
                       <div className="editor-zone-actions">
                         <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
                         <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
@@ -1194,23 +1242,11 @@ function MasterAdminView({ parkingMap }) {
                     <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
                       {section.spots.map((spot, sIdx) => (
                         <div key={sIdx} style={{ position: 'relative' }}>
-                          <input
-                            value={spot}
-                            onChange={(e) => updateSpotName(idx, sIdx, e.target.value)}
-                            className="spot-edit-input"
-                          />
-                          <button
-                            onClick={() => removeSpot(idx, sIdx)}
-                            className="spot-delete-btn"
-                            title="Remove Spot"
-                          >
-                            ✕
-                          </button>
+                          <input value={spot} onChange={(e) => updateSpotName(idx, sIdx, e.target.value)} className="spot-edit-input" />
+                          <button onClick={() => removeSpot(idx, sIdx)} className="spot-delete-btn" title="Remove Spot">✕</button>
                         </div>
                       ))}
-                      <div className="spot-add-btn" onClick={() => addSpotToZone(idx)} title="Add New Spot">
-                        +
-                      </div>
+                      <div className="spot-add-btn" onClick={() => addSpotToZone(idx)} title="Add New Spot">+</div>
                     </div>
                   </div>
                 ))}
@@ -1218,6 +1254,44 @@ function MasterAdminView({ parkingMap }) {
                 <div style={{display: 'flex', gap: '24px', marginTop: '40px'}}>
                   <button onClick={addZone} className="btn-outline" style={{flex: 1, padding: '16px', fontSize: '1.05rem'}}>+ Add New Zone</button>
                   <button onClick={handleSaveMap} className="btn-green" style={{flex: 2, padding: '16px', fontSize: '1.05rem'}}>Save Floor Plan to Live Database</button>
+                </div>
+              </div>
+            )}
+            
+            {/* STAFF INSTRUCTIONS TAB */}
+            {activeTab === 'staff' && (
+              <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
+                <div className="editor-card" style={{textAlign: 'left'}}>
+                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Creating Staff Accounts</h3>
+                  <p style={{color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '1.05rem'}}>To maintain top-tier security for your B2B SaaS platform, client accounts must be created directly in the Firebase System Database.</p>
+                  
+                  <div style={{background: '#f8fafc', padding: '24px', borderRadius: '12px', border: '1px solid var(--card-border)', marginTop: '24px'}}>
+                    <h4 style={{margin: '0 0 16px 0', fontSize: '1.1rem'}}>Step 1: Create Login Credentials</h4>
+                    <ol style={{margin: 0, paddingLeft: '20px', color: 'var(--text-main)', lineHeight: 1.8}}>
+                      <li>Go to your <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer" style={{color: 'var(--accent-blue)', fontWeight: 'bold'}}>Firebase Console</a>.</li>
+                      <li>Click on <strong>Authentication</strong> in the left menu.</li>
+                      <li>Click the <strong>Add User</strong> button.</li>
+                      <li>Enter the staff member's Email (e.g., <code>valet1@hotel.com</code>) and a temporary password.</li>
+                      <li>Copy the generated <strong>User UID</strong> (a long string of random letters/numbers next to their email).</li>
+                    </ol>
+                  </div>
+                  
+                  <div style={{background: '#f8fafc', padding: '24px', borderRadius: '12px', border: '1px solid var(--card-border)', marginTop: '24px'}}>
+                    <h4 style={{margin: '0 0 16px 0', fontSize: '1.1rem'}}>Step 2: Assign Access Roles</h4>
+                    <ol style={{margin: 0, paddingLeft: '20px', color: 'var(--text-main)', lineHeight: 1.8}}>
+                      <li>Go to <strong>Realtime Database</strong> in the Firebase menu.</li>
+                      <li>Hover over the <code>users</code> node and click the <strong>+</strong> button.</li>
+                      <li>Paste the <strong>User UID</strong> you copied in Step 1 as the key name.</li>
+                      <li>Inside that UID, add the following two fields:
+                        <ul style={{marginTop: '8px', marginBottom: '8px'}}>
+                          <li><code>role</code> : Type <code>valet_runner</code>, <code>wash_team</code>, or <code>master_admin</code></li>
+                          <li><code>venueId</code> : Type <code>venue_001</code> (or their specific hotel code)</li>
+                        </ul>
+                      </li>
+                      <li>Click <strong>Add</strong>. They can now log in to the portal!</li>
+                    </ol>
+                  </div>
+                  
                 </div>
               </div>
             )}
@@ -1253,7 +1327,7 @@ function MasterAdminView({ parkingMap }) {
 }
 
 // ------------------------------------------------------------------
-// 5. MAIN ROUTER & APP SHELL
+// APP ROUTER (Role-Based Access)
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -1278,7 +1352,7 @@ function App() {
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const snapshot = await get(ref(db, `users/${currentUser.uid}`));
-        setUserRole(snapshot.exists() ? snapshot.val().role : "valet_runner");
+        setUserRole(snapshot.exists() ? snapshot.val().role : "valet_runner"); // Default fallback
       } else {
         setUserRole(null);
       }
@@ -1299,8 +1373,12 @@ function App() {
 
   if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>AUTHENTICATING...</div></div>;
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
+  
   if (!userRole) return <LoginView />;
   if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} />;
+  if (userRole === "wash_team") return <WashBayView />;
+  
+  // Default for "valet_runner"
   return <ValetDashboardView parkingMap={globalParkingMap} />;
 }
 
