@@ -51,7 +51,6 @@ const vibrantStyles = `
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  /* Buttons */
   .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px;}
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
@@ -114,7 +113,6 @@ const vibrantStyles = `
   .status-incoming { background: #fffbeb; color: var(--warning-yellow); border: 1px solid #fde68a; }
   .status-ready { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
   
-  /* Wash Badges */
   .wash-queued { background: #fffbeb; color: var(--warning-yellow); border: 1px solid #fde68a; }
   .wash-washing { background: #e0f2fe; color: var(--accent-blue); border: 1px solid #bae6fd; }
   .wash-completed { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
@@ -177,6 +175,9 @@ const getZonePrefix = (zoneName) => {
   return firstWord.charAt(0).toUpperCase();
 };
 
+// ------------------------------------------------------------------
+// WIDGETS (Confirm & Verification Prompt)
+// ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
   return (
@@ -188,6 +189,42 @@ function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, conf
           <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--accent-green)' }}>{confirmText}</button>
           <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, onCancel }) {
+  const [val, setVal] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => { setVal(''); setErrorMsg(''); }, [isOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (val.trim().toUpperCase() === expectedValue.toUpperCase()) {
+      onMatch();
+    } else {
+      setErrorMsg('Incorrect License Plate. Do not hand over keys.');
+    }
+  };
+
+  if (!isOpen) return null;
+  return (
+    <div className="modal-overlay" style={{ zIndex: 1100 }}>
+      <div className="vibrant-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
+        <h3 style={{ color: 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase' }}>{title}</h3>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>{message}</p>
+        
+        {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontWeight: 700, border: '1px solid #fecaca'}}>{errorMsg}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <input type="text" placeholder="Type License Plate" className="vibrant-input" style={{marginBottom: '24px', textTransform: 'uppercase', textAlign: 'center', fontSize: '1.2rem', fontWeight: 700}} value={val} onChange={(e) => {setVal(e.target.value); setErrorMsg('');}} autoFocus />
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button type="submit" className="btn-green" style={{ flex: 2 }}>Verify Handover</button>
+            <button type="button" onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -381,6 +418,11 @@ function GuestTicketView({ ticketId }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
   const [requestDetails, setRequestDetails] = useState({ location: 'Main Entrance' });
+  
+  // Tip Flow State
+  const [selectedTip, setSelectedTip] = useState(null);
+  const [customTip, setCustomTip] = useState('');
+  const [isTipPaymentStep, setIsTipPaymentStep] = useState(false);
 
   useEffect(() => {
     const unsubscribeTicket = onValue(ref(db, `tickets/${ticketId}`), (snapshot) => {
@@ -396,10 +438,7 @@ function GuestTicketView({ ticketId }) {
   }, [ticketId]);
 
   const handleWashCheckout = async () => {
-    // Simulating Payment Success for Wash
-    await update(ref(db, `tickets/${ticketId}`), { 
-      wantsWash: true, washPaid: true, washStatus: 'queued', "timestamps/washRequestedAt": Date.now() 
-    });
+    await update(ref(db, `tickets/${ticketId}`), { wantsWash: true, washPaid: true, washStatus: 'queued', "timestamps/washRequestedAt": Date.now() });
     setShowPaymentModal(false);
   };
 
@@ -408,8 +447,13 @@ function GuestTicketView({ ticketId }) {
     setShowRequestModal(false);
   };
 
-  const submitTip = async (amount) => {
-    await update(ref(db, `tickets/${ticketId}`), { tippedAmount: amount });
+  const handleTipSelection = (amount) => {
+    setSelectedTip(amount);
+    setIsTipPaymentStep(true);
+  };
+
+  const submitTip = async () => {
+    await update(ref(db, `tickets/${ticketId}`), { tippedAmount: selectedTip });
     setShowTipModal(false);
   };
 
@@ -447,12 +491,10 @@ function GuestTicketView({ ticketId }) {
         </div>
 
         <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
-        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || 'N/A'} • {vehicle?.color || 'N/A'}</p>
+        <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || ''} • {vehicle?.color || ''}</p>
 
         {/* DUAL TRACKERS */}
         <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px'}}>
-          
-          {/* Tracker 1: Car Wash Status (Only if bought) */}
           {wantsWash && (
             <div style={{background: '#f0f9ff', border: '2px solid #bae6fd', borderRadius: '16px', padding: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
               <p style={{margin: '0 0 8px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-blue)', textTransform: 'uppercase', letterSpacing: '1px'}}>Car Wash Status</p>
@@ -462,7 +504,6 @@ function GuestTicketView({ ticketId }) {
             </div>
           )}
 
-          {/* Tracker 2: Valet Status */}
           <div style={{background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '16px', padding: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
             <p style={{margin: '0 0 8px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Valet Status</p>
             {status === 'parked' && <h4 style={{margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800}}>Safely Parked</h4>}
@@ -485,20 +526,16 @@ function GuestTicketView({ ticketId }) {
 
         {status === 'parked' && (
           <div className="animate-scale-in">
-            {/* DIRECT WASH CHECKOUT BUTTON */}
             {!wantsWash && venueSettings.carWashEnabled && (
               <button onClick={() => setShowPaymentModal(true)} className="btn-blue" style={{ marginBottom: '16px' }}>
                 🫧 Buy Premium Car Wash (${venueSettings.carWashPrice || 25})
               </button>
             )}
-            <button onClick={() => setShowRequestModal(true)} className="btn-green">
-              Request My Vehicle
-            </button>
+            <button onClick={() => setShowRequestModal(true)} className="btn-green">Request My Vehicle</button>
           </div>
         )}
       </div>
 
-      {/* REQUEST VEHICLE MODAL (Location Select) */}
       {showRequestModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
@@ -515,36 +552,50 @@ function GuestTicketView({ ticketId }) {
         </div>
       )}
 
-      {/* PAYMENT MODAL (Car Wash Checkout) */}
       {showPaymentModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0'}}>Complete Payment</h3>
             <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>${venueSettings.carWashPrice || 25}.00</strong></p>
-            
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
               <button onClick={handleWashCheckout} className="btn-apple-pay"> Pay</button>
               <button onClick={handleWashCheckout} className="btn-google-pay">G Pay</button>
             </div>
-            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel</button>
+            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel Wash</button>
           </div>
         </div>
       )}
 
-      {/* TIP MODAL (Post Delivery) */}
+      {/* 2-STEP TIP MODAL */}
       {showTipModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0'}}>Vehicle Delivered</h3>
-            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>If you enjoyed your service, consider leaving a tip for your valet team.</p>
             
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '24px'}}>
-              <button onClick={() => submitTip(2)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$2</button>
-              <button onClick={() => submitTip(5)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$5</button>
-              <button onClick={() => submitTip(10)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$10</button>
-            </div>
-            
-            <button onClick={() => setShowTipModal(false)} className="btn-outline" style={{width: '100%', border: 'none', background: 'transparent', boxShadow: 'none', color: 'var(--text-muted)'}}>No Tip / Skip</button>
+            {!isTipPaymentStep ? (
+              <>
+                <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>If you enjoyed your service, consider leaving a tip for your valet team.</p>
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px'}}>
+                  <button onClick={() => handleTipSelection(2)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$2</button>
+                  <button onClick={() => handleTipSelection(5)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$5</button>
+                  <button onClick={() => handleTipSelection(10)} className="btn-outline" style={{padding: '12px', fontSize: '1.1rem', fontWeight: 700}}>$10</button>
+                </div>
+                <div style={{display: 'flex', gap: '8px', marginBottom: '24px'}}>
+                  <input type="number" placeholder="Custom Tip ($)" className="vibrant-input" style={{marginBottom: 0}} value={customTip} onChange={(e) => setCustomTip(e.target.value)} />
+                  <button onClick={() => {if(customTip) handleTipSelection(Number(customTip))}} className="btn-green" style={{width: 'auto', padding: '0 24px'}}>Pay</button>
+                </div>
+                <button onClick={() => setShowTipModal(false)} className="btn-outline" style={{width: '100%', border: 'none', background: 'transparent', boxShadow: 'none', color: 'var(--text-muted)'}}>No Tip / Skip</button>
+              </>
+            ) : (
+              <div className="animate-scale-in">
+                <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Gratuity Amount: <strong style={{color: 'var(--accent-green)', fontSize: '1.2rem'}}>${selectedTip}.00</strong></p>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
+                  <button onClick={submitTip} className="btn-apple-pay"> Pay</button>
+                  <button onClick={submitTip} className="btn-google-pay">G Pay</button>
+                </div>
+                <button onClick={() => setIsTipPaymentStep(false)} className="btn-outline" style={{width: '100%'}}>Back</button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -586,13 +637,14 @@ function LoginView() {
 // ------------------------------------------------------------------
 function ValetDashboardView({ parkingMap }) {
   const [tickets, setTickets] = useState([]);
-  const [viewMode, setViewMode] = useState('dispatcher'); // 'dispatcher' or 'wash_bay'
+  const [viewMode, setViewMode] = useState('dispatcher'); 
   
   const [showLogModal, setShowLogModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [quickQrId, setQuickQrId] = useState(null);
   const [draftToEdit, setDraftToEdit] = useState(null); 
   const [knownPlates, setKnownPlates] = useState({});
+  const [promptConfig, setPromptConfig] = useState({ isOpen: false, ticketId: null, expectedPlate: '' });
 
   const currentVenueId = "venue_001";
   const currentDomain = window.location.origin;
@@ -676,9 +728,17 @@ function ValetDashboardView({ parkingMap }) {
                   <span className="status-badge status-requested">Needs Retrieval</span>
                   <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
                   <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                  
+                  {t.wantsWash && (
+                    <div style={{marginTop: '8px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
+                      {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
+                      {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
+                      {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
+                    </div>
+                  )}
+                  
                   <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
                     📍 To: {t.returnLocation}
-                    {t.wantsWash && <div style={{color: 'var(--accent-green)', marginTop: '4px'}}>🫧 WASH COMPLETED</div>}
                   </div>
                   <button onClick={() => changeStatus(t.id, 'status', 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px', boxShadow: 'none'}}>Bring Car</button>
                 </div>
@@ -698,11 +758,7 @@ function ValetDashboardView({ parkingMap }) {
                   {t.status === 'incoming' ? (
                     <button onClick={() => changeStatus(t.id, 'status', 'ready')} className="btn-green" style={{boxShadow: 'none'}}>Mark "Ready at Door"</button>
                   ) : (
-                    <button onClick={() => {
-                      const plateMatch = prompt(`Verify Plate before handing keys over.\nType the plate number to confirm handover:`);
-                      if (plateMatch && plateMatch.toUpperCase() === t.vehicle?.licensePlate?.toUpperCase()) changeStatus(t.id, 'status', 'retrieved');
-                      else if (plateMatch) alert("Plate does not match! Do not hand over keys.");
-                    }} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
+                    <button onClick={() => setPromptConfig({ isOpen: true, ticketId: t.id, expectedPlate: t.vehicle?.licensePlate })} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
                       Verify Plate & Handover
                     </button>
                   )}
@@ -721,6 +777,13 @@ function ValetDashboardView({ parkingMap }) {
                     <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
                   </div>
                   <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
+                  {t.wantsWash && (
+                    <div style={{marginTop: '4px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
+                      {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
+                      {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
+                      {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -776,7 +839,19 @@ function ValetDashboardView({ parkingMap }) {
         </div>
       )}
 
-      {/* SCANNER MODAL PLACEHOLDER */}
+      {/* CUSTOM PROMPT WIDGET FOR PLATE VERIFICATION */}
+      <CustomPromptWidget 
+        isOpen={promptConfig.isOpen}
+        title="Verify Handover"
+        message="Type the license plate number of this vehicle to confirm you are handing the keys to the correct guest."
+        expectedValue={promptConfig.expectedPlate}
+        onMatch={() => {
+          changeStatus(promptConfig.ticketId, 'status', 'retrieved');
+          setPromptConfig({ ...promptConfig, isOpen: false });
+        }}
+        onCancel={() => setPromptConfig({ ...promptConfig, isOpen: false })}
+      />
+
       {showScannerModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-scale-in" style={{maxWidth: '400px'}}>
@@ -935,6 +1010,18 @@ function MasterAdminView({ parkingMap }) {
     locs.splice(index, 1);
     await update(ref(db, `venues/${currentVenueId}/settings`), { returnLocations: locs });
   };
+  
+  // ADMIN DELETE TICKET
+  const handleAdminDelete = (id) => {
+    setConfirmConfig({
+      isOpen: true, title: "Delete Ticket?", message: "Are you sure you want to permanently delete this active ticket?", isDanger: true,
+      onConfirm: async () => {
+        await set(ref(db, `tickets/${id}`), null);
+        setConfirmConfig({ ...confirmConfig, isOpen: false });
+      },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
 
   return (
     <div className="app-container">
@@ -1000,6 +1087,7 @@ function MasterAdminView({ parkingMap }) {
                         <td style={{ display: 'flex', gap: '8px' }}>
                           <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Edit</button>
                           <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>View QR</button>
+                          <button onClick={() => handleAdminDelete(t.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Delete</button>
                         </td>
                       </tr>
                     );
@@ -1165,7 +1253,7 @@ function MasterAdminView({ parkingMap }) {
 }
 
 // ------------------------------------------------------------------
-// APP ROUTER
+// 5. MAIN ROUTER & APP SHELL
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
