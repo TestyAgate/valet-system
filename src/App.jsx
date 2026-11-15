@@ -15,18 +15,22 @@ const vibrantStyles = `
     --card-border: #e2e8f0;
     --text-main: #0f172a;
     --text-muted: #64748b;
+    
     --accent-green: #10b981;
     --accent-green-hover: #059669;
+    --accent-blue: #0ea5e9;
+    --accent-blue-hover: #0284c7;
     --danger-red: #ef4444;
     --warning-yellow: #f59e0b;
     --draft-purple: #8b5cf6;
+    
     --font-ui: 'Outfit', sans-serif;
     
-    /* New Shadow Variables for Depth */
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
     --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
     --shadow-btn: 0 4px 14px rgba(16, 185, 129, 0.3);
+    --shadow-btn-blue: 0 4px 14px rgba(14, 165, 233, 0.3);
   }
 
   body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -47,31 +51,36 @@ const vibrantStyles = `
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  /* Buttons with Shadows */
-  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); }
+  /* Buttons */
+  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px;}
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
   
+  .btn-blue { background: var(--accent-blue); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn-blue); display: flex; justify-content: center; align-items: center; gap: 8px;}
+  .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4); background: var(--accent-blue-hover); }
+
   .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
   .btn-purple:hover { transform: translateY(-2px); filter: brightness(1.1); }
   
   .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
   .btn-action:hover { background: var(--danger-red); color: white; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
   .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
   
-  /* Mobile Wallet Buttons */
   .btn-apple-pay { background: #000; color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-md); }
   .btn-apple-pay:hover { background: #333; transform: translateY(-2px); }
   .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-md); }
   .btn-google-pay:hover { background: #f8f9fa; transform: translateY(-2px); }
 
-  /* Inputs */
   .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
   .vibrant-input:focus { outline: none; border-color: var(--accent-green); background: #fff; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
   
-  /* Map Editor & Spot Selector Styles */
+  .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
+  .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 2px solid var(--accent-green); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: var(--shadow-lg); list-style: none; padding: 8px; margin: 0; text-align: left; }
+  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-radius: 8px; font-weight: 500; }
+  .autocomplete-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+
   .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
   .spot-box { padding: 16px 4px; border-radius: 10px; text-align: center; font-size: 0.85rem; font-weight: 700; border: 2px solid var(--card-border); transition: all 0.2s; box-sizing: border-box; box-shadow: var(--shadow-sm); }
   .spot-empty { background: #ecfdf5; color: var(--accent-green); border-color: #a7f3d0; cursor: pointer; }
@@ -104,37 +113,26 @@ const vibrantStyles = `
   .status-requested { background: #fef2f2; color: var(--danger-red); border: 1px solid #fecaca; }
   .status-incoming { background: #fffbeb; color: var(--warning-yellow); border: 1px solid #fde68a; }
   .status-ready { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
+  
+  /* Wash Badges */
+  .wash-queued { background: #fffbeb; color: var(--warning-yellow); border: 1px solid #fde68a; }
+  .wash-washing { background: #e0f2fe; color: var(--accent-blue); border: 1px solid #bae6fd; }
+  .wash-completed { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
 
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease-out; overflow-y: auto;}
-  
-  .contact-bar { display: flex; gap: 12px; margin-top: 16px; }
-  .btn-contact { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; transition: transform 0.2s; box-shadow: var(--shadow-sm); border: 1px solid var(--card-border); }
-  .btn-contact:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .btn-whatsapp { background: #25D366; color: white; border-color: #25D366; }
   
   .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); }
   .luxury-table th { padding: 16px; border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; background: #f8fafc;}
   .luxury-table td { padding: 20px 16px; border-bottom: 1px solid var(--card-border); }
 
-  /* Settings UI */
-  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--card-border); }
   .toggle-switch { position: relative; width: 50px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
   .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
   .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: var(--shadow-sm); }
   input:checked + .toggle-slider { background-color: var(--accent-green); }
   input:checked + .toggle-slider:before { transform: translateX(24px); }
-
-  /* Autocomplete Specific */
-  .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
-  .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 2px solid var(--accent-green); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: var(--shadow-lg); list-style: none; padding: 8px; margin: 0; text-align: left; }
-  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-radius: 8px; font-weight: 500; }
-  .autocomplete-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
 `;
 
-// ------------------------------------------------------------------
-// MASSIVE GLOBAL CAR DATABASE
-// ------------------------------------------------------------------
 const CAR_DATABASE = {
   "Abarth": ["595", "695", "124 Spider"], "Acura": ["MDX", "RDX", "TLX", "Integra", "NSX"],
   "Alfa Romeo": ["Giulia", "Stelvio", "Tonale"], "Aston Martin": ["DBX", "Vantage", "DB11", "DBS", "Valhalla"],
@@ -179,20 +177,13 @@ const getZonePrefix = (zoneName) => {
   return firstWord.charAt(0).toUpperCase();
 };
 
-// ------------------------------------------------------------------
-// CUSTOM CONFIRM MODAL
-// ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
   return (
     <div className="modal-overlay" style={{ zIndex: 1100 }}>
       <div className="vibrant-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
-        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          {title}
-        </h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>
-          {message}
-        </p>
+        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>{message}</p>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--accent-green)' }}>{confirmText}</button>
           <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
@@ -202,39 +193,27 @@ function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, conf
   );
 }
 
-// ------------------------------------------------------------------
-// REUSABLE AUTOCOMPLETE COMPONENT
-// ------------------------------------------------------------------
 function Autocomplete({ options, value, onChange, placeholder, style, isObject }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (isObject) {
-      const match = options.find(o => o.value === value);
-      setSearchTerm(match ? match.label : value);
-    } else {
-      setSearchTerm(value);
-    }
+    if (isObject) { const match = options.find(o => o.value === value); setSearchTerm(match ? match.label : value); } 
+    else { setSearchTerm(value); }
   }, [value, options, isObject]);
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false);
-    }
+    function handleClickOutside(event) { if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false); }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <div className="autocomplete-container" ref={wrapperRef} style={style}>
-      <input
-        type="text" className="vibrant-input" style={{ marginBottom: 0 }}
-        placeholder={placeholder} value={searchTerm}
+      <input type="text" className="vibrant-input" style={{ marginBottom: 0 }} placeholder={placeholder} value={searchTerm}
         onChange={(e) => { setSearchTerm(e.target.value); setIsOpen(true); if (!isObject) onChange(e.target.value); }}
-        onFocus={() => setIsOpen(true)} required
-      />
+        onFocus={() => setIsOpen(true)} required />
       {isOpen && (
         <ul className="autocomplete-dropdown">
           {options.filter(opt => (isObject ? opt.label : opt).toLowerCase().includes(searchTerm.toLowerCase())).map((opt, i) => (
@@ -249,29 +228,22 @@ function Autocomplete({ options, value, onChange, placeholder, style, isObject }
 }
 
 // ------------------------------------------------------------------
-// SHARED LOG ARRIVAL MODAL (Used by Admin & Valet for Creation & Editing)
+// LOG ARRIVAL MODAL (Edit / Create)
 // ------------------------------------------------------------------
 function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPlates, editingTicket = null }) {
   const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
-  const [formData, setFormData] = useState({ 
-    make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: '' 
-  });
+  const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: '' });
 
   useEffect(() => {
-    // If we are editing an existing draft or ticket, auto-fill it
     if (editingTicket && editingTicket.vehicle) {
       const phoneParts = (editingTicket.guestPhone || "").split(' ');
       setFormData({
-        make: editingTicket.vehicle.make || '',
-        model: editingTicket.vehicle.model || '',
-        color: editingTicket.vehicle.color || '',
-        plate: editingTicket.vehicle.licensePlate || '',
-        spot: editingTicket.parkingSpot || '',
-        countryCode: phoneParts[0] || '+971',
-        phone: phoneParts[1] || ''
+        make: editingTicket.vehicle.make || '', model: editingTicket.vehicle.model || '',
+        color: editingTicket.vehicle.color || '', plate: editingTicket.vehicle.licensePlate || '',
+        spot: editingTicket.parkingSpot || '', countryCode: phoneParts[0] || '+971', phone: phoneParts[1] || ''
       });
     }
   }, [editingTicket]);
@@ -292,7 +264,6 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
     const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
     
     if (editingTicket) {
-      // Edit Mode
       await update(ref(db, `tickets/${editingTicket.id}`), {
         guestPhone: fullPhone,
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
@@ -302,11 +273,9 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       });
       onClose();
     } else {
-      // Create Mode
       const ticketId = `ticket_${Date.now()}`;
       await set(ref(db, `tickets/${ticketId}`), {
-        venueId: venueId, 
-        guestPhone: fullPhone,
+        venueId: venueId, guestPhone: fullPhone,
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
         parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
         timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
@@ -316,19 +285,14 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
   };
 
   const handlePlateBlur = (e) => {
-    if(editingTicket) return; // Disable auto-fill if we are actively editing
+    if(editingTicket && editingTicket.id !== 'new') return; 
     const plate = e.target.value.toUpperCase();
     if (knownPlates && knownPlates[plate]) {
       const past = knownPlates[plate];
       const phoneParts = (past.guestPhone || "").split(' ');
       setFormData({
-        ...formData,
-        plate: plate,
-        make: past.vehicle?.make || '',
-        model: past.vehicle?.model || '',
-        color: past.vehicle?.color || '',
-        countryCode: phoneParts[0] || '+971',
-        phone: phoneParts[1] || ''
+        ...formData, plate: plate, make: past.vehicle?.make || '', model: past.vehicle?.model || '',
+        color: past.vehicle?.color || '', countryCode: phoneParts[0] || '+971', phone: phoneParts[1] || ''
       });
     }
   };
@@ -348,27 +312,16 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         ) : isMapOpen ? (
           <div className="animate-slide-up" style={{textAlign: 'left'}}>
             <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
-            <p style={{color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', fontWeight: 500}}>Tap an empty green spot to assign it to this vehicle.</p>
-            
             <div className="parking-map" style={{maxHeight: '60vh'}}>
               {parkingMap.map((section, idx) => (
                 <div key={idx} style={{display: 'contents'}}>
                   <div className="zone-title">{section.zone}</div>
                   {section.spots.map(spot => {
-                    // Spot is occupied if it's in the list AND it's not the spot we are currently editing
                     const isOccupied = occupiedSpots.includes(spot) && spot !== formData.spot; 
                     return (
-                      <div 
-                        key={spot} 
-                        className={`spot-box ${isOccupied ? 'spot-occupied' : 'spot-empty'}`}
+                      <div key={spot} className={`spot-box ${isOccupied ? 'spot-occupied' : 'spot-empty'}`}
                         style={formData.spot === spot ? {background: 'var(--accent-green)', color: 'white', borderColor: 'var(--accent-green)'} : {}}
-                        onClick={() => {
-                          if(!isOccupied) {
-                            setFormData({...formData, spot: spot});
-                            setIsMapOpen(false);
-                          }
-                        }}
-                      >
+                        onClick={() => { if(!isOccupied) { setFormData({...formData, spot: spot}); setIsMapOpen(false); } }}>
                         {spot}
                       </div>
                     );
@@ -381,10 +334,10 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         ) : (
           <form onSubmit={handleSubmit} className="animate-slide-up">
             <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '24px'}}>
-              {editingTicket ? 'EDIT DETAILS' : 'LOG ARRIVAL'}
+              {editingTicket && editingTicket.id !== 'new' ? 'EDIT DETAILS' : 'LOG ARRIVAL'}
             </h2>
             
-            {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '2px solid #fecaca'}}>{errorMsg}</div>}
+            {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '2px solid #fecaca', boxShadow: 'var(--shadow-sm)'}}>{errorMsg}</div>}
 
             <input placeholder="License Plate (Auto-fills if known)" className="vibrant-input" style={{marginBottom: '16px', textTransform: 'uppercase', borderColor: 'var(--warning-yellow)'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} onBlur={handlePlateBlur} />
 
@@ -395,14 +348,9 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
             
             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
               <input placeholder="Color" className="vibrant-input" style={{marginBottom: '16px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
-              <input 
-                readOnly
-                placeholder="Tap to Select Spot" 
-                className="vibrant-input" 
+              <input readOnly placeholder="Tap to Select Spot" className="vibrant-input" 
                 style={{marginBottom: '16px', textAlign: 'center', color: formData.spot ? 'var(--accent-green)' : 'var(--danger-red)', fontWeight: '700', cursor: 'pointer', border: formData.spot ? '2px solid var(--accent-green)' : '2px dashed var(--danger-red)'}} 
-                value={formData.spot || "Spot Missing!"} 
-                onClick={() => setIsMapOpen(true)} 
-              />
+                value={formData.spot || "Spot Missing!"} onClick={() => setIsMapOpen(true)} />
             </div>
             
             <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', alignItems: 'start'}}>
@@ -411,7 +359,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
             </div>
 
             <div style={{display: 'flex', gap: '16px'}}>
-              <button type="submit" className="btn-green" style={{flex: 2}}>{editingTicket ? 'Save Update' : 'Generate Ticket'}</button>
+              <button type="submit" className="btn-green" style={{flex: 2}}>{editingTicket && editingTicket.id !== 'new' ? 'Save Update' : 'Generate Ticket'}</button>
               <button type="button" onClick={onClose} className="btn-outline" style={{flex: 1}}>Cancel</button>
             </div>
           </form>
@@ -432,60 +380,43 @@ function GuestTicketView({ ticketId }) {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
-  
-  const [requestDetails, setRequestDetails] = useState({ location: 'Main Entrance', wantsWash: false });
+  const [requestDetails, setRequestDetails] = useState({ location: 'Main Entrance' });
 
   useEffect(() => {
     const unsubscribeTicket = onValue(ref(db, `tickets/${ticketId}`), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         setTicket(data);
-        
-        // Fetch Venue Settings dynamically
-        get(ref(db, `venues/${data.venueId}/settings`)).then(snap => {
-          if (snap.exists()) setVenueSettings(snap.val());
-        });
-
-        // Trigger Tip Modal if retrieved and not tipped
-        if (data.status === 'retrieved' && !data.tippedAmount) {
-          setShowTipModal(true);
-        }
+        get(ref(db, `venues/${data.venueId}/settings`)).then(snap => { if (snap.exists()) setVenueSettings(snap.val()); });
+        if (data.status === 'retrieved' && !data.tippedAmount && data.wantsWash !== 'processing') setShowTipModal(true);
       }
       setLoading(false);
     });
     return () => unsubscribeTicket();
   }, [ticketId]);
 
-  const handleRequestClick = () => {
-    if (requestDetails.wantsWash) {
-      setShowPaymentModal(true); // Open payment gateway first
-    } else {
-      setShowRequestModal(true); // Open location select
-    }
+  const handleWashCheckout = async () => {
+    // Simulating Payment Success for Wash
+    await update(ref(db, `tickets/${ticketId}`), { 
+      wantsWash: true, washPaid: true, washStatus: 'queued', "timestamps/washRequestedAt": Date.now() 
+    });
+    setShowPaymentModal(false);
   };
 
-  const submitRequest = async () => {
-    await update(ref(db, `tickets/${ticketId}`), { 
-      status: "requested", 
-      returnLocation: requestDetails.location,
-      wantsWash: requestDetails.wantsWash,
-      washPaid: requestDetails.wantsWash ? true : false,
-      "timestamps/requestedAt": Date.now() 
-    });
+  const submitVehicleRequest = async () => {
+    await update(ref(db, `tickets/${ticketId}`), { status: "requested", returnLocation: requestDetails.location, "timestamps/requestedAt": Date.now() });
     setShowRequestModal(false);
-    setShowPaymentModal(false);
   };
 
   const submitTip = async (amount) => {
     await update(ref(db, `tickets/${ticketId}`), { tippedAmount: amount });
     setShowTipModal(false);
-    alert(`Thank you for tipping $${amount}!`);
   };
 
   if (loading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>LOADING TICKET...</div></div>;
   if (!ticket) return <div className="app-container center-wrapper"><div className="vibrant-card animate-scale-in">Ticket not found or expired.</div></div>;
 
-  const { vehicle, status, parkedByPhone, parkedByName } = ticket;
+  const { vehicle, status, parkedByPhone, parkedByName, wantsWash, washStatus } = ticket;
 
   if (status === 'draft') {
     return (
@@ -496,9 +427,7 @@ function GuestTicketView({ ticketId }) {
           </div>
           <h3 style={{fontSize: '1.5rem', fontWeight: 700, marginBottom: '16px'}}>Securing your vehicle...</h3>
           <p style={{color: 'var(--text-muted)', marginBottom: '32px', fontWeight: 500}}>Your valet is currently logging your vehicle details and parking it safely. This screen will update automatically.</p>
-          <div style={{display: 'flex', justifyContent: 'center'}}>
-            <div style={{width: '40px', height: '40px', border: '4px solid #e2e8f0', borderTopColor: 'var(--draft-purple)', borderRadius: '50%', animation: 'spin 1s linear infinite'}} />
-          </div>
+          <div style={{display: 'flex', justifyContent: 'center'}}><div style={{width: '40px', height: '40px', border: '4px solid #e2e8f0', borderTopColor: 'var(--draft-purple)', borderRadius: '50%', animation: 'spin 1s linear infinite'}} /></div>
           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -511,8 +440,8 @@ function GuestTicketView({ ticketId }) {
 
   return (
     <div className="app-container center-wrapper">
-      <div className="vibrant-card animate-slide-up">
-        <div style={{background: 'var(--accent-green)', padding: '24px', margin: '-32px -32px 32px -32px', color: 'white', boxShadow: 'var(--shadow-sm)'}}>
+      <div className="vibrant-card animate-slide-up" style={{padding: '24px'}}>
+        <div style={{background: 'var(--accent-green)', padding: '24px', margin: '-24px -24px 24px -24px', color: 'white', boxShadow: 'var(--shadow-sm)'}}>
           <h2 style={{margin: 0, fontSize: '1.5rem', fontWeight: 800}}>SKY VALET</h2>
           <p style={{margin: '4px 0 0 0', opacity: 0.9, fontSize: '0.9rem', fontWeight: 500}}>Digital Parking Pass</p>
         </div>
@@ -520,39 +449,49 @@ function GuestTicketView({ ticketId }) {
         <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
         <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || 'N/A'} • {vehicle?.color || 'N/A'}</p>
 
-        <div style={{background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
-          <p style={{margin: '0 0 12px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Live Status</p>
-          {status === 'parked' && <h4 style={{margin: 0, fontSize: '1.75rem', color: '#0f172a', fontWeight: 800}}>Safely Parked</h4>}
-          {status === 'requested' && <h4 style={{margin: 0, fontSize: '1.75rem', color: 'var(--danger-red)', fontWeight: 800}}>Preparing Vehicle...</h4>}
-          {status === 'incoming' && <h4 style={{margin: 0, fontSize: '1.75rem', color: 'var(--warning-yellow)', fontWeight: 800}}>On the Way!</h4>}
-          {status === 'ready' && <h4 style={{margin: 0, fontSize: '1.75rem', color: 'var(--accent-green)', fontWeight: 800}}>Ready at Door!</h4>}
-          {status === 'retrieved' && <h4 style={{margin: 0, fontSize: '1.75rem', color: '#0f172a', fontWeight: 800}}>Delivered</h4>}
-          {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: 600}}>Parked for {hoursParked}h {minsParked}m</p>}
+        {/* DUAL TRACKERS */}
+        <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px'}}>
+          
+          {/* Tracker 1: Car Wash Status (Only if bought) */}
+          {wantsWash && (
+            <div style={{background: '#f0f9ff', border: '2px solid #bae6fd', borderRadius: '16px', padding: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
+              <p style={{margin: '0 0 8px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-blue)', textTransform: 'uppercase', letterSpacing: '1px'}}>Car Wash Status</p>
+              {washStatus === 'queued' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--warning-yellow)', fontWeight: 800}}>🚗 In Queue</h4>}
+              {washStatus === 'washing' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--accent-blue)', fontWeight: 800}}>🫧 Washing Now...</h4>}
+              {washStatus === 'completed' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--accent-green)', fontWeight: 800}}>✨ Shining & Ready</h4>}
+            </div>
+          )}
+
+          {/* Tracker 2: Valet Status */}
+          <div style={{background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '16px', padding: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
+            <p style={{margin: '0 0 8px 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Valet Status</p>
+            {status === 'parked' && <h4 style={{margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800}}>Safely Parked</h4>}
+            {status === 'requested' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--danger-red)', fontWeight: 800}}>Preparing Vehicle...</h4>}
+            {status === 'incoming' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--warning-yellow)', fontWeight: 800}}>On the Way!</h4>}
+            {status === 'ready' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--accent-green)', fontWeight: 800}}>Ready at Door!</h4>}
+            {status === 'retrieved' && <h4 style={{margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800}}>Delivered</h4>}
+            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>{hoursParked}h {minsParked}m</p>}
+          </div>
         </div>
 
         {status !== 'retrieved' && (
           <div style={{textAlign: 'left', marginBottom: '32px'}}>
             <p style={{margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)'}}>Your Valet: <span style={{color: 'var(--text-main)'}}>{parkedByName || 'Team Member'}</span></p>
             <div className="contact-bar">
-              <a href={`https://wa.me/${parkedByPhone?.replace('+', '')}`} className="btn-contact btn-whatsapp" target="_blank" rel="noreferrer">💬 Chat with Valet</a>
+              <a href={`https://wa.me/${parkedByPhone?.replace('+', '')}`} className="btn-contact btn-outline" target="_blank" rel="noreferrer">💬 Chat with Valet</a>
             </div>
           </div>
         )}
 
         {status === 'parked' && (
           <div className="animate-scale-in">
-            {/* Car Wash Toggle on Main Page */}
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', padding: '16px', borderRadius: '12px', border: '2px solid var(--card-border)', marginBottom: '16px', boxShadow: 'var(--shadow-md)'}}>
-              <label style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: venueSettings.carWashEnabled ? 'pointer' : 'not-allowed', fontWeight: 700, opacity: venueSettings.carWashEnabled ? 1 : 0.5}}>
-                <input type="checkbox" style={{width: '20px', height: '20px', accentColor: 'var(--accent-green)'}} checked={requestDetails.wantsWash} disabled={!venueSettings.carWashEnabled} onChange={(e) => setRequestDetails({...requestDetails, wantsWash: e.target.checked})} />
-                🫧 Add Car Wash (${venueSettings.carWashPrice || 25})
-              </label>
-              <span style={{fontSize: '0.85rem', fontWeight: 800, color: venueSettings.carWashEnabled ? 'var(--accent-green)' : 'var(--danger-red)'}}>
-                {venueSettings.carWashEnabled ? 'AVAILABLE' : 'UNAVAILABLE'}
-              </span>
-            </div>
-
-            <button onClick={handleRequestClick} className="btn-green" style={{ padding: '20px' }}>
+            {/* DIRECT WASH CHECKOUT BUTTON */}
+            {!wantsWash && venueSettings.carWashEnabled && (
+              <button onClick={() => setShowPaymentModal(true)} className="btn-blue" style={{ marginBottom: '16px' }}>
+                🫧 Buy Premium Car Wash (${venueSettings.carWashPrice || 25})
+              </button>
+            )}
+            <button onClick={() => setShowRequestModal(true)} className="btn-green">
               Request My Vehicle
             </button>
           </div>
@@ -564,14 +503,12 @@ function GuestTicketView({ ticketId }) {
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 24px 0'}}>Confirm Return Details</h3>
-            
             <p style={{textAlign: 'left', fontWeight: 600, marginBottom: '8px'}}>Deliver my car to:</p>
-            <select className="vibrant-input" style={{marginBottom: '24px', cursor: 'pointer'}} value={requestDetails.location} onChange={(e) => setRequestDetails({...requestDetails, location: e.target.value})}>
+            <select className="vibrant-input" style={{marginBottom: '32px', cursor: 'pointer'}} value={requestDetails.location} onChange={(e) => setRequestDetails({...requestDetails, location: e.target.value})}>
               {venueSettings.returnLocations.map(loc => <option key={loc}>{loc}</option>)}
             </select>
-
             <div style={{display: 'flex', gap: '12px'}}>
-              <button onClick={submitRequest} className="btn-green" style={{flex: 2}}>Confirm Request</button>
+              <button onClick={submitVehicleRequest} className="btn-green" style={{flex: 2}}>Confirm Request</button>
               <button onClick={() => setShowRequestModal(false)} className="btn-outline" style={{flex: 1}}>Cancel</button>
             </div>
           </div>
@@ -586,14 +523,10 @@ function GuestTicketView({ ticketId }) {
             <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>${venueSettings.carWashPrice || 25}.00</strong></p>
             
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
-              <button onClick={() => setShowRequestModal(true)} className="btn-apple-pay"> Pay</button>
-              <button onClick={() => setShowRequestModal(true)} className="btn-google-pay">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Pay
-              </button>
+              <button onClick={handleWashCheckout} className="btn-apple-pay"> Pay</button>
+              <button onClick={handleWashCheckout} className="btn-google-pay">G Pay</button>
             </div>
-            
-            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel Wash</button>
+            <button onClick={() => setShowPaymentModal(false)} className="btn-outline" style={{width: '100%'}}>Cancel</button>
           </div>
         </div>
       )}
@@ -649,16 +582,17 @@ function LoginView() {
 }
 
 // ------------------------------------------------------------------
-// VALET DASHBOARD COMPONENT
+// VALET DASHBOARD & WASH BAY (DUAL MODE)
 // ------------------------------------------------------------------
 function ValetDashboardView({ parkingMap }) {
   const [tickets, setTickets] = useState([]);
+  const [viewMode, setViewMode] = useState('dispatcher'); // 'dispatcher' or 'wash_bay'
+  
   const [showLogModal, setShowLogModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [quickQrId, setQuickQrId] = useState(null);
   const [draftToEdit, setDraftToEdit] = useState(null); 
   const [knownPlates, setKnownPlates] = useState({});
-  const [venueSettings, setVenueSettings] = useState(DEFAULT_VENUE_SETTINGS);
 
   const currentVenueId = "venue_001";
   const currentDomain = window.location.origin;
@@ -675,16 +609,11 @@ function ValetDashboardView({ parkingMap }) {
         setKnownPlates(memory);
       } else { setTickets([]); }
     });
-    
-    get(ref(db, `venues/${currentVenueId}/settings`)).then(snap => {
-      if (snap.exists()) setVenueSettings(snap.val());
-    });
-
     return () => unsubscribe();
   }, []);
 
-  const changeStatus = async (ticketId, newStatus) => {
-    const updates = { status: newStatus };
+  const changeStatus = async (ticketId, field, newStatus) => {
+    const updates = { [field]: newStatus };
     if (newStatus === 'retrieved') updates["timestamps/retrievedAt"] = Date.now();
     await update(ref(db, `tickets/${ticketId}`), updates);
   };
@@ -692,13 +621,8 @@ function ValetDashboardView({ parkingMap }) {
   const handleQuickDropOff = async () => {
     const ticketId = `ticket_${Date.now()}`;
     await set(ref(db, `tickets/${ticketId}`), {
-      venueId: currentVenueId, 
-      status: "draft", 
-      parkedByUserId: auth.currentUser.uid,
-      parkedByName: "Valet Team",
-      parkedByPhone: "+971501234567",
-      vehicle: { make: '', model: '', licensePlate: '', color: '' },
-      timestamps: { created: Date.now() }
+      venueId: currentVenueId, status: "draft", parkedByUserId: auth.currentUser.uid, parkedByName: "Valet Team", parkedByPhone: "+971501234567",
+      vehicle: { make: '', model: '', licensePlate: '', color: '' }, timestamps: { created: Date.now() }
     });
     setQuickQrId(ticketId); 
   };
@@ -709,90 +633,132 @@ function ValetDashboardView({ parkingMap }) {
   const parked = tickets.filter(t => t.status === "parked");
   const occupiedSpots = parked.map(t => t.parkingSpot);
 
+  const washQueued = tickets.filter(t => t.wantsWash && t.washStatus === 'queued');
+  const washWashing = tickets.filter(t => t.wantsWash && t.washStatus === 'washing');
+  const washCompleted = tickets.filter(t => t.wantsWash && t.washStatus === 'completed' && t.status !== 'requested');
+
   return (
     <div className="app-container">
       <div className="dashboard-wrapper">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <h1 className="heading-dashboard">Dispatcher</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
+          
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={() => setViewMode('dispatcher')} className={viewMode === 'dispatcher' ? 'btn-green' : 'btn-outline'} style={{width: 'auto', padding: '12px 24px'}}>Dispatcher</button>
+            <button onClick={() => setViewMode('wash_bay')} className={viewMode === 'wash_bay' ? 'btn-blue' : 'btn-outline'} style={{width: 'auto', padding: '12px 24px'}}>Wash Bay</button>
           </div>
+          
           <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
             <button onClick={() => setShowScannerModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
             <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{width: 'auto', padding: '12px 24px', boxShadow: 'none'}}>Logout</button>
           </div>
         </div>
 
-        <div className="dashboard-grid">
-          {/* DRAFTS */}
-          <div className="queue-column">
-            <h2 className="queue-title">Needs Info ({drafts.length})</h2>
-            {drafts.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--draft-purple)', animationDelay: `${i * 0.05}s` }}>
-                <span className="status-badge status-draft">Draft Ticket</span>
-                <p style={{margin: '8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500}}>Guest has QR code. Car needs parking spot and details.</p>
-                <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{borderColor: 'var(--draft-purple)', color: 'var(--draft-purple)', marginTop: '8px'}}>Complete Details</button>
-              </div>
-            ))}
-          </div>
-
-          {/* REQUESTED */}
-          <div className="queue-column">
-            <h2 className="queue-title">Requested ({requested.length})</h2>
-            {requested.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
-                <span className="status-badge status-requested">Needs Retrieval</span>
-                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
-                <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
-                <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
-                  📍 To: {t.returnLocation}
-                  {t.wantsWash && <div style={{color: '#0ea5e9', marginTop: '4px'}}>🫧 PAID CAR WASH (${venueSettings.carWashPrice})</div>}
+        {viewMode === 'dispatcher' ? (
+          <div className="dashboard-grid">
+            {/* DRAFTS */}
+            <div className="queue-column">
+              <h2 className="queue-title">Needs Info ({drafts.length})</h2>
+              {drafts.map((t, i) => (
+                <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--draft-purple)', animationDelay: `${i * 0.05}s` }}>
+                  <span className="status-badge status-draft">Draft Ticket</span>
+                  <p style={{margin: '8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500}}>Guest has QR code. Car needs parking spot and details.</p>
+                  <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{borderColor: 'var(--draft-purple)', color: 'var(--draft-purple)', marginTop: '8px', boxShadow: 'none'}}>Complete Details</button>
                 </div>
-                <button onClick={() => changeStatus(t.id, 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px'}}>Bring Car</button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* TRANSIT/READY */}
-          <div className="queue-column">
-            <h2 className="queue-title">Transit/Ready ({incomingReady.length})</h2>
-            {incomingReady.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: `6px solid ${t.status === 'ready' ? 'var(--accent-green)' : 'var(--warning-yellow)'}`, animationDelay: `${i * 0.05}s` }}>
-                <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
-                  {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
-                </span>
-                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
-                
-                {t.status === 'incoming' ? (
-                  <button onClick={() => changeStatus(t.id, 'ready')} className="btn-green">Mark "Ready at Door"</button>
-                ) : (
-                  <button onClick={() => {
-                    const plateMatch = prompt(`Verify Plate before handing keys over.\nType the plate number to confirm handover:`);
-                    if (plateMatch && plateMatch.toUpperCase() === t.vehicle?.licensePlate?.toUpperCase()) changeStatus(t.id, 'retrieved');
-                    else if (plateMatch) alert("Plate does not match! Do not hand over keys.");
-                  }} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)'}}>
-                    Verify Plate & Handover
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* PARKED */}
-          <div className="queue-column">
-            <h2 className="queue-title">Parked ({parked.length})</h2>
-            {parked.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
-                <button className="edit-icon-btn" onClick={() => setDraftToEdit(t)}>✏️</button>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
-                  <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
+            {/* REQUESTED */}
+            <div className="queue-column">
+              <h2 className="queue-title">Requested ({requested.length})</h2>
+              {requested.map((t, i) => (
+                <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
+                  <span className="status-badge status-requested">Needs Retrieval</span>
+                  <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
+                  <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                  <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
+                    📍 To: {t.returnLocation}
+                    {t.wantsWash && <div style={{color: 'var(--accent-green)', marginTop: '4px'}}>🫧 WASH COMPLETED</div>}
+                  </div>
+                  <button onClick={() => changeStatus(t.id, 'status', 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px', boxShadow: 'none'}}>Bring Car</button>
                 </div>
-                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* TRANSIT/READY */}
+            <div className="queue-column">
+              <h2 className="queue-title">Transit/Ready ({incomingReady.length})</h2>
+              {incomingReady.map((t, i) => (
+                <div key={t.id} className="ticket-card" style={{ borderLeft: `6px solid ${t.status === 'ready' ? 'var(--accent-green)' : 'var(--warning-yellow)'}`, animationDelay: `${i * 0.05}s` }}>
+                  <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
+                    {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
+                  </span>
+                  <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
+                  
+                  {t.status === 'incoming' ? (
+                    <button onClick={() => changeStatus(t.id, 'status', 'ready')} className="btn-green" style={{boxShadow: 'none'}}>Mark "Ready at Door"</button>
+                  ) : (
+                    <button onClick={() => {
+                      const plateMatch = prompt(`Verify Plate before handing keys over.\nType the plate number to confirm handover:`);
+                      if (plateMatch && plateMatch.toUpperCase() === t.vehicle?.licensePlate?.toUpperCase()) changeStatus(t.id, 'status', 'retrieved');
+                      else if (plateMatch) alert("Plate does not match! Do not hand over keys.");
+                    }} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
+                      Verify Plate & Handover
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* PARKED */}
+            <div className="queue-column">
+              <h2 className="queue-title">Parked ({parked.length})</h2>
+              {parked.map((t, i) => (
+                <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
+                  <button className="edit-icon-btn" onClick={() => setDraftToEdit(t)}>✏️</button>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
+                    <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
+                  </div>
+                  <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          
+          /* WASH BAY VIEW */
+          <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
+            <div className="queue-column">
+              <h2 className="queue-title">Wash Queue ({washQueued.length})</h2>
+              {washQueued.map(t => (
+                <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--warning-yellow)' }}>
+                  <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                  <p style={{margin: '0 0 12px 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                  <button onClick={() => changeStatus(t.id, 'washStatus', 'washing')} className="btn-blue" style={{boxShadow: 'none'}}>Bring to Wash Bay</button>
+                </div>
+              ))}
+            </div>
+            <div className="queue-column">
+              <h2 className="queue-title">Currently Washing ({washWashing.length})</h2>
+              {washWashing.map(t => (
+                <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-blue)' }}>
+                  <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                  <button onClick={() => changeStatus(t.id, 'washStatus', 'completed')} className="btn-green" style={{boxShadow: 'none'}}>Mark Wash Complete</button>
+                </div>
+              ))}
+            </div>
+            <div className="queue-column">
+              <h2 className="queue-title">Completed ({washCompleted.length})</h2>
+              {washCompleted.map(t => (
+                <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-green)' }}>
+                  <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                  <p style={{margin: 0, color: 'var(--accent-green)', fontWeight: 700}}>✨ Cleaned & Parked</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       
       {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={currentVenueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
@@ -814,7 +780,7 @@ function ValetDashboardView({ parkingMap }) {
       {showScannerModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-scale-in" style={{maxWidth: '400px'}}>
-            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest QR</h3>
+            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest App</h3>
             <div style={{background: '#000', height: '220px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '24px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
               <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite'}}></div>
               <p style={{fontWeight: 600, letterSpacing: '1px'}}>Camera Active...</p>
@@ -834,14 +800,13 @@ function ValetDashboardView({ parkingMap }) {
 function MasterAdminView({ parkingMap }) {
   const [history, setHistory] = useState([]);
   const [parkedCars, setParkedCars] = useState([]);
-  const [activeTab, setActiveTab] = useState('parked');
+  const [activeTab, setActiveTab] = useState('operations');
   const [draftToEdit, setDraftToEdit] = useState(null);
   const [editingMap, setEditingMap] = useState([]);
   const [qrModalTicket, setQrModalTicket] = useState(null);
   const [knownPlates, setKnownPlates] = useState({});
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
   
-  // Venue Settings State
   const [venueSettings, setVenueSettings] = useState(DEFAULT_VENUE_SETTINGS);
   const [newLocationInput, setNewLocationInput] = useState('');
 
@@ -853,7 +818,6 @@ function MasterAdminView({ parkingMap }) {
   }, [parkingMap]);
 
   useEffect(() => {
-    // Tickets listener
     const unsubscribeTickets = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -867,14 +831,9 @@ function MasterAdminView({ parkingMap }) {
       }
     });
 
-    // Settings listener
     const unsubscribeSettings = onValue(ref(db, `venues/${currentVenueId}/settings`), (snapshot) => {
-      if (snapshot.exists()) {
-        setVenueSettings(snapshot.val());
-      } else {
-        set(ref(db, `venues/${currentVenueId}/settings`), DEFAULT_VENUE_SETTINGS);
-        setVenueSettings(DEFAULT_VENUE_SETTINGS);
-      }
+      if (snapshot.exists()) setVenueSettings(snapshot.val());
+      else { set(ref(db, `venues/${currentVenueId}/settings`), DEFAULT_VENUE_SETTINGS); setVenueSettings(DEFAULT_VENUE_SETTINGS); }
     });
 
     return () => { unsubscribeTickets(); unsubscribeSettings(); };
@@ -888,7 +847,6 @@ function MasterAdminView({ parkingMap }) {
 
   const occupiedSpots = parkedCars.map(t => t.parkingSpot);
 
-  // --- Map Editor Functions ---
   const handleSaveMap = async () => {
     setConfirmConfig({
       isOpen: true, title: "Save Floor Plan", message: "Push these changes to the live database?", isDanger: false,
@@ -960,7 +918,6 @@ function MasterAdminView({ parkingMap }) {
     setEditingMap(newMap);
   };
 
-  // --- Settings Functions ---
   const handleToggleWash = async (e) => {
     await update(ref(db, `venues/${currentVenueId}/settings`), { carWashEnabled: e.target.checked });
   };
@@ -991,8 +948,8 @@ function MasterAdminView({ parkingMap }) {
         </div>
 
         <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={activeTab === 'parked' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('parked')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
-            Active Fleet ({parkedCars.length})
+          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
+            Live Operations Tracking
           </button>
           <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
             History & Metrics
@@ -1007,27 +964,39 @@ function MasterAdminView({ parkingMap }) {
 
         <div>
           <h2 className="queue-title">
-            {activeTab === 'parked' ? 'Live Parked Inventory' : 
+            {activeTab === 'operations' ? 'Live Valet & Wash Progress' : 
              activeTab === 'metrics' ? 'Retrieval Time History' : 
              activeTab === 'map' ? 'Live Floor Plan Editor' : 'Venue Configuration'}
           </h2>
           
           <div style={{ overflowX: 'auto' }}>
             
-            {/* PARKED TICKETS */}
-            {activeTab === 'parked' && (
+            {/* LIVE OPERATIONS (DUAL TRACKING) */}
+            {activeTab === 'operations' && (
               <table className="luxury-table animate-slide-up">
-                <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Spot</th><th>Arrival Date</th><th>Parked Time</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Vehicle</th><th>Plate</th><th>Spot</th><th>Valet Status</th><th>Wash Status</th><th>Time Parked</th><th>Actions</th></tr></thead>
                 <tbody>
                   {parkedCars.map(t => {
-                    const { date, time } = formatDateTime(t.timestamps?.parkedAt);
+                    const { time } = formatDateTime(t.timestamps?.parkedAt);
                     return (
                       <tr key={t.id}>
-                        <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
-                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || ''}</td>
-                        <td style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.guestPhone || '-'}</td>
-                        <td style={{ color: 'var(--accent-green)', fontWeight: '800' }}>{t.parkingSpot || 'Draft'}</td>
-                        <td style={{ fontWeight: 500 }}>{date}</td><td style={{ fontWeight: 500 }}>{time}</td>
+                        <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Waiting for details'} {t.vehicle?.model || ''}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || '-'}</td>
+                        <td style={{ fontWeight: '800' }}>{t.parkingSpot || '-'}</td>
+                        <td>
+                          {t.status === 'draft' && <span className="status-badge status-draft">Draft</span>}
+                          {t.status === 'parked' && <span className="status-badge status-parked">Parked</span>}
+                          {t.status === 'requested' && <span className="status-badge status-requested">Requested</span>}
+                          {t.status === 'incoming' && <span className="status-badge status-incoming">Transit</span>}
+                          {t.status === 'ready' && <span className="status-badge status-ready">Ready</span>}
+                        </td>
+                        <td>
+                          {!t.wantsWash && <span style={{color: 'var(--text-muted)', fontWeight: 600}}>Not Ordered</span>}
+                          {t.wantsWash && t.washStatus === 'queued' && <span className="status-badge wash-queued">Queued</span>}
+                          {t.wantsWash && t.washStatus === 'washing' && <span className="status-badge wash-washing">Washing</span>}
+                          {t.wantsWash && t.washStatus === 'completed' && <span className="status-badge wash-completed">Completed</span>}
+                        </td>
+                        <td style={{ fontWeight: 500 }}>{t.status === 'draft' ? '-' : time}</td>
                         <td style={{ display: 'flex', gap: '8px' }}>
                           <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Edit</button>
                           <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>View QR</button>
@@ -1035,7 +1004,7 @@ function MasterAdminView({ parkingMap }) {
                       </tr>
                     );
                   })}
-                  {parkedCars.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>Lot is completely empty.</td></tr>}
+                  {parkedCars.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No cars currently on site.</td></tr>}
                 </tbody>
               </table>
             )}
@@ -1043,7 +1012,7 @@ function MasterAdminView({ parkingMap }) {
             {/* METRICS */}
             {activeTab === 'metrics' && (
               <table className="luxury-table animate-slide-up">
-                <thead><tr><th>Vehicle</th><th>Plate</th><th>Phone</th><th>Arrival Date</th><th>Wash</th><th>Tip</th><th>Retrieval Time</th></tr></thead>
+                <thead><tr><th>Vehicle</th><th>Plate</th><th>Arrival Date</th><th>Wash</th><th>Tip</th><th>Retrieval Time</th></tr></thead>
                 <tbody>
                   {history.map(t => {
                     const { date } = formatDateTime(t.timestamps?.parkedAt);
@@ -1054,7 +1023,6 @@ function MasterAdminView({ parkingMap }) {
                       <tr key={t.id}>
                         <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
                         <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || ''}</td>
-                        <td style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.guestPhone || '-'}</td>
                         <td style={{ fontWeight: 500 }}>{date}</td>
                         <td style={{ fontWeight: 700, color: t.washPaid ? '#0ea5e9' : 'var(--text-muted)' }}>{t.washPaid ? 'Yes' : 'No'}</td>
                         <td style={{ fontWeight: 700, color: 'var(--accent-green)' }}>{t.tippedAmount ? `$${t.tippedAmount}` : '-'}</td>
@@ -1075,7 +1043,7 @@ function MasterAdminView({ parkingMap }) {
                   <div className="settings-row">
                     <div>
                       <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Enable Car Wash Service</p>
-                      <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash before checkout.</p>
+                      <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash on their ticket.</p>
                     </div>
                     <label className="toggle-switch">
                       <input type="checkbox" checked={venueSettings.carWashEnabled} onChange={handleToggleWash} />
@@ -1197,7 +1165,7 @@ function MasterAdminView({ parkingMap }) {
 }
 
 // ------------------------------------------------------------------
-// 5. MAIN ROUTER & APP SHELL
+// APP ROUTER
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
