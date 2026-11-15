@@ -53,7 +53,6 @@ const vibrantStyles = `
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  /* Buttons */
   .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px;}
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
@@ -129,7 +128,11 @@ const vibrantStyles = `
   .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); }
   .luxury-table th { padding: 16px; border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; background: #f8fafc;}
   .luxury-table td { padding: 20px 16px; border-bottom: 1px solid var(--card-border); }
-
+  
+  .metric-card { background: #fff; border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md); text-align: left; }
+  .metric-value { font-size: 2.5rem; font-weight: 800; margin: 8px 0; color: var(--text-main); }
+  
+  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--card-border); }
   .toggle-switch { position: relative; width: 50px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
   .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
@@ -175,18 +178,15 @@ const getZonePrefix = (zoneName) => {
   return firstWord.charAt(0).toUpperCase();
 };
 
-// ------------------------------------------------------------------
-// WIDGETS & LOGOS
-// ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
   return (
     <div className="modal-overlay" style={{ zIndex: 1100 }}>
       <div className="vibrant-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
-        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--text-main)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
+        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>{message}</p>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--dev-black)' }}>{confirmText}</button>
+          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--accent-green)' }}>{confirmText}</button>
           <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
         </div>
       </div>
@@ -317,7 +317,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
         parkingSpot: formData.spot,
         status: editingTicket.status === "draft" ? "parked" : editingTicket.status, 
-        "timestamps/parkedAt": editingTicket.status === "draft" ? Date.now() : editingTicket.timestamps?.parkedAt
+        "timestamps/parkedAt": editingTicket.status === "draft" ? Date.now() : (editingTicket.timestamps?.parkedAt || Date.now())
       });
       onClose();
     } else {
@@ -490,7 +490,8 @@ function GuestTicketView({ ticketId }) {
     );
   }
 
-  const parkedTimeMs = Date.now() - ticket.timestamps.parkedAt;
+  // Safe fallback to prevent crash on older tickets without timestamps
+  const parkedTimeMs = Date.now() - (ticket.timestamps?.parkedAt || Date.now());
   const hoursParked = Math.floor(parkedTimeMs / (1000 * 60 * 60));
   const minsParked = Math.floor((parkedTimeMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -691,7 +692,6 @@ function DeveloperView() {
     alert(`Venue ${newVenueId} Created.`);
   };
 
-  // TRUE ACCOUNT CREATION (Ghost Instance)
   const handleProvisionUser = async (e) => {
     e.preventDefault();
     if (!newUserVenue) { alert("Select a venue."); return; }
@@ -730,7 +730,7 @@ function DeveloperView() {
       isOpen: true,
       title: "Change SaaS Tier",
       message: `Are you sure you want to ${currentTier === 1 ? 'UPGRADE this venue to Premium (Tier 2)?' : 'DOWNGRADE this venue to Standard (Tier 1)?'}`,
-      isDanger: currentTier === 2, // Danger color if downgrading
+      isDanger: currentTier === 2,
       onConfirm: async () => {
         await update(ref(db, `venues/${venueId}/settings`), { tier: currentTier === 1 ? 2 : 1 });
         setDevConfirm({ ...devConfirm, isOpen: false });
@@ -865,20 +865,15 @@ function DeveloperView() {
             <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
               
               {allVenues.map(venue => {
-                // Filter tickets that belong to this venue and have a transaction record
                 const venueTransactions = allTickets.filter(t => t.venueId === venue.id && (t.washTransaction || t.tipTransaction));
-                
-                // Calculate venue totals
                 const washRev = venueTransactions.filter(t => t.washTransaction).reduce((acc, t) => acc + (t.washTransaction.amount || 0), 0);
                 const tipRev = venueTransactions.filter(t => t.tipTransaction).reduce((acc, t) => acc + (t.tipTransaction.amount || 0), 0);
                 
-                // Flatten the transactions for the ledger table
                 let ledger = [];
                 venueTransactions.forEach(t => {
                   if(t.washTransaction) ledger.push({ type: 'Car Wash', tx: t.washTransaction, vehicle: t.vehicle?.licensePlate || 'Unknown' });
                   if(t.tipTransaction) ledger.push({ type: 'Valet Tip', tx: t.tipTransaction, vehicle: t.vehicle?.licensePlate || 'Unknown' });
                 });
-                // Sort by date newest first
                 ledger.sort((a, b) => b.tx.date - a.tx.date);
 
                 return (
@@ -934,7 +929,7 @@ function DeveloperView() {
 }
 
 // ------------------------------------------------------------------
-// VALET, WASH BAY, & ADMIN VIEWS (No Structural Changes Below)
+// VALET, WASH BAY, & ADMIN VIEWS
 // ------------------------------------------------------------------
 function WashBayView({ venueId }) {
   const [tickets, setTickets] = useState([]);
@@ -1019,7 +1014,11 @@ function ValetDashboardView({ parkingMap, venueId }) {
         setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
         
         const memory = {};
-        all.forEach(t => { if(t.vehicle?.licensePlate) memory[t.vehicle?.licensePlate.toUpperCase()] = t; });
+        all.forEach(t => { 
+          if(t.vehicle?.licensePlate && typeof t.vehicle.licensePlate === 'string') {
+            memory[t.vehicle.licensePlate.toUpperCase()] = t; 
+          }
+        });
         setKnownPlates(memory);
       } else { setTickets([]); }
     });
@@ -1167,6 +1166,326 @@ function ValetDashboardView({ parkingMap, venueId }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function MasterAdminView({ parkingMap, venueId }) {
+  const [history, setHistory] = useState([]);
+  const [parkedCars, setParkedCars] = useState([]);
+  const [activeTab, setActiveTab] = useState('operations');
+  const [draftToEdit, setDraftToEdit] = useState(null);
+  const [editingMap, setEditingMap] = useState([]);
+  const [qrModalTicket, setQrModalTicket] = useState(null);
+  const [knownPlates, setKnownPlates] = useState({});
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
+  
+  const [venueSettings, setVenueSettings] = useState(DEFAULT_VENUE_SETTINGS);
+  const [newLocationInput, setNewLocationInput] = useState('');
+
+  const currentDomain = window.location.origin;
+
+  useEffect(() => { setEditingMap(JSON.parse(JSON.stringify(parkingMap || []))); }, [parkingMap]);
+
+  useEffect(() => {
+    const unsubscribeTickets = onValue(ref(db, 'tickets'), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] })).filter(t => t.venueId === venueId);
+        
+        // Bulletproof timestamp sorting to prevent crashes on old data
+        setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => (b.timestamps?.parkedAt || 0) - (a.timestamps?.parkedAt || 0)));
+        setHistory(allTickets.filter(t => t.status === "retrieved").sort((a, b) => (b.timestamps?.retrievedAt || 0) - (a.timestamps?.retrievedAt || 0)));
+        
+        const memory = {};
+        allTickets.forEach(t => { 
+          if(t.vehicle?.licensePlate && typeof t.vehicle.licensePlate === 'string') {
+            memory[t.vehicle.licensePlate.toUpperCase()] = t; 
+          }
+        });
+        setKnownPlates(memory);
+      }
+    });
+
+    const unsubscribeSettings = onValue(ref(db, `venues/${venueId}/settings`), (snapshot) => {
+      if (snapshot.exists()) setVenueSettings(snapshot.val());
+      else { set(ref(db, `venues/${venueId}/settings`), DEFAULT_VENUE_SETTINGS); setVenueSettings(DEFAULT_VENUE_SETTINGS); }
+    });
+
+    return () => { unsubscribeTickets(); unsubscribeSettings(); };
+  }, [venueId]);
+
+  const formatDateTime = (timestamp) => {
+    if (!timestamp) return { date: '-', time: '-' };
+    const dateObj = new Date(timestamp);
+    return { date: dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }), time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+  };
+
+  const occupiedSpots = parkedCars.map(t => t.parkingSpot);
+
+  const handleSaveMap = async () => {
+    setConfirmConfig({
+      isOpen: true, title: "Save Floor Plan", message: "Push these changes to the live database?", isDanger: false,
+      onConfirm: async () => { await set(ref(db, `venues/${venueId}/parkingMap`), editingMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  const moveZone = (index, direction) => {
+    const newMap = [...editingMap];
+    if (direction === 'up' && index > 0) [newMap[index - 1], newMap[index]] = [newMap[index], newMap[index - 1]];
+    else if (direction === 'down' && index < newMap.length - 1) [newMap[index + 1], newMap[index]] = [newMap[index], newMap[index + 1]];
+    setEditingMap(newMap);
+  };
+
+  const addZone = () => {
+    let nextZoneName = "Zone A";
+    if (editingMap.length > 0) {
+      const lastZone = editingMap[editingMap.length - 1].zone.trim();
+      const match = lastZone.match(/^(Zone\s+)([A-Y])$/i); 
+      if (match) nextZoneName = match[1] + String.fromCharCode(match[2].charCodeAt(0) + 1);
+      else nextZoneName = lastZone + " (New)";
+    }
+    setEditingMap([...editingMap, { zone: nextZoneName, spots: [] }]);
+  };
+
+  const removeZone = (index) => {
+    setConfirmConfig({
+      isOpen: true, title: "Delete Zone", message: "Delete this entire zone? All parking spots inside will be lost.", isDanger: true,
+      onConfirm: () => { const newMap = [...editingMap]; newMap.splice(index, 1); setEditingMap(newMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  const updateSpotName = (zoneIdx, spotIdx, val) => { const newMap = [...editingMap]; newMap[zoneIdx].spots[spotIdx] = val; setEditingMap(newMap); };
+
+  const removeSpot = (zoneIdx, spotIdx) => {
+    setConfirmConfig({
+      isOpen: true, title: "Remove Spot", message: "Delete this parking spot from the floor plan?", isDanger: true,
+      onConfirm: () => { const newMap = [...editingMap]; newMap[zoneIdx].spots.splice(spotIdx, 1); setEditingMap(newMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  const addSpotToZone = (zoneIdx) => {
+    const newMap = [...editingMap];
+    const prefix = getZonePrefix(newMap[zoneIdx].zone);
+    let newNum = newMap[zoneIdx].spots.length + 1;
+    let newSpotName = `${prefix}-${newNum}`;
+    while (newMap[zoneIdx].spots.includes(newSpotName)) { newNum++; newSpotName = `${prefix}-${newNum}`; }
+    newMap[zoneIdx].spots.push(newSpotName);
+    setEditingMap(newMap);
+  };
+
+  const handleToggleWash = async (e) => { await update(ref(db, `venues/${venueId}/settings`), { carWashEnabled: e.target.checked }); };
+  const handlePriceChange = async (e) => { await update(ref(db, `venues/${venueId}/settings`), { carWashPrice: Number(e.target.value) }); };
+  const handleAddLocation = async () => {
+    if (!newLocationInput.trim()) return;
+    const locs = [...(venueSettings.returnLocations || []), newLocationInput.trim()];
+    await update(ref(db, `venues/${venueId}/settings`), { returnLocations: locs });
+    setNewLocationInput('');
+  };
+  const handleRemoveLocation = async (index) => {
+    const locs = [...(venueSettings.returnLocations || [])];
+    locs.splice(index, 1);
+    await update(ref(db, `venues/${venueId}/settings`), { returnLocations: locs });
+  };
+  
+  const handleAdminDelete = (id) => {
+    setConfirmConfig({
+      isOpen: true, title: "Delete Ticket?", message: "Are you sure you want to permanently delete this active ticket from the system?", isDanger: true,
+      onConfirm: async () => { await set(ref(db, `tickets/${id}`), null); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  return (
+    <div className="app-container">
+      <div className="dashboard-wrapper">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <h1 className="heading-dashboard">Management Overview</h1>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
+          </div>
+          <button onClick={() => setDraftToEdit({ id: 'new' })} className="btn-green" style={{width: 'auto', padding: '12px 32px'}}>+ Add Vehicle</button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Live Operations</button>
+          <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Metrics</button>
+          <button className={activeTab === 'map' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Map Editor</button>
+          <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Settings</button>
+        </div>
+
+        <div>
+          <div style={{ overflowX: 'auto' }}>
+            
+            {activeTab === 'operations' && (
+              <table className="luxury-table animate-slide-up">
+                <thead><tr><th>Vehicle</th><th>Plate</th><th>Spot</th><th>Valet Status</th><th>Wash Status</th><th>Time Parked</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {parkedCars.map(t => {
+                    const { time } = formatDateTime(t.timestamps?.parkedAt);
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Waiting for details'} {t.vehicle?.model || ''}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || '-'}</td>
+                        <td style={{ fontWeight: '800' }}>{t.parkingSpot || '-'}</td>
+                        <td>
+                          {t.status === 'draft' && <span className="status-badge status-draft">Draft</span>}
+                          {t.status === 'parked' && <span className="status-badge status-parked">Parked</span>}
+                          {t.status === 'requested' && <span className="status-badge status-requested">Requested</span>}
+                          {t.status === 'incoming' && <span className="status-badge status-incoming">Transit</span>}
+                          {t.status === 'ready' && <span className="status-badge status-ready">Ready</span>}
+                        </td>
+                        <td>
+                          {!t.wantsWash && <span style={{color: 'var(--text-muted)', fontWeight: 600}}>Not Ordered</span>}
+                          {t.wantsWash && t.washStatus === 'queued' && <span className="status-badge wash-queued">Queued</span>}
+                          {t.wantsWash && t.washStatus === 'washing' && <span className="status-badge wash-washing">Washing</span>}
+                          {t.wantsWash && t.washStatus === 'completed' && <span className="status-badge wash-completed">Completed</span>}
+                        </td>
+                        <td style={{ fontWeight: 500 }}>{t.status === 'draft' ? '-' : time}</td>
+                        <td style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Edit</button>
+                          <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>QR</button>
+                          <button onClick={() => handleAdminDelete(t.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Del</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {parkedCars.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No cars currently on site.</td></tr>}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === 'metrics' && (
+              <table className="luxury-table animate-slide-up">
+                <thead><tr><th>Vehicle</th><th>Plate</th><th>Arrival Date</th><th>Wash</th><th>Tip</th><th>Retrieval Time</th></tr></thead>
+                <tbody>
+                  {history.map(t => {
+                    const { date } = formatDateTime(t.timestamps?.parkedAt);
+                    
+                    // Bulletproof Math calculation
+                    const retrievedAt = t.timestamps?.retrievedAt || 0;
+                    const requestedAt = t.timestamps?.requestedAt || 0;
+                    const ms = (retrievedAt > requestedAt && requestedAt > 0) ? retrievedAt - requestedAt : 0;
+                    
+                    const mins = Math.floor(ms / 60000);
+                    const secs = ((ms % 60000) / 1000).toFixed(0);
+                    
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || ''}</td>
+                        <td style={{ fontWeight: 500 }}>{date}</td>
+                        <td style={{ fontWeight: 700, color: t.washPaid ? '#0ea5e9' : 'var(--text-muted)' }}>{t.washPaid ? 'Yes' : 'No'}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--accent-green)' }}>{t.tippedAmount ? `$${t.tippedAmount}` : '-'}</td>
+                        <td style={{ color: mins > 5 ? 'var(--danger-red)' : 'var(--accent-green)', fontWeight: '800' }}>{mins}m {secs}s</td>
+                      </tr>
+                    );
+                  })}
+                  {history.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No completed retrieval data.</td></tr>}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === 'settings' && (
+              <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
+                
+                <div className="editor-card" style={{borderColor: venueSettings.tier === 1 ? 'var(--card-border)' : 'var(--warning-yellow)', borderWidth: venueSettings.tier === 2 ? '2px' : '1px'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                    <h3 style={{margin: 0, fontWeight: 800, fontSize: '1.5rem'}}>Service Options</h3>
+                    <span style={{background: venueSettings.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: venueSettings.tier === 1 ? '#475569' : '#fff', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase'}}>
+                      {venueSettings.tier === 1 ? 'Standard Tier' : 'Premium Tier'}
+                    </span>
+                  </div>
+                  
+                  <div className="settings-row" style={{opacity: venueSettings.tier === 1 ? 0.5 : 1}}>
+                    <div>
+                      <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Enable Car Wash Service</p>
+                      <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash on their ticket.</p>
+                      {venueSettings.tier === 1 && <p style={{margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--danger-red)', fontWeight: 700}}>Please contact software provider to unlock.</p>}
+                    </div>
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={venueSettings.tier === 1 ? false : venueSettings.carWashEnabled} onChange={handleToggleWash} disabled={venueSettings.tier === 1} />
+                      <span className="toggle-slider" style={{cursor: venueSettings.tier === 1 ? 'not-allowed' : 'pointer'}}></span>
+                    </label>
+                  </div>
+                  
+                  <div className="settings-row" style={{borderBottom: 'none', opacity: venueSettings.tier === 1 ? 0.5 : 1}}>
+                    <div>
+                      <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Car Wash Price ($)</p>
+                    </div>
+                    <input type="number" className="vibrant-input" style={{width: '100px', marginBottom: 0, padding: '12px', textAlign: 'center'}} value={venueSettings.carWashPrice || 25} onChange={handlePriceChange} disabled={venueSettings.tier === 1} />
+                  </div>
+                </div>
+
+                <div className="editor-card">
+                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Return Locations (Deliver To)</h3>
+                  <p style={{fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '16px', fontWeight: 500}}>These are the physical places a guest can request their car be brought to.</p>
+                  
+                  {(venueSettings.returnLocations || []).map((loc, i) => (
+                    <div key={i} className="settings-row" style={{padding: '12px 0'}}>
+                      <span style={{fontWeight: 600}}>{loc}</span>
+                      <button onClick={() => handleRemoveLocation(i)} style={{background: 'transparent', border: 'none', color: 'var(--danger-red)', cursor: 'pointer', fontWeight: 'bold'}}>Remove</button>
+                    </div>
+                  ))}
+                  
+                  <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
+                    <input type="text" className="vibrant-input" placeholder="e.g. Back Entrance" value={newLocationInput} onChange={e => setNewLocationInput(e.target.value)} style={{marginBottom: 0}} />
+                    <button onClick={handleAddLocation} className="btn-green" style={{width: '120px'}}>Add</button>
+                  </div>
+                </div>
+              </div>
+            )}
+              
+            {activeTab === 'map' && (
+              <div style={{maxWidth: '1000px', margin: '0 auto'}}>
+                <p style={{color: 'var(--text-muted)', marginBottom: '32px', fontSize: '1rem', fontWeight: 500}}>Changes made here will instantly update the interactive floor map for all valets. Tap a spot to rename it.</p>
+                {editingMap.map((section, idx) => (
+                  <div key={idx} className="editor-card" style={{ animationDelay: `${idx * 0.1}s` }}>
+                    <div className="editor-zone-header">
+                      <input type="text" value={section.zone} onChange={(e) => { const newMap = [...editingMap]; newMap[idx].zone = e.target.value; setEditingMap(newMap); }} className="vibrant-input editor-zone-input" />
+                      <div className="editor-zone-actions">
+                        <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
+                        <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
+                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto', boxShadow: 'none'}}>Delete</button>
+                      </div>
+                    </div>
+                    <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
+                      {section.spots.map((spot, sIdx) => (
+                        <div key={sIdx} style={{ position: 'relative' }}>
+                          <input value={spot} onChange={(e) => updateSpotName(idx, sIdx, e.target.value)} className="spot-edit-input" />
+                          <button onClick={() => removeSpot(idx, sIdx)} className="spot-delete-btn" title="Remove Spot">✕</button>
+                        </div>
+                      ))}
+                      <div className="spot-add-btn" onClick={() => addSpotToZone(idx)} title="Add New Spot">+</div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{display: 'flex', gap: '24px', marginTop: '40px'}}>
+                  <button onClick={addZone} className="btn-outline" style={{flex: 1, padding: '16px', fontSize: '1.05rem'}}>+ Add New Zone</button>
+                  <button onClick={handleSaveMap} className="btn-green" style={{flex: 2, padding: '16px', fontSize: '1.05rem'}}>Save Floor Plan to Live Database</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit.id === 'new' ? null : draftToEdit} />}
+      {qrModalTicket && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in" style={{width: '90%'}}>
+            <h2 className="heading-brand" style={{color: 'var(--accent-green)'}}>DIGITAL TICKET</h2>
+            <div style={{background: '#fff', padding: '20px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            </div>
+            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Ticket</button>
+          </div>
+        </div>
+      )}
+      <CustomConfirmWidget isOpen={confirmConfig.isOpen} title={confirmConfig.title} message={confirmConfig.message} onConfirm={confirmConfig.onConfirm} onCancel={confirmConfig.onCancel} isDanger={confirmConfig.isDanger} />
     </div>
   );
 }
