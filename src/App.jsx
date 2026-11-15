@@ -609,6 +609,24 @@ function CustomerGarageView({ userProfile, uid, onOpenLiveTicket }) {
   const [allVenues, setAllVenues] = useState({});
   const [showAddCarModal, setShowAddCarModal] = useState(false);
   const [selectedPassCar, setSelectedPassCar] = useState(null);
+  const [showVipModal, setShowVipModal] = useState(false);
+const isSubscribed = Boolean(userProfile?.isVipMember);
+
+const handleSubscribeVip = async (method) => {
+  const subRecord = {
+    plan: 'Sky Black Card',
+    price: 49,
+    method,
+    last4: Math.floor(1000 + Math.random() * 9000),
+    date: Date.now(),
+    status: 'Done'
+  };
+  await update(ref(db, `users/${uid}`), {
+    isVipMember: true,
+    vipSubscription: subRecord
+  });
+  setShowVipModal(false);
+};
   const [newCar, setNewCar] = useState({ make: '', model: '', color: '', plate: '' });
 
   const garageCars = userProfile?.garage ? Object.values(userProfile.garage) : [];
@@ -714,6 +732,31 @@ function CustomerGarageView({ userProfile, uid, onOpenLiveTicket }) {
           </button>
         </div>
 
+        {/* VIP BLACK CARD MEMBERSHIP BANNER */}
+<div style={{
+  background: isSubscribed ? 'linear-gradient(135deg, #0f172a 0%, #334155 100%)' : 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+  border: isSubscribed ? '2px solid #f59e0b' : '1px solid #4338ca',
+  color: 'white', borderRadius: '20px', padding: '24px 28px', marginBottom: '28px',
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', boxShadow: 'var(--shadow-lg)'
+}}>
+  <div>
+    <span style={{ background: isSubscribed ? '#f59e0b' : 'rgba(255,255,255,0.15)', color: isSubscribed ? '#0f172a' : '#fff', padding: '4px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>
+      {isSubscribed ? '👑 Active Sky Black Card' : '⚡ Upgrade Available'}
+    </span>
+    <h3 style={{ margin: '10px 0 4px 0', fontSize: '1.5rem', fontWeight: 900 }}>
+      {isSubscribed ? 'VIP Priority & 50% Wash Discount Unlocked' : 'Get the Sky Valet Black Card — $49/mo'}
+    </h3>
+    <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem', fontWeight: 500 }}>
+      {isSubscribed ? 'Your vehicles automatically jump to #1 in the retrieval queue at all partner venues.' : 'Skip the retrieval line at every hotel & get 50% off unlimited luxury car washes.'}
+    </p>
+  </div>
+  {!isSubscribed && (
+    <button onClick={() => setShowVipModal(true)} className="btn-green" style={{ width: 'auto', background: '#f59e0b', color: '#0f172a', padding: '14px 24px', fontWeight: 900 }}>
+      👑 Upgrade Now ($49/mo)
+    </button>
+  )}
+</div>
+
         {/* MY GARAGE TAB */}
         {activeTab === 'garage' && (
           <div className="animate-slide-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '24px' }}>
@@ -784,6 +827,24 @@ function CustomerGarageView({ userProfile, uid, onOpenLiveTicket }) {
           </div>
         )}
       </div>
+
+      {/* VIP SUBSCRIPTION CHECKOUT MODAL */}
+{showVipModal && (
+  <div className="modal-overlay">
+    <div className="vibrant-card animate-scale-in">
+      <span style={{ background: '#fef3c7', color: '#b45309', padding: '6px 14px', borderRadius: '999px', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase' }}>Sky Black Card</span>
+      <h3 style={{ fontSize: '1.6rem', fontWeight: 900, margin: '12px 0 8px 0' }}>VIP Membership</h3>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontWeight: 500 }}>
+        Instant #1 queue priority + 50% off every car wash: <strong>$49.00 / month</strong>
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+        <button onClick={() => handleSubscribeVip('Apple Pay')} className="btn-apple-pay"><ApplePayLogo /></button>
+        <button onClick={() => handleSubscribeVip('Google Pay')} className="btn-google-pay"><GooglePayLogo /></button>
+      </div>
+      <button onClick={() => setShowVipModal(false)} className="btn-outline" style={{ width: '100%' }}>Cancel</button>
+    </div>
+  </div>
+)}
 
       {/* ADD VEHICLE MODAL */}
       {showAddCarModal && (
@@ -866,7 +927,8 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         make: prefillVipData.make || '', model: prefillVipData.model || '',
         color: prefillVipData.color || '', plate: prefillVipData.licensePlate || '',
         spot: '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
-        customerId: prefillVipData.customerId || null
+        customerId: prefillVipData.customerId || null,
+        isVipMember: Boolean(prefillVipData.isVipMember)
       });
     }
   }, [editingTicket, prefillVipData]);
@@ -902,6 +964,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         venueId: venueId,
         guestPhone: fullPhone,
         customerId: formData.customerId || null,
+        isVipMember: Boolean(formData.isVipMember),
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
         parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
         timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
@@ -1034,7 +1097,7 @@ function GuestTicketView({ ticketId, onBack }) {
   }, [ticketId]);
 
   const handleWashCheckout = async (method) => {
-    const transaction = { date: Date.now(), last4: Math.floor(1000 + Math.random() * 9000), status: 'Done', method: method, amount: venueSettings.carWashPrice || 25 };
+    const transaction = { date: Date.now(), last4: Math.floor(1000 + Math.random() * 9000), status: 'Done', method: method, amount: effectiveWashPrice };
     await update(ref(db, `tickets/${ticketId}`), { wantsWash: true, washPaid: true, washStatus: 'queued', "timestamps/washRequestedAt": Date.now(), washTransaction: transaction });
     setShowPaymentModal(false);
   };
@@ -1067,6 +1130,8 @@ function GuestTicketView({ ticketId, onBack }) {
   );
 
   const { vehicle, status, parkedByPhone, parkedByName, wantsWash, washStatus } = ticket;
+  const baseWashPrice = venueSettings.carWashPrice || 25;
+const effectiveWashPrice = ticket.isVipMember ? Math.round(baseWashPrice * 0.5) : baseWashPrice;
 
   if (status === 'draft') {
     return (
@@ -1139,7 +1204,7 @@ function GuestTicketView({ ticketId, onBack }) {
           <div className="animate-scale-in">
             {!wantsWash && venueSettings.tier === 2 && venueSettings.carWashEnabled && (
               <button onClick={() => setShowPaymentModal(true)} className="btn-blue" style={{ marginBottom: '16px' }}>
-                🫧 Premium Car Wash (${venueSettings.carWashPrice || 25})
+                🫧 Premium Car Wash (${effectiveWashPrice})
               </button>
             )}
             <button onClick={() => setShowRequestModal(true)} className="btn-green">Request My Vehicle</button>
@@ -1167,7 +1232,7 @@ function GuestTicketView({ ticketId, onBack }) {
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0'}}>Complete Payment</h3>
-            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>${venueSettings.carWashPrice || 25}.00</strong></p>
+            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Premium Car Wash Service: <strong>${effectiveWashPrice}.00</strong></p>
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px'}}>
               <button onClick={() => handleWashCheckout('Apple Pay')} className="btn-apple-pay"><ApplePayLogo/></button>
               <button onClick={() => handleWashCheckout('Google Pay')} className="btn-google-pay"><GooglePayLogo/></button>
@@ -1471,6 +1536,21 @@ function DeveloperView() {
 
           {activeTab === 'finance' && (
             <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
+
+              <div className="vibrant-card" style={{ maxWidth: '100%', textAlign: 'left', background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', color: 'white', border: '1px solid #4f46e5' }}>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+    <div>
+      <span style={{ color: '#f59e0b', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>100% Platform Owner Revenue</span>
+      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.6rem', fontWeight: 900 }}>VIP Black Card Subscriptions</h3>
+    </div>
+    <div style={{ textAlign: 'right' }}>
+      <div style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700 }}>ACTIVE SUBSCRIBERS: {allUsers.filter(u => u.isVipMember).length}</div>
+      <div style={{ fontSize: '2rem', fontWeight: 900, color: '#34d399' }}>
+        ${(allUsers.filter(u => u.isVipMember).length * 49).toLocaleString()} / mo
+      </div>
+    </div>
+  </div>
+</div>
               
               {allVenues.map(venue => {
                 const venueTransactions = allTickets.filter(t => t.venueId === venue.id && (t.washTransaction || t.tipTransaction));
@@ -1663,7 +1743,8 @@ function ValetDashboardView({ parkingMap, venueId }) {
                 ...car,
                 customerId: uid,
                 ownerName: u.name || 'VIP Member',
-                phone: u.phone || '+971 500000000'
+phone: u.phone || '+971 500000000',
+isVipMember: Boolean(u.isVipMember)
               });
             });
           }
@@ -1710,7 +1791,9 @@ function ValetDashboardView({ parkingMap, venueId }) {
   };
 
   const drafts = tickets.filter(t => t.status === "draft");
-  const requested = tickets.filter(t => t.status === "requested");
+  const requested = tickets
+  .filter(t => t.status === "requested")
+  .sort((a, b) => (b.isVipMember ? 1 : 0) - (a.isVipMember ? 1 : 0));
   const incomingReady = tickets.filter(t => t.status === "incoming" || t.status === "ready");
   const parked = tickets.filter(t => t.status === "parked");
   const occupiedSpots = parked.map(t => t.parkingSpot);
@@ -1746,6 +1829,11 @@ function ValetDashboardView({ parkingMap, venueId }) {
             {requested.map((t, i) => (
               <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
                 <span className="status-badge status-requested">Needs Retrieval</span>
+                {t.isVipMember && (
+  <span className="status-badge" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #f59e0b' }}>
+    👑 VIP PRIORITY #1
+  </span>
+)}
                 <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
                 <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
                 {t.wantsWash && (
