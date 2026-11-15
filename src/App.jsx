@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
 import { ref, onValue, update, set, get } from 'firebase/database';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { initializeApp, getApps } from 'firebase/app';
 
 // ------------------------------------------------------------------
 // INJECTED CSS FOR VIBRANT, ENERGETIC APP UI & SHADOWS
@@ -23,6 +24,7 @@ const vibrantStyles = `
     --danger-red: #ef4444;
     --warning-yellow: #f59e0b;
     --draft-purple: #8b5cf6;
+    --dev-black: #0f172a;
     
     --font-ui: 'Outfit', sans-serif;
     
@@ -62,6 +64,9 @@ const vibrantStyles = `
   .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
   .btn-purple:hover { transform: translateY(-2px); filter: brightness(1.1); }
   
+  .btn-dev { background: var(--dev-black); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-md); }
+  .btn-dev:hover { transform: translateY(-2px); filter: brightness(1.2); }
+
   .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
   .btn-action:hover { background: var(--danger-red); color: white; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
@@ -75,6 +80,7 @@ const vibrantStyles = `
 
   .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
   .vibrant-input:focus { outline: none; border-color: var(--accent-green); background: #fff; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+  .vibrant-input.dev-focus:focus { border-color: var(--dev-black); box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1); }
   
   .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
   .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 2px solid var(--accent-green); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: var(--shadow-lg); list-style: none; padding: 8px; margin: 0; text-align: left; }
@@ -123,7 +129,11 @@ const vibrantStyles = `
   .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); }
   .luxury-table th { padding: 16px; border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; background: #f8fafc;}
   .luxury-table td { padding: 20px 16px; border-bottom: 1px solid var(--card-border); }
-
+  
+  .metric-card { background: #fff; border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md); text-align: left; }
+  .metric-value { font-size: 2.5rem; font-weight: 800; margin: 8px 0; color: var(--text-main); }
+  
+  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--card-border); }
   .toggle-switch { position: relative; width: 50px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
   .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
@@ -133,28 +143,20 @@ const vibrantStyles = `
 `;
 
 const CAR_DATABASE = {
-  "Abarth": ["595", "695", "124 Spider"], "Acura": ["MDX", "RDX", "TLX", "Integra", "NSX"],
-  "Alfa Romeo": ["Giulia", "Stelvio", "Tonale"], "Aston Martin": ["DBX", "Vantage", "DB11", "DBS", "Valhalla"],
-  "Audi": ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q4", "Q5", "Q7", "Q8", "RS Models", "e-tron", "R8"],
-  "Bentley": ["Bentayga", "Continental GT", "Flying Spur"], "BMW": ["1-Series", "3-Series", "5-Series", "7-Series", "X1", "X3", "X5", "X7", "M Models"],
-  "Bugatti": ["Chiron", "Veyron", "Bolide"], "BYD": ["Atto 3", "Seal", "Dolphin", "Han", "Tang"],
-  "Cadillac": ["Escalade", "CT4", "CT5", "XT4", "XT5", "Lyriq"], "Chevrolet": ["Tahoe", "Suburban", "Corvette", "Camaro", "Silverado"],
-  "Ferrari": ["Roma", "F8", "SF90", "Purosangue", "812", "296"], "Ford": ["Mustang", "Explorer", "Expedition", "F-150", "Bronco"],
-  "Geely": ["Coolray", "Azkarra", "Tugella", "Monjaro"], "Honda": ["Accord", "Civic", "CR-V", "Pilot", "Odyssey"],
-  "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Ioniq 5"], "Jeep": ["Wrangler", "Grand Cherokee", "Wagoneer"],
-  "Kia": ["Telluride", "Sportage", "Sorento", "K5", "EV6", "EV9"], "Lamborghini": ["Urus", "Huracan", "Revuelto", "Aventador"],
-  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Velar", "Discovery"], "Lexus": ["IS", "ES", "LS", "NX", "RX", "UX", "GX", "LX", "LC"],
-  "Maserati": ["Ghibli", "Quattroporte", "Levante", "Grecale", "MC20"], "McLaren": ["750S", "Artura", "GT", "720S"],
-  "Mercedes-Benz": ["A-Class", "C-Class", "E-Class", "S-Class", "G-Class", "GLA", "GLC", "GLE", "GLS", "AMG GT", "EQS"],
-  "Nissan": ["Altima", "Maxima", "Rogue/X-Trail", "Armada", "Patrol", "Pathfinder", "GT-R"], "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne"],
-  "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Spectre"], "Tesla": ["Model S", "Model 3", "Model X", "Model Y", "Cybertruck"],
-  "Toyota": ["Land Cruiser", "Camry", "Corolla", "RAV4", "Highlander", "Tacoma", "Tundra", "Supra", "Hilux", "Prado"],
-  "Volkswagen": ["Golf", "Passat", "Tiguan", "Touareg", "ID.4"], "Volvo": ["XC40", "XC60", "XC90"]
+  "Abarth": ["595", "695"], "Acura": ["MDX", "RDX"], "Alfa Romeo": ["Giulia", "Stelvio"],
+  "Audi": ["A3", "A4", "Q5", "Q7", "e-tron"], "Bentley": ["Bentayga", "Continental GT"], 
+  "BMW": ["3-Series", "5-Series", "X5", "X7", "M Models"], "Bugatti": ["Chiron"], 
+  "Cadillac": ["Escalade"], "Chevrolet": ["Tahoe", "Corvette"], "Ferrari": ["F8", "Roma", "Purosangue"], 
+  "Ford": ["Mustang", "F-150"], "Honda": ["Accord", "Civic"], "Hyundai": ["Tucson", "Ioniq 5"],
+  "Jeep": ["Wrangler", "Grand Cherokee"], "Kia": ["Telluride", "Sportage"], "Lamborghini": ["Urus", "Huracan"],
+  "Land Rover": ["Range Rover", "Defender"], "Lexus": ["RX", "LX"], "Maserati": ["Levante", "Grecale"], 
+  "McLaren": ["720S", "Artura"], "Mercedes-Benz": ["C-Class", "S-Class", "G-Class", "GLE"],
+  "Nissan": ["Patrol", "Altima"], "Porsche": ["911", "Macan", "Cayenne"], "Rolls-Royce": ["Cullinan", "Ghost"], 
+  "Tesla": ["Model 3", "Model Y"], "Toyota": ["Land Cruiser", "Camry", "RAV4"], "Volvo": ["XC60", "XC90"]
 };
 
 const COUNTRY_CODES = [
   { label: "🇦🇪 UAE (+971)", value: "+971" }, { label: "🇮🇱 Israel (+972)", value: "+972" }, { label: "🇺🇸 USA/Canada (+1)", value: "+1" }, { label: "🇬🇧 UK (+44)", value: "+44" },
-  { label: "🇸🇦 Saudi Arabia (+966)", value: "+966" }, { label: "🇶🇦 Qatar (+974)", value: "+974" }
 ];
 
 const DEFAULT_PARKING_MAP = [
@@ -177,9 +179,6 @@ const getZonePrefix = (zoneName) => {
   return firstWord.charAt(0).toUpperCase();
 };
 
-// ------------------------------------------------------------------
-// WIDGETS
-// ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
   return (
@@ -204,11 +203,8 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (val.trim().toUpperCase() === expectedValue.toUpperCase()) {
-      onMatch();
-    } else {
-      setErrorMsg('Incorrect License Plate. Do not hand over keys.');
-    }
+    if (val.trim().toUpperCase() === expectedValue.toUpperCase()) { onMatch(); } 
+    else { setErrorMsg('Incorrect License Plate. Do not hand over keys.'); }
   };
 
   if (!isOpen) return null;
@@ -217,9 +213,7 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
       <div className="vibrant-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
         <h3 style={{ color: 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase' }}>{title}</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>{message}</p>
-        
         {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontWeight: 700, border: '1px solid #fecaca'}}>{errorMsg}</div>}
-        
         <form onSubmit={handleSubmit}>
           <input type="text" placeholder="Type License Plate" className="vibrant-input" style={{marginBottom: '24px', textTransform: 'uppercase', textAlign: 'center', fontSize: '1.2rem', fontWeight: 700}} value={val} onChange={(e) => {setVal(e.target.value); setErrorMsg('');}} autoFocus />
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -527,7 +521,7 @@ function GuestTicketView({ ticketId }) {
             {status === 'incoming' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--warning-yellow)', fontWeight: 800}}>On the Way!</h4>}
             {status === 'ready' && <h4 style={{margin: 0, fontSize: '1.5rem', color: 'var(--accent-green)', fontWeight: 800}}>Ready at Door!</h4>}
             {status === 'retrieved' && <h4 style={{margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800}}>Delivered</h4>}
-            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>{hoursParked}h {minsParked}m</p>}
+            {status === 'parked' && <p style={{margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600}}>Parked for {hoursParked}h {minsParked}m</p>}
           </div>
         </div>
 
@@ -649,271 +643,209 @@ function LoginView() {
 }
 
 // ------------------------------------------------------------------
-// WASH BAY STAFF DASHBOARD (Exclusive)
+// SUPER ADMIN DASHBOARD (DEVELOPER SAAS PORTAL)
 // ------------------------------------------------------------------
-function WashBayView({ venueId }) {
-  const [tickets, setTickets] = useState([]);
-
-  useEffect(() => {
-    const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
-      } else { setTickets([]); }
-    });
-    return () => unsubscribe();
-  }, [venueId]);
-
-  const changeStatus = async (ticketId, field, newStatus) => {
-    await update(ref(db, `tickets/${ticketId}`), { [field]: newStatus });
-  };
-
-  const washQueued = tickets.filter(t => t.wantsWash && t.washStatus === 'queued');
-  const washWashing = tickets.filter(t => t.wantsWash && t.washStatus === 'washing');
-  const washCompleted = tickets.filter(t => t.wantsWash && t.washStatus === 'completed' && t.status !== 'requested');
-
-  return (
-    <div className="app-container">
-      <div className="dashboard-wrapper">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <h1 className="heading-dashboard" style={{color: 'var(--accent-blue)'}}>Wash Bay Operations</h1>
-          <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
-        </div>
-
-        <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
-          <div className="queue-column">
-            <h2 className="queue-title">Wash Queue ({washQueued.length})</h2>
-            {washQueued.map(t => (
-              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--warning-yellow)' }}>
-                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
-                <p style={{margin: '0 0 12px 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
-                <button onClick={() => changeStatus(t.id, 'washStatus', 'washing')} className="btn-blue" style={{boxShadow: 'none'}}>Bring to Wash Bay</button>
-              </div>
-            ))}
-          </div>
-          
-          <div className="queue-column">
-            <h2 className="queue-title">Currently Washing ({washWashing.length})</h2>
-            {washWashing.map(t => (
-              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-blue)' }}>
-                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
-                <button onClick={() => changeStatus(t.id, 'washStatus', 'completed')} className="btn-green" style={{boxShadow: 'none'}}>Mark Wash Complete</button>
-              </div>
-            ))}
-          </div>
-          
-          <div className="queue-column">
-            <h2 className="queue-title">Completed ({washCompleted.length})</h2>
-            {washCompleted.map(t => (
-              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-green)' }}>
-                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
-                <p style={{margin: 0, color: 'var(--accent-green)', fontWeight: 700}}>✨ Cleaned & Ready</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ------------------------------------------------------------------
-// VALET DISPATCHER DASHBOARD (Exclusive)
-// ------------------------------------------------------------------
-function ValetDashboardView({ parkingMap, venueId }) {
-  const [tickets, setTickets] = useState([]);
+function DeveloperView() {
+  const [activeTab, setActiveTab] = useState('venues');
+  const [allVenues, setAllVenues] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [allTickets, setAllTickets] = useState([]);
   
-  const [showLogModal, setShowLogModal] = useState(false);
-  const [showScannerModal, setShowScannerModal] = useState(false);
-  const [quickQrId, setQuickQrId] = useState(null);
-  const [draftToEdit, setDraftToEdit] = useState(null); 
-  const [knownPlates, setKnownPlates] = useState({});
-  const [promptConfig, setPromptConfig] = useState({ isOpen: false, ticketId: null, expectedPlate: '' });
+  // Account Provisioning State
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState('valet_runner');
+  const [newUserVenue, setNewUserVenue] = useState('');
 
-  const currentDomain = window.location.origin;
+  // Venue Creation State
+  const [newVenueId, setNewVenueId] = useState('');
+  const [newVenueName, setNewVenueName] = useState('');
+  const [newVenueTier, setNewVenueTier] = useState(1);
 
   useEffect(() => {
-    const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
-        
-        const memory = {};
-        all.forEach(t => { if(t.vehicle?.licensePlate) memory[t.vehicle?.licensePlate.toUpperCase()] = t; });
-        setKnownPlates(memory);
-      } else { setTickets([]); }
+    const unsubVenues = onValue(ref(db, 'venues'), (snap) => {
+      if(snap.exists()) setAllVenues(Object.keys(snap.val()).map(k => ({ id: k, ...snap.val()[k] })));
+      else setAllVenues([]);
     });
-    return () => unsubscribe();
-  }, [venueId]);
+    const unsubUsers = onValue(ref(db, 'users'), (snap) => {
+      if(snap.exists()) setAllUsers(Object.keys(snap.val()).map(k => ({ uid: k, ...snap.val()[k] })));
+      else setAllUsers([]);
+    });
+    const unsubTickets = onValue(ref(db, 'tickets'), (snap) => {
+      if(snap.exists()) setAllTickets(Object.keys(snap.val()).map(k => ({ id: k, ...snap.val()[k] })));
+      else setAllTickets([]);
+    });
+    return () => { unsubVenues(); unsubUsers(); unsubTickets(); };
+  }, []);
 
-  const changeStatus = async (ticketId, field, newStatus) => {
-    const updates = { [field]: newStatus };
-    if (newStatus === 'retrieved') updates["timestamps/retrievedAt"] = Date.now();
-    await update(ref(db, `tickets/${ticketId}`), updates);
+  const handleCreateVenue = async (e) => {
+    e.preventDefault();
+    await set(ref(db, `venues/${newVenueId}`), {
+      name: newVenueName, type: "hotel", isActive: true,
+      settings: { tier: newVenueTier, carWashEnabled: newVenueTier === 2, carWashPrice: 25, returnLocations: ["Main Entrance"] }
+    });
+    setNewVenueId(''); setNewVenueName('');
+    alert(`Venue ${newVenueId} Created.`);
   };
 
-  const handleQuickDropOff = async () => {
-    const ticketId = `ticket_${Date.now()}`;
-    await set(ref(db, `tickets/${ticketId}`), {
-      venueId: venueId, status: "draft", parkedByUserId: auth.currentUser.uid, parkedByName: "Valet Team", parkedByPhone: "+971501234567",
-      vehicle: { make: '', model: '', licensePlate: '', color: '' }, timestamps: { created: Date.now() }
-    });
-    setQuickQrId(ticketId); 
+  // TRUE ACCOUNT CREATION (Ghost Instance)
+  const handleProvisionUser = async (e) => {
+    e.preventDefault();
+    if (!newUserVenue) { alert("Select a venue."); return; }
+    
+    try {
+      // 1. Create a hidden, secondary Firebase App just for making accounts
+      const appOptions = auth.app.options;
+      const secondaryApp = getApps().find(app => app.name === "StaffCreator") || initializeApp(appOptions, "StaffCreator");
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      // 2. Create the account in Firebase Auth (without logging Developer out)
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
+      const newUid = userCredential.user.uid;
+      
+      // 3. Save the role to Realtime DB
+      await set(ref(db, `users/${newUid}`), { role: newUserRole, venueId: newUserVenue, email: newEmail });
+      
+      // 4. Log the ghost out so it's ready for the next account
+      await secondaryAuth.signOut();
+      
+      setNewEmail(''); setNewPassword('');
+      alert(`Account Created Successfully!`);
+      
+    } catch (error) {
+      alert("Error creating account: " + error.message);
+    }
   };
 
-  const drafts = tickets.filter(t => t.status === "draft");
-  const requested = tickets.filter(t => t.status === "requested");
-  const incomingReady = tickets.filter(t => t.status === "incoming" || t.status === "ready");
-  const parked = tickets.filter(t => t.status === "parked");
-  const occupiedSpots = parked.map(t => t.parkingSpot);
+  const toggleVenueTier = async (venueId, currentTier) => {
+    await update(ref(db, `venues/${venueId}/settings`), { tier: currentTier === 1 ? 2 : 1 });
+  };
+
+  // Global Finance Calculation
+  const totalWashRevenue = allTickets.filter(t => t.washPaid).reduce((acc, t) => {
+    const venue = allVenues.find(v => v.id === t.venueId);
+    const price = venue?.settings?.carWashPrice || 25;
+    return acc + price;
+  }, 0);
+  
+  const totalTips = allTickets.filter(t => t.tippedAmount).reduce((acc, t) => acc + Number(t.tippedAmount), 0);
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{backgroundColor: '#0f172a'}}>
       <div className="dashboard-wrapper">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <h1 className="heading-dashboard">Dispatcher</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
-          </div>
-          
-          <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
-            <button onClick={() => setShowScannerModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
-            <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
-          </div>
+          <h1 className="heading-dashboard" style={{color: 'white'}}>SaaS Control Room</h1>
+          <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', background: 'transparent', color: 'white', borderColor: 'rgba(255,255,255,0.2)', boxShadow: 'none'}}>Logout</button>
         </div>
 
-        <div className="dashboard-grid">
-          {/* DRAFTS */}
-          <div className="queue-column">
-            <h2 className="queue-title">Needs Info ({drafts.length})</h2>
-            {drafts.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--draft-purple)', animationDelay: `${i * 0.05}s` }}>
-                <span className="status-badge status-draft">Draft Ticket</span>
-                <p style={{margin: '8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500}}>Guest has QR code. Car needs parking spot and details.</p>
-                <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{borderColor: 'var(--draft-purple)', color: 'var(--draft-purple)', marginTop: '8px', boxShadow: 'none'}}>Complete Details</button>
-              </div>
-            ))}
-          </div>
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+          <button className={activeTab === 'venues' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'venues' ? {background: 'transparent', color: 'white'} : {}} onClick={() => setActiveTab('venues')}>Client Venues</button>
+          <button className={activeTab === 'users' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'users' ? {background: 'transparent', color: 'white'} : {}} onClick={() => setActiveTab('users')}>Staff Creation</button>
+          <button className={activeTab === 'finance' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'finance' ? {background: 'transparent', color: 'white'} : {}} onClick={() => setActiveTab('finance')}>Global Revenue</button>
+        </div>
 
-          {/* REQUESTED */}
-          <div className="queue-column">
-            <h2 className="queue-title">Requested ({requested.length})</h2>
-            {requested.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
-                <span className="status-badge status-requested">Needs Retrieval</span>
-                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
-                <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
-                
-                {t.wantsWash && (
-                  <div style={{marginTop: '8px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
-                    {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
-                    {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
-                    {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
-                  </div>
-                )}
-                
-                <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
-                  📍 To: {t.returnLocation}
-                </div>
-                <button onClick={() => changeStatus(t.id, 'status', 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px', boxShadow: 'none'}}>Bring Car</button>
+        <div>
+          {activeTab === 'venues' && (
+            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
+              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left'}}>
+                <h3 style={{marginTop: 0, fontWeight: 800}}>Add New Client Venue</h3>
+                <form onSubmit={handleCreateVenue} style={{display: 'flex', gap: '12px', alignItems: 'flex-start'}}>
+                  <input placeholder="Venue ID (e.g. venue_002)" required className="vibrant-input dev-focus" value={newVenueId} onChange={e => setNewVenueId(e.target.value.toLowerCase().replace(/\s+/g, '_'))} />
+                  <input placeholder="Display Name (e.g. North Platte)" required className="vibrant-input dev-focus" value={newVenueName} onChange={e => setNewVenueName(e.target.value)} />
+                  <select className="vibrant-input dev-focus" value={newVenueTier} onChange={e => setNewVenueTier(Number(e.target.value))}>
+                    <option value={1}>Tier 1 (Standard)</option>
+                    <option value={2}>Tier 2 (Premium Wash)</option>
+                  </select>
+                  <button type="submit" className="btn-dev" style={{width: 'auto', whiteSpace: 'nowrap'}}>Create Venue</button>
+                </form>
               </div>
-            ))}
-          </div>
 
-          {/* TRANSIT/READY */}
-          <div className="queue-column">
-            <h2 className="queue-title">Transit/Ready ({incomingReady.length})</h2>
-            {incomingReady.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: `6px solid ${t.status === 'ready' ? 'var(--accent-green)' : 'var(--warning-yellow)'}`, animationDelay: `${i * 0.05}s` }}>
-                <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
-                  {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
-                </span>
-                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
-                
-                {t.status === 'incoming' ? (
-                  <button onClick={() => changeStatus(t.id, 'status', 'ready')} className="btn-green" style={{boxShadow: 'none'}}>Mark "Ready at Door"</button>
-                ) : (
-                  <button onClick={() => setPromptConfig({ isOpen: true, ticketId: t.id, expectedPlate: t.vehicle?.licensePlate })} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
-                    Verify Plate & Handover
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+              <table className="luxury-table">
+                <thead><tr><th>Venue ID</th><th>Display Name</th><th>SaaS Tier</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>
+                  {allVenues.map(v => (
+                    <tr key={v.id}>
+                      <td style={{fontWeight: '700', color: 'var(--dev-black)'}}>{v.id}</td>
+                      <td style={{fontWeight: '600'}}>{v.name || 'Unnamed Venue'}</td>
+                      <td>
+                        <span style={{background: v.settings?.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: v.settings?.tier === 1 ? '#475569' : '#fff', padding: '4px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem'}}>
+                          Tier {v.settings?.tier || 1}
+                        </span>
+                      </td>
+                      <td style={{color: 'var(--accent-green)', fontWeight: 700}}>Active</td>
+                      <td><button onClick={() => toggleVenueTier(v.id, v.settings?.tier || 1)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem'}}>Toggle Tier</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-          {/* PARKED */}
-          <div className="queue-column">
-            <h2 className="queue-title">Parked ({parked.length})</h2>
-            {parked.map((t, i) => (
-              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
-                <button className="edit-icon-btn" onClick={() => setDraftToEdit(t)}>✏️</button>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
-                  <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
-                </div>
-                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
-                {t.wantsWash && (
-                  <div style={{marginTop: '4px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
-                    {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
-                    {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
-                    {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
-                  </div>
-                )}
+          {activeTab === 'users' && (
+            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
+              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left'}}>
+                <h3 style={{marginTop: 0, fontWeight: 800}}>Create Staff Account</h3>
+                <p style={{color: 'var(--text-muted)', marginBottom: '16px', fontWeight: 500}}>Generate logins for hotel managers and valets here. They cannot create accounts themselves.</p>
+                <form onSubmit={handleProvisionUser} style={{display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap'}}>
+                  <input type="email" placeholder="Staff Email" required className="vibrant-input dev-focus" value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{flex: 1, minWidth: '200px'}} />
+                  <input type="password" placeholder="Password (Min 6 chars)" required className="vibrant-input dev-focus" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={{flex: 1, minWidth: '200px'}} minLength={6} />
+                  
+                  <select className="vibrant-input dev-focus" value={newUserRole} onChange={e => setNewUserRole(e.target.value)} style={{flex: 1, minWidth: '200px'}}>
+                    <option value="valet_runner">Valet Runner</option>
+                    <option value="wash_team">Wash Team</option>
+                    <option value="master_admin">Master Admin (Hotel Mgr)</option>
+                    <option value="developer">SaaS Developer (Super Admin)</option>
+                  </select>
+                  
+                  <select className="vibrant-input dev-focus" value={newUserVenue} onChange={e => setNewUserVenue(e.target.value)} required style={{flex: 1, minWidth: '200px'}}>
+                    <option value="" disabled>Assign to Venue...</option>
+                    {allVenues.map(v => <option key={v.id} value={v.id}>{v.name || v.id}</option>)}
+                  </select>
+                  
+                  <button type="submit" className="btn-dev" style={{width: 'auto', whiteSpace: 'nowrap'}}>Create Account</button>
+                </form>
               </div>
-            ))}
-          </div>
+
+              <table className="luxury-table">
+                <thead><tr><th>Email / UID</th><th>Assigned Role</th><th>Assigned Venue</th></tr></thead>
+                <tbody>
+                  {allUsers.map(u => (
+                    <tr key={u.uid}>
+                      <td>
+                        <div style={{fontWeight: '700', color: 'var(--dev-black)'}}>{u.email || 'Unknown Email'}</div>
+                        <div style={{fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: '0.8rem'}}>{u.uid}</div>
+                      </td>
+                      <td style={{fontWeight: '700', textTransform: 'capitalize'}}>{(u.role || 'none').replace('_', ' ')}</td>
+                      <td style={{fontWeight: '600'}}>{u.venueId || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === 'finance' && (
+            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
+              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left'}}>
+                <p style={{margin: '0 0 8px 0', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Platform Wash Revenue</p>
+                <div style={{fontSize: '2.5rem', fontWeight: 800, margin: '8px 0', color: 'var(--accent-blue)'}}>${totalWashRevenue.toLocaleString()}</div>
+                <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Total value processed across all Tier 2 venues.</p>
+              </div>
+              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left'}}>
+                <p style={{margin: '0 0 8px 0', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Global Tips Processed</p>
+                <div style={{fontSize: '2.5rem', fontWeight: 800, margin: '8px 0', color: 'var(--accent-green)'}}>${totalTips.toLocaleString()}</div>
+                <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Total gratuity routed to valet teams.</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
-      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
-
-      {quickQrId && (
-        <div className="modal-overlay">
-          <div className="vibrant-card animate-scale-in">
-            <h2 className="heading-brand" style={{color: 'var(--draft-purple)'}}>TICKET READY</h2>
-            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Guest can scan this now. You can fill out the car details later from the "Needs Info" queue.</p>
-            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '0 0 24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-md)'}}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${quickQrId}`)}`} alt="QR Code" style={{display: 'block'}} />
-            </div>
-            <button onClick={() => setQuickQrId(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close & Return</button>
-          </div>
-        </div>
-      )}
-
-      <CustomPromptWidget 
-        isOpen={promptConfig.isOpen}
-        title="Verify Handover"
-        message="Type the license plate number of this vehicle to confirm you are handing the keys to the correct guest."
-        expectedValue={promptConfig.expectedPlate || 'N/A'}
-        onMatch={() => {
-          changeStatus(promptConfig.ticketId, 'status', 'retrieved');
-          setPromptConfig({ ...promptConfig, isOpen: false });
-        }}
-        onCancel={() => setPromptConfig({ ...promptConfig, isOpen: false })}
-      />
-
-      {showScannerModal && (
-        <div className="modal-overlay">
-          <div className="vibrant-card animate-scale-in" style={{maxWidth: '400px'}}>
-            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest App</h3>
-            <div style={{background: '#000', height: '220px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '24px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
-              <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite'}}></div>
-              <p style={{fontWeight: 600, letterSpacing: '1px'}}>Camera Active...</p>
-            </div>
-            <p style={{color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', fontWeight: 500}}>Point camera at the guest's Sky Valet App to instantly retrieve their vehicle and membership details.</p>
-            <button onClick={() => setShowScannerModal(false)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Scanner</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 // ------------------------------------------------------------------
-// MASTER ADMIN DASHBOARD
+// MASTER ADMIN DASHBOARD (For Hotel Managers)
 // ------------------------------------------------------------------
 function MasterAdminView({ parkingMap, venueId }) {
   const [history, setHistory] = useState([]);
@@ -930,9 +862,7 @@ function MasterAdminView({ parkingMap, venueId }) {
 
   const currentDomain = window.location.origin;
 
-  useEffect(() => {
-    setEditingMap(JSON.parse(JSON.stringify(parkingMap || [])));
-  }, [parkingMap]);
+  useEffect(() => { setEditingMap(JSON.parse(JSON.stringify(parkingMap || []))); }, [parkingMap]);
 
   useEffect(() => {
     const unsubscribeTickets = onValue(ref(db, 'tickets'), (snapshot) => {
@@ -967,10 +897,7 @@ function MasterAdminView({ parkingMap, venueId }) {
   const handleSaveMap = async () => {
     setConfirmConfig({
       isOpen: true, title: "Save Floor Plan", message: "Push these changes to the live database?", isDanger: false,
-      onConfirm: async () => {
-        await set(ref(db, 'parkingMap'), editingMap);
-        setConfirmConfig({ ...confirmConfig, isOpen: false });
-      },
+      onConfirm: async () => { await set(ref(db, `venues/${venueId}/parkingMap`), editingMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
       onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
     });
   };
@@ -996,31 +923,17 @@ function MasterAdminView({ parkingMap, venueId }) {
   const removeZone = (index) => {
     setConfirmConfig({
       isOpen: true, title: "Delete Zone", message: "Delete this entire zone? All parking spots inside will be lost.", isDanger: true,
-      onConfirm: () => {
-        const newMap = [...editingMap];
-        newMap.splice(index, 1);
-        setEditingMap(newMap);
-        setConfirmConfig({ ...confirmConfig, isOpen: false });
-      },
+      onConfirm: () => { const newMap = [...editingMap]; newMap.splice(index, 1); setEditingMap(newMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
       onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
     });
   };
 
-  const updateSpotName = (zoneIdx, spotIdx, val) => {
-    const newMap = [...editingMap];
-    newMap[zoneIdx].spots[spotIdx] = val;
-    setEditingMap(newMap);
-  };
+  const updateSpotName = (zoneIdx, spotIdx, val) => { const newMap = [...editingMap]; newMap[zoneIdx].spots[spotIdx] = val; setEditingMap(newMap); };
 
   const removeSpot = (zoneIdx, spotIdx) => {
     setConfirmConfig({
       isOpen: true, title: "Remove Spot", message: "Delete this parking spot from the floor plan?", isDanger: true,
-      onConfirm: () => {
-        const newMap = [...editingMap];
-        newMap[zoneIdx].spots.splice(spotIdx, 1);
-        setEditingMap(newMap);
-        setConfirmConfig({ ...confirmConfig, isOpen: false });
-      },
+      onConfirm: () => { const newMap = [...editingMap]; newMap[zoneIdx].spots.splice(spotIdx, 1); setEditingMap(newMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
       onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
     });
   };
@@ -1035,12 +948,8 @@ function MasterAdminView({ parkingMap, venueId }) {
     setEditingMap(newMap);
   };
 
-  const handleToggleWash = async (e) => {
-    await update(ref(db, `venues/${venueId}/settings`), { carWashEnabled: e.target.checked });
-  };
-  const handlePriceChange = async (e) => {
-    await update(ref(db, `venues/${venueId}/settings`), { carWashPrice: Number(e.target.value) });
-  };
+  const handleToggleWash = async (e) => { await update(ref(db, `venues/${venueId}/settings`), { carWashEnabled: e.target.checked }); };
+  const handlePriceChange = async (e) => { await update(ref(db, `venues/${venueId}/settings`), { carWashPrice: Number(e.target.value) }); };
   const handleAddLocation = async () => {
     if (!newLocationInput.trim()) return;
     const locs = [...(venueSettings.returnLocations || []), newLocationInput.trim()];
@@ -1056,10 +965,7 @@ function MasterAdminView({ parkingMap, venueId }) {
   const handleAdminDelete = (id) => {
     setConfirmConfig({
       isOpen: true, title: "Delete Ticket?", message: "Are you sure you want to permanently delete this active ticket from the system?", isDanger: true,
-      onConfirm: async () => {
-        await set(ref(db, `tickets/${id}`), null);
-        setConfirmConfig({ ...confirmConfig, isOpen: false });
-      },
+      onConfirm: async () => { await set(ref(db, `tickets/${id}`), null); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
       onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
     });
   };
@@ -1076,34 +982,15 @@ function MasterAdminView({ parkingMap, venueId }) {
         </div>
 
         <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
-            Live Operations Tracking
-          </button>
-          <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
-            History & Metrics
-          </button>
-          <button className={activeTab === 'map' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
-            Visual Map Editor
-          </button>
-          <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
-            Venue Settings
-          </button>
-          <button className={activeTab === 'staff' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('staff')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>
-            Staff Management
-          </button>
+          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Live Operations</button>
+          <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Metrics</button>
+          <button className={activeTab === 'map' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Map Editor</button>
+          <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Settings</button>
         </div>
 
         <div>
-          <h2 className="queue-title">
-            {activeTab === 'operations' ? 'Live Valet & Wash Progress' : 
-             activeTab === 'metrics' ? 'Retrieval Time History' : 
-             activeTab === 'map' ? 'Live Floor Plan Editor' : 
-             activeTab === 'staff' ? 'Staff Account Setup Guide' : 'Venue Configuration'}
-          </h2>
-          
           <div style={{ overflowX: 'auto' }}>
             
-            {/* LIVE OPERATIONS */}
             {activeTab === 'operations' && (
               <table className="luxury-table animate-slide-up">
                 <thead><tr><th>Vehicle</th><th>Plate</th><th>Spot</th><th>Valet Status</th><th>Wash Status</th><th>Time Parked</th><th>Actions</th></tr></thead>
@@ -1131,8 +1018,8 @@ function MasterAdminView({ parkingMap, venueId }) {
                         <td style={{ fontWeight: 500 }}>{t.status === 'draft' ? '-' : time}</td>
                         <td style={{ display: 'flex', gap: '8px' }}>
                           <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Edit</button>
-                          <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>View QR</button>
-                          <button onClick={() => handleAdminDelete(t.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Delete</button>
+                          <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>QR</button>
+                          <button onClick={() => handleAdminDelete(t.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Del</button>
                         </td>
                       </tr>
                     );
@@ -1142,7 +1029,6 @@ function MasterAdminView({ parkingMap, venueId }) {
               </table>
             )}
 
-            {/* METRICS */}
             {activeTab === 'metrics' && (
               <table className="luxury-table animate-slide-up">
                 <thead><tr><th>Vehicle</th><th>Plate</th><th>Arrival Date</th><th>Wash</th><th>Tip</th><th>Retrieval Time</th></tr></thead>
@@ -1163,12 +1049,11 @@ function MasterAdminView({ parkingMap, venueId }) {
                       </tr>
                     );
                   })}
-                  {history.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No completed retrieval data.</td></tr>}
+                  {history.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No completed retrieval data.</td></tr>}
                 </tbody>
               </table>
             )}
 
-            {/* SETTINGS TAB */}
             {activeTab === 'settings' && (
               <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
                 
@@ -1184,7 +1069,7 @@ function MasterAdminView({ parkingMap, venueId }) {
                     <div>
                       <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Enable Car Wash Service</p>
                       <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash on their ticket.</p>
-                      {venueSettings.tier === 1 && <p style={{margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--danger-red)', fontWeight: 700}}>Requires Premium Upgrade.</p>}
+                      {venueSettings.tier === 1 && <p style={{margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--danger-red)', fontWeight: 700}}>Please contact software provider to unlock.</p>}
                     </div>
                     <label className="toggle-switch">
                       <input type="checkbox" checked={venueSettings.tier === 1 ? false : venueSettings.carWashEnabled} onChange={handleToggleWash} disabled={venueSettings.tier === 1} />
@@ -1219,11 +1104,9 @@ function MasterAdminView({ parkingMap, venueId }) {
               </div>
             )}
               
-            {/* MAP EDITOR TAB */}
             {activeTab === 'map' && (
               <div style={{maxWidth: '1000px', margin: '0 auto'}}>
                 <p style={{color: 'var(--text-muted)', marginBottom: '32px', fontSize: '1rem', fontWeight: 500}}>Changes made here will instantly update the interactive floor map for all valets. Tap a spot to rename it.</p>
-                
                 {editingMap.map((section, idx) => (
                   <div key={idx} className="editor-card" style={{ animationDelay: `${idx * 0.1}s` }}>
                     <div className="editor-zone-header">
@@ -1231,10 +1114,9 @@ function MasterAdminView({ parkingMap, venueId }) {
                       <div className="editor-zone-actions">
                         <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
                         <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
-                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto', boxShadow: 'none'}}>Delete Zone</button>
+                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto', boxShadow: 'none'}}>Delete</button>
                       </div>
                     </div>
-                    
                     <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
                       {section.spots.map((spot, sIdx) => (
                         <div key={sIdx} style={{ position: 'relative' }}>
@@ -1246,58 +1128,17 @@ function MasterAdminView({ parkingMap, venueId }) {
                     </div>
                   </div>
                 ))}
-
                 <div style={{display: 'flex', gap: '24px', marginTop: '40px'}}>
                   <button onClick={addZone} className="btn-outline" style={{flex: 1, padding: '16px', fontSize: '1.05rem'}}>+ Add New Zone</button>
                   <button onClick={handleSaveMap} className="btn-green" style={{flex: 2, padding: '16px', fontSize: '1.05rem'}}>Save Floor Plan to Live Database</button>
                 </div>
               </div>
             )}
-            
-            {/* STAFF INSTRUCTIONS TAB */}
-            {activeTab === 'staff' && (
-              <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
-                <div className="editor-card" style={{textAlign: 'left'}}>
-                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Creating Staff Accounts</h3>
-                  <p style={{color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '1.05rem'}}>To maintain top-tier security for your B2B SaaS platform, client accounts must be created directly in the Firebase System Database.</p>
-                  
-                  <div style={{background: '#f8fafc', padding: '24px', borderRadius: '12px', border: '1px solid var(--card-border)', marginTop: '24px'}}>
-                    <h4 style={{margin: '0 0 16px 0', fontSize: '1.1rem'}}>Step 1: Create Login Credentials</h4>
-                    <ol style={{margin: 0, paddingLeft: '20px', color: 'var(--text-main)', lineHeight: 1.8}}>
-                      <li>Go to your <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer" style={{color: 'var(--accent-blue)', fontWeight: 'bold'}}>Firebase Console</a>.</li>
-                      <li>Click on <strong>Authentication</strong> in the left menu.</li>
-                      <li>Click the <strong>Add User</strong> button.</li>
-                      <li>Enter the staff member's Email (e.g., <code>valet1@hotel.com</code>) and a temporary password.</li>
-                      <li>Copy the generated <strong>User UID</strong> (a long string of random letters/numbers next to their email).</li>
-                    </ol>
-                  </div>
-                  
-                  <div style={{background: '#f8fafc', padding: '24px', borderRadius: '12px', border: '1px solid var(--card-border)', marginTop: '24px'}}>
-                    <h4 style={{margin: '0 0 16px 0', fontSize: '1.1rem'}}>Step 2: Assign Access Roles</h4>
-                    <ol style={{margin: 0, paddingLeft: '20px', color: 'var(--text-main)', lineHeight: 1.8}}>
-                      <li>Go to <strong>Realtime Database</strong> in the Firebase menu.</li>
-                      <li>Hover over the <code>users</code> node and click the <strong>+</strong> button.</li>
-                      <li>Paste the <strong>User UID</strong> you copied in Step 1 as the key name.</li>
-                      <li>Inside that UID, add the following two fields:
-                        <ul style={{marginTop: '8px', marginBottom: '8px'}}>
-                          <li><code>role</code> : Type <code>valet_runner</code>, <code>wash_team</code>, or <code>master_admin</code></li>
-                          <li><code>venueId</code> : Type <code>venue_001</code> (or their specific hotel code)</li>
-                        </ul>
-                      </li>
-                      <li>Click <strong>Add</strong>. They can now log in to the portal!</li>
-                    </ol>
-                  </div>
-                  
-                </div>
-              </div>
-            )}
-
           </div>
         </div>
       </div>
       
       {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit.id === 'new' ? null : draftToEdit} />}
-      
       {qrModalTicket && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-scale-in" style={{width: '90%'}}>
@@ -1309,15 +1150,7 @@ function MasterAdminView({ parkingMap, venueId }) {
           </div>
         </div>
       )}
-
-      <CustomConfirmWidget 
-        isOpen={confirmConfig.isOpen} 
-        title={confirmConfig.title} 
-        message={confirmConfig.message} 
-        onConfirm={confirmConfig.onConfirm} 
-        onCancel={confirmConfig.onCancel}
-        isDanger={confirmConfig.isDanger}
-      />
+      <CustomConfirmWidget isOpen={confirmConfig.isOpen} title={confirmConfig.title} message={confirmConfig.message} onConfirm={confirmConfig.onConfirm} onCancel={confirmConfig.onCancel} isDanger={confirmConfig.isDanger} />
     </div>
   );
 }
@@ -1353,6 +1186,9 @@ function App() {
           const userData = snapshot.val();
           setUserRole(userData.role || "valet_runner"); 
           setUserVenueId(userData.venueId || "venue_001");
+        } else {
+          setUserRole("valet_runner");
+          setUserVenueId("venue_001");
         }
       } else {
         setUserRole(null);
@@ -1361,22 +1197,28 @@ function App() {
       setAuthLoading(false);
     });
 
-    const unsubscribeMap = onValue(ref(db, 'parkingMap'), (snapshot) => {
+    return () => { unsubscribeAuth(); document.head.removeChild(styleSheet); };
+  }, [requestedTicketId]);
+
+  useEffect(() => {
+    if (!userVenueId || userRole === 'developer') return;
+    
+    const unsubscribeMap = onValue(ref(db, `venues/${userVenueId}/parkingMap`), (snapshot) => {
       if (snapshot.exists()) {
         setGlobalParkingMap(snapshot.val());
       } else {
-        set(ref(db, 'parkingMap'), DEFAULT_PARKING_MAP);
+        set(ref(db, `venues/${userVenueId}/parkingMap`), DEFAULT_PARKING_MAP);
         setGlobalParkingMap(DEFAULT_PARKING_MAP);
       }
     });
-
-    return () => { unsubscribeAuth(); unsubscribeMap(); document.head.removeChild(styleSheet); };
-  }, [requestedTicketId]);
+    return () => unsubscribeMap();
+  }, [userVenueId, userRole]);
 
   if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>AUTHENTICATING...</div></div>;
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   
-  if (!userRole || !userVenueId) return <LoginView />;
+  if (!userRole) return <LoginView />;
+  if (userRole === "developer") return <DeveloperView />;
   if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} venueId={userVenueId} />;
   if (userRole === "wash_team") return <WashBayView venueId={userVenueId} />;
   
