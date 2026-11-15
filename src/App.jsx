@@ -53,7 +53,6 @@ const vibrantStyles = `
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  /* Buttons */
   .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px;}
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
@@ -180,15 +179,18 @@ const getZonePrefix = (zoneName) => {
   return firstWord.charAt(0).toUpperCase();
 };
 
+// ------------------------------------------------------------------
+// WIDGETS & LOGOS
+// ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
   if (!isOpen) return null;
   return (
     <div className="modal-overlay" style={{ zIndex: 1100 }}>
       <div className="vibrant-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
-        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
+        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--text-main)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>{message}</p>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--accent-green)' }}>{confirmText}</button>
+          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--dev-black)' }}>{confirmText}</button>
           <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
         </div>
       </div>
@@ -228,18 +230,20 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
 }
 
 const ApplePayLogo = () => (
-  <span style={{fontSize: '1.3rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', color: 'white'}}> Pay</span>
+  <svg width="50" height="20" viewBox="0 0 50 20" fill="white" style={{marginRight: '8px'}}>
+    <path d="M18.8,10.6c0-2.4,1.9-4,2.1-4c-1.1-1.7-2.9-1.9-3.5-2c-1.5-0.1-3,0.9-3.8,0.9c-0.8,0-2-0.9-3.3-0.9 C8.2,4.6,6.3,5.7,5.2,7.7C2.9,11.5,4.5,17,6.5,19.8c1,1.4,2.1,3,3.7,3c1.5,0,2-0.9,3.7-0.9c1.7,0,2.2,0.9,3.8,0.9 c1.6,0,2.6-1.7,3.6-3.1c1.2-1.7,1.6-3.4,1.6-3.5C22.8,16.2,18.8,14.5,18.8,10.6z M16.6,3c0.8-1,1.3-2.3,1.1-3.7 C16.5,0,15.1,0.7,14.3,1.7C13.6,2.5,13,3.8,13.2,5.2C14.6,5.3,15.8,4.1,16.6,3z"/>
+    <text x="25" y="18" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" fontSize="18" fontWeight="600" fill="white">Pay</text>
+  </svg>
 );
 
 const GooglePayLogo = () => (
   <span style={{fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', color: '#3c4043'}}>
-    <svg width="22" height="22" viewBox="0 0 48 48">
-      <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#EA4335" d="M39.89 42.19c4.22-3.83 6.64-9.52 6.64-16.19 0-1.25-.13-2.47-.35-3.64H24v9.06h12.59c-.58 3.01-2.27 5.56-4.7 7.28l7.73 6.01h.27z"/>
-    </svg> 
-    Pay
+    <svg width="45" height="18" viewBox="0 0 45 18" fill="none">
+      <path d="M16.9 8.2h-3.6v-3h3.6c.7 0 1.3.2 1.8.6.5.4.7 1 .7 1.6 0 .6-.2 1.2-.7 1.6-.4.4-1 .6-1.8.6zm.3 2.1c1.1-.3 1.9-.8 2.5-1.6.6-.8.9-1.8.9-2.9 0-1.1-.3-2-.9-2.8-.6-.8-1.5-1.3-2.5-1.6C16.2.2 15 0 13.5 0H9v17.5h3.2v-6.6h1.3c1.5 0 2.7-.2 3.7-.6z" fill="#5F6368"/>
+      <path d="M3.7 17.5V5.5h1.2v11.9H3.7z" fill="#5F6368"/>
+      <path d="M9.8 17.5V.2h1.2v17.3H9.8z" fill="#5F6368"/>
+      <path d="M19 0h-1.2v17.5H19V0z" fill="#5F6368"/>
+    </svg>
   </span>
 );
 
@@ -492,7 +496,7 @@ function GuestTicketView({ ticketId }) {
     );
   }
 
-  const parkedTimeMs = Date.now() - ticket.timestamps.parkedAt;
+  const parkedTimeMs = Date.now() - (ticket.timestamps?.parkedAt || Date.now());
   const hoursParked = Math.floor(parkedTimeMs / (1000 * 60 * 60));
   const minsParked = Math.floor((parkedTimeMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -507,7 +511,6 @@ function GuestTicketView({ ticketId }) {
         <h3 style={{fontSize: '1.75rem', fontWeight: 800, margin: '0 0 4px 0'}}>{vehicle?.make || 'Unknown'} {vehicle?.model || ''}</h3>
         <p style={{color: 'var(--text-muted)', fontSize: '1.1rem', margin: '0 0 24px 0', fontWeight: 600}}>{vehicle?.licensePlate || ''} • {vehicle?.color || ''}</p>
 
-        {/* DUAL TRACKERS */}
         <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px'}}>
           {wantsWash && (
             <div style={{background: '#f0f9ff', border: '2px solid #bae6fd', borderRadius: '16px', padding: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
@@ -580,7 +583,6 @@ function GuestTicketView({ ticketId }) {
         </div>
       )}
 
-      {/* 2-STEP TIP MODAL */}
       {showTipModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-slide-up">
@@ -647,320 +649,568 @@ function LoginView() {
 }
 
 // ------------------------------------------------------------------
-// SUPER ADMIN DASHBOARD (DEVELOPER SAAS PORTAL)
+// WASH BAY STAFF DASHBOARD (Exclusive)
 // ------------------------------------------------------------------
-function DeveloperView() {
-  const [activeTab, setActiveTab] = useState('venues');
-  const [allVenues, setAllVenues] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [allTickets, setAllTickets] = useState([]);
-  
-  // Account Provisioning State
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newUserRole, setNewUserRole] = useState('valet_runner');
-  const [newUserVenue, setNewUserVenue] = useState('');
-  const [devConfirm, setDevConfirm] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
-
-  // Venue Creation State
-  const [newVenueId, setNewVenueId] = useState('');
-  const [newVenueName, setNewVenueName] = useState('');
-  const [newVenueTier, setNewVenueTier] = useState(1);
+function WashBayView({ venueId }) {
+  const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
-    const unsubVenues = onValue(ref(db, 'venues'), (snap) => {
-      if(snap.exists()) setAllVenues(Object.keys(snap.val()).map(k => ({ id: k, ...snap.val()[k] })));
-      else setAllVenues([]);
+    const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
+      } else { setTickets([]); }
     });
-    const unsubUsers = onValue(ref(db, 'users'), (snap) => {
-      if(snap.exists()) setAllUsers(Object.keys(snap.val()).map(k => ({ uid: k, ...snap.val()[k] })));
-      else setAllUsers([]);
-    });
-    const unsubTickets = onValue(ref(db, 'tickets'), (snap) => {
-      if(snap.exists()) setAllTickets(Object.keys(snap.val()).map(k => ({ id: k, ...snap.val()[k] })));
-      else setAllTickets([]);
-    });
-    return () => { unsubVenues(); unsubUsers(); unsubTickets(); };
-  }, []);
+    return () => unsubscribe();
+  }, [venueId]);
 
-  const handleCreateVenue = async (e) => {
-    e.preventDefault();
-    await set(ref(db, `venues/${newVenueId}`), {
-      name: newVenueName, type: "hotel", isActive: true,
-      settings: { tier: newVenueTier, carWashEnabled: newVenueTier === 2, carWashPrice: 25, returnLocations: ["Main Entrance"] }
-    });
-    setNewVenueId(''); setNewVenueName('');
-    alert(`Venue ${newVenueId} Created.`);
+  const changeStatus = async (ticketId, field, newStatus) => {
+    await update(ref(db, `tickets/${ticketId}`), { [field]: newStatus });
   };
 
-  const handleProvisionUser = async (e) => {
-    e.preventDefault();
-    if (!newUserVenue) { alert("Select a venue."); return; }
-    
-    try {
-      const appOptions = auth.app.options;
-      const secondaryApp = getApps().find(app => app.name === "StaffCreator") || initializeApp(appOptions, "StaffCreator");
-      const secondaryAuth = getAuth(secondaryApp);
-      
-      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
-      const newUid = userCredential.user.uid;
-      
-      await set(ref(db, `users/${newUid}`), { role: newUserRole, venueId: newUserVenue, email: newEmail });
-      await secondaryAuth.signOut();
-      
-      setNewEmail(''); setNewPassword('');
-      alert(`Account Created Successfully!`);
-      
-    } catch (error) {
-      alert("Error creating account: " + error.message);
-    }
-  };
-
-  const handleResetPassword = async (emailToReset) => {
-    if(!emailToReset) return alert("No email saved for this user. Cannot send reset link.");
-    try {
-      await sendPasswordResetEmail(auth, emailToReset);
-      alert(`Password reset link securely sent to ${emailToReset}`);
-    } catch(err) {
-      alert(err.message);
-    }
-  };
-
-  const promptToggleTier = (venueId, currentTier) => {
-    setDevConfirm({
-      isOpen: true,
-      title: "Change SaaS Tier",
-      message: `Are you sure you want to ${currentTier === 1 ? 'UPGRADE this venue to Premium (Tier 2)?' : 'DOWNGRADE this venue to Standard (Tier 1)?'}`,
-      isDanger: currentTier === 2,
-      onConfirm: async () => {
-        await update(ref(db, `venues/${venueId}/settings`), { tier: currentTier === 1 ? 2 : 1 });
-        setDevConfirm({ ...devConfirm, isOpen: false });
-      },
-      onCancel: () => setDevConfirm({ ...devConfirm, isOpen: false })
-    });
-  };
-
-  const promptDeleteVenue = (venueId) => {
-    setDevConfirm({
-      isOpen: true,
-      title: "Delete Venue",
-      message: `CRITICAL: Are you sure you want to completely delete ${venueId}? This will destroy all their settings and parking maps.`,
-      isDanger: true,
-      onConfirm: async () => {
-        await remove(ref(db, `venues/${venueId}`));
-        setDevConfirm({ ...devConfirm, isOpen: false });
-      },
-      onCancel: () => setDevConfirm({ ...devConfirm, isOpen: false })
-    });
-  };
-
-  const promptDeleteStaff = (uid, email) => {
-    setDevConfirm({
-      isOpen: true,
-      title: "Delete Staff Account",
-      message: `Remove access for ${email || uid}? They will no longer be able to log in.`,
-      isDanger: true,
-      onConfirm: async () => {
-        await remove(ref(db, `users/${uid}`));
-        setDevConfirm({ ...devConfirm, isOpen: false });
-      },
-      onCancel: () => setDevConfirm({ ...devConfirm, isOpen: false })
-    });
-  };
-
-  const formatTxDateTime = (timestamp) => {
-    if (!timestamp) return { date: '-', time: '-' };
-    const d = new Date(timestamp);
-    return { date: d.toLocaleDateString([], {month: 'short', day: 'numeric', year: 'numeric'}), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-  };
+  const washQueued = tickets.filter(t => t.wantsWash && t.washStatus === 'queued');
+  const washWashing = tickets.filter(t => t.wantsWash && t.washStatus === 'washing');
+  const washCompleted = tickets.filter(t => t.wantsWash && t.washStatus === 'completed' && t.status !== 'requested');
 
   return (
-    <div className="app-container" style={{backgroundColor: '#0f172a'}}>
+    <div className="app-container">
       <div className="dashboard-wrapper">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <h1 className="heading-dashboard" style={{color: 'white'}}>SaaS Control Room</h1>
-          <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', background: 'transparent', color: 'white', borderColor: 'rgba(255,255,255,0.2)', boxShadow: 'none'}}>Logout</button>
+          <h1 className="heading-dashboard" style={{color: 'var(--accent-blue)'}}>Wash Bay Operations</h1>
+          <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px'}}>Logout</button>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={activeTab === 'venues' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'venues' ? {background: 'transparent', color: 'white'} : {background: 'white', color: 'var(--dev-black)'}} onClick={() => setActiveTab('venues')}>Client Venues</button>
-          <button className={activeTab === 'users' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'users' ? {background: 'transparent', color: 'white'} : {background: 'white', color: 'var(--dev-black)'}} onClick={() => setActiveTab('users')}>Staff Creation</button>
-          <button className={activeTab === 'finance' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'finance' ? {background: 'transparent', color: 'white'} : {background: 'white', color: 'var(--dev-black)'}} onClick={() => setActiveTab('finance')}>Global Revenue</button>
+        <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
+          <div className="queue-column">
+            <h2 className="queue-title">Wash Queue ({washQueued.length})</h2>
+            {washQueued.map(t => (
+              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--warning-yellow)' }}>
+                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                <p style={{margin: '0 0 12px 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                <button onClick={() => changeStatus(t.id, 'washStatus', 'washing')} className="btn-blue" style={{boxShadow: 'none'}}>Bring to Wash Bay</button>
+              </div>
+            ))}
+          </div>
+          <div className="queue-column">
+            <h2 className="queue-title">Currently Washing ({washWashing.length})</h2>
+            {washWashing.map(t => (
+              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-blue)' }}>
+                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                <button onClick={() => changeStatus(t.id, 'washStatus', 'completed')} className="btn-green" style={{boxShadow: 'none'}}>Mark Wash Complete</button>
+              </div>
+            ))}
+          </div>
+          <div className="queue-column">
+            <h2 className="queue-title">Completed ({washCompleted.length})</h2>
+            {washCompleted.map(t => (
+              <div key={t.id} className="ticket-card animate-slide-up" style={{ borderLeft: '6px solid var(--accent-green)' }}>
+                <h3 style={{margin: '0 0 4px 0', fontWeight: 800}}>{t.vehicle?.make} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate}</span></h3>
+                <p style={{margin: 0, color: 'var(--accent-green)', fontWeight: 700}}>✨ Cleaned & Ready</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// VALET DISPATCHER DASHBOARD
+// ------------------------------------------------------------------
+function ValetDashboardView({ parkingMap, venueId }) {
+  const [tickets, setTickets] = useState([]);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [quickQrId, setQuickQrId] = useState(null);
+  const [draftToEdit, setDraftToEdit] = useState(null); 
+  const [knownPlates, setKnownPlates] = useState({});
+  const [promptConfig, setPromptConfig] = useState({ isOpen: false, ticketId: null, expectedPlate: '' });
+
+  const currentDomain = window.location.origin;
+
+  useEffect(() => {
+    const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const all = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        setTickets(all.filter(t => t.venueId === venueId && t.status !== "retrieved"));
+        
+        const memory = {};
+        all.forEach(t => { 
+          if(t.vehicle?.licensePlate && typeof t.vehicle.licensePlate === 'string') {
+            memory[t.vehicle.licensePlate.toUpperCase()] = t; 
+          }
+        });
+        setKnownPlates(memory);
+      } else { setTickets([]); }
+    });
+    return () => unsubscribe();
+  }, [venueId]);
+
+  const changeStatus = async (ticketId, field, newStatus) => {
+    const updates = { [field]: newStatus };
+    if (newStatus === 'retrieved') updates["timestamps/retrievedAt"] = Date.now();
+    await update(ref(db, `tickets/${ticketId}`), updates);
+  };
+
+  const handleQuickDropOff = async () => {
+    const ticketId = `ticket_${Date.now()}`;
+    await set(ref(db, `tickets/${ticketId}`), {
+      venueId: venueId, status: "draft", parkedByUserId: auth.currentUser.uid, parkedByName: "Valet Team", parkedByPhone: "+971501234567",
+      vehicle: { make: '', model: '', licensePlate: '', color: '' }, timestamps: { created: Date.now() }
+    });
+    setQuickQrId(ticketId); 
+  };
+
+  const drafts = tickets.filter(t => t.status === "draft");
+  const requested = tickets.filter(t => t.status === "requested");
+  const incomingReady = tickets.filter(t => t.status === "incoming" || t.status === "ready");
+  const parked = tickets.filter(t => t.status === "parked");
+  const occupiedSpots = parked.map(t => t.parkingSpot);
+
+  return (
+    <div className="app-container">
+      <div className="dashboard-wrapper">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <h1 className="heading-dashboard">Dispatcher</h1>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
+          </div>
+          <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
+            <button onClick={() => setShowScannerModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
+            <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
+          </div>
         </div>
 
-        <div>
-          {activeTab === 'venues' && (
-            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
-              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left'}}>
-                <h3 style={{marginTop: 0, fontWeight: 800}}>Add New Client Venue</h3>
-                <form onSubmit={handleCreateVenue} style={{display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap'}}>
-                  <input placeholder="Venue ID (e.g. venue_002)" required className="vibrant-input dev-focus" value={newVenueId} onChange={e => setNewVenueId(e.target.value.toLowerCase().replace(/\s+/g, '_'))} style={{flex: 1, minWidth: '150px'}} />
-                  <input placeholder="Display Name (e.g. North Platte)" required className="vibrant-input dev-focus" value={newVenueName} onChange={e => setNewVenueName(e.target.value)} style={{flex: 2, minWidth: '200px'}} />
-                  <select className="vibrant-input dev-focus" value={newVenueTier} onChange={e => setNewVenueTier(Number(e.target.value))} style={{flex: 1, minWidth: '150px'}}>
-                    <option value={1}>Tier 1 (Standard)</option>
-                    <option value={2}>Tier 2 (Premium Wash)</option>
-                  </select>
-                  <button type="submit" className="btn-dev" style={{width: 'auto', whiteSpace: 'nowrap'}}>Create Venue</button>
-                </form>
+        <div className="dashboard-grid">
+          <div className="queue-column">
+            <h2 className="queue-title">Needs Info ({drafts.length})</h2>
+            {drafts.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--draft-purple)', animationDelay: `${i * 0.05}s` }}>
+                <span className="status-badge status-draft">Draft Ticket</span>
+                <p style={{margin: '8px 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500}}>Guest has QR code. Car needs parking spot and details.</p>
+                <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{borderColor: 'var(--draft-purple)', color: 'var(--draft-purple)', marginTop: '8px', boxShadow: 'none'}}>Complete Details</button>
               </div>
+            ))}
+          </div>
 
-              <div style={{background: 'white', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow-lg)'}}>
-                <table className="luxury-table" style={{boxShadow: 'none', margin: 0}}>
-                  <thead><tr><th>Venue ID</th><th>Display Name</th><th>SaaS Tier</th><th>Status</th><th>Actions</th></tr></thead>
-                  <tbody>
-                    {allVenues.map(v => (
-                      <tr key={v.id}>
-                        <td style={{fontWeight: '800', color: 'var(--dev-black)'}}>{v.id}</td>
-                        <td style={{fontWeight: '600'}}>{v.name || 'Unnamed Venue'}</td>
-                        <td>
-                          <span style={{background: v.settings?.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: v.settings?.tier === 1 ? '#475569' : '#fff', padding: '4px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem'}}>
-                            Tier {v.settings?.tier || 1}
-                          </span>
-                        </td>
-                        <td style={{color: 'var(--accent-green)', fontWeight: 700}}>Active</td>
-                        <td style={{display: 'flex', gap: '8px'}}>
-                          <button onClick={() => promptToggleTier(v.id, v.settings?.tier || 1)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Change Tier</button>
-                          <button onClick={() => promptDeleteVenue(v.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'users' && (
-            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
-              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left'}}>
-                <h3 style={{marginTop: 0, fontWeight: 800}}>Create Staff Account</h3>
-                <p style={{color: 'var(--text-muted)', marginBottom: '16px', fontWeight: 500}}>Generate logins for hotel managers and valets here. They cannot create accounts themselves.</p>
-                
-                {/* Dummy hidden inputs to block aggressive Chrome Autocomplete */}
-                <input type="email" style={{display: 'none'}} />
-                <input type="password" style={{display: 'none'}} />
-                
-                <form onSubmit={handleProvisionUser} style={{display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap'}} autoComplete="off">
-                  <input type="email" name="new-staff-email" placeholder="Staff Email" required className="vibrant-input dev-focus" value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{flex: 1, minWidth: '200px'}} autoComplete="off" />
-                  <input type="password" name="new-staff-password" placeholder="Password (Min 6 chars)" required className="vibrant-input dev-focus" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={{flex: 1, minWidth: '200px'}} minLength={6} autoComplete="new-password" />
-                  
-                  <select className="vibrant-input dev-focus" value={newUserRole} onChange={e => setNewUserRole(e.target.value)} style={{flex: 1, minWidth: '200px'}}>
-                    <option value="valet_runner">Valet Runner</option>
-                    <option value="wash_team">Wash Team</option>
-                    <option value="master_admin">Master Admin (Hotel Mgr)</option>
-                    <option value="developer">SaaS Developer (Super Admin)</option>
-                  </select>
-                  
-                  <select className="vibrant-input dev-focus" value={newUserVenue} onChange={e => setNewUserVenue(e.target.value)} required style={{flex: 1, minWidth: '200px'}}>
-                    <option value="" disabled>Assign to Venue...</option>
-                    {allVenues.map(v => <option key={v.id} value={v.id}>{v.name || v.id}</option>)}
-                  </select>
-                  
-                  <button type="submit" className="btn-dev" style={{width: 'auto', whiteSpace: 'nowrap'}}>Create Account</button>
-                </form>
-              </div>
-
-              {/* Group Users by Venue */}
-              {allVenues.map(venue => {
-                const venueUsers = allUsers.filter(u => u.venueId === venue.id);
-                return (
-                  <div key={venue.id} className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', padding: '0', overflow: 'hidden'}}>
-                    <div style={{background: '#f8fafc', padding: '16px 24px', borderBottom: '1px solid var(--card-border)'}}>
-                      <h3 style={{margin: 0, fontWeight: 800, color: 'var(--dev-black)'}}>{venue.name} <span style={{color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500}}>({venue.id})</span></h3>
-                    </div>
-                    {venueUsers.length === 0 ? (
-                       <p style={{padding: '24px', color: 'var(--text-muted)', margin: 0, textAlign: 'center'}}>No staff accounts active.</p>
-                    ) : (
-                      <table className="luxury-table" style={{boxShadow: 'none', borderRadius: 0}}>
-                        <thead><tr><th>Email / UID</th><th>Assigned Role</th><th>Account Actions</th></tr></thead>
-                        <tbody>
-                          {venueUsers.map(u => (
-                            <tr key={u.uid}>
-                              <td>
-                                <div style={{fontWeight: '800', color: 'var(--dev-black)'}}>{u.email || 'Unknown Email'}</div>
-                                <div style={{fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: '0.8rem'}}>{u.uid}</div>
-                              </td>
-                              <td style={{fontWeight: '700', textTransform: 'capitalize'}}>{(u.role || 'none').replace('_', ' ')}</td>
-                              <td style={{display: 'flex', gap: '8px'}}>
-                                <button onClick={() => handleResetPassword(u.email)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Reset Pass</button>
-                                <button onClick={() => promptDeleteStaff(u.uid, u.email)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Delete</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
+          <div className="queue-column">
+            <h2 className="queue-title">Requested ({requested.length})</h2>
+            {requested.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
+                <span className="status-badge status-requested">Needs Retrieval</span>
+                <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
+                <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
+                {t.wantsWash && (
+                  <div style={{marginTop: '8px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
+                    {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
+                    {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
+                    {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
+                <div style={{background: '#f8fafc', padding: '12px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px', border: '1px solid #e2e8f0'}}>
+                  📍 To: {t.returnLocation}
+                </div>
+                <button onClick={() => changeStatus(t.id, 'status', 'incoming')} className="btn-outline" style={{borderColor: 'var(--warning-yellow)', color: 'var(--warning-yellow)', marginTop: '8px', boxShadow: 'none'}}>Bring Car</button>
+              </div>
+            ))}
+          </div>
 
-          {activeTab === 'finance' && (
-            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
-              
-              {allVenues.map(venue => {
-                const venueTransactions = allTickets.filter(t => t.venueId === venue.id && (t.washTransaction || t.tipTransaction));
-                const washRev = venueTransactions.filter(t => t.washTransaction).reduce((acc, t) => acc + (t.washTransaction.amount || 0), 0);
-                const tipRev = venueTransactions.filter(t => t.tipTransaction).reduce((acc, t) => acc + (t.tipTransaction.amount || 0), 0);
-                
-                let ledger = [];
-                venueTransactions.forEach(t => {
-                  if(t.washTransaction) ledger.push({ type: 'Car Wash', tx: t.washTransaction, vehicle: t.vehicle?.licensePlate || 'Unknown' });
-                  if(t.tipTransaction) ledger.push({ type: 'Valet Tip', tx: t.tipTransaction, vehicle: t.vehicle?.licensePlate || 'Unknown' });
-                });
-                ledger.sort((a, b) => b.tx.date - a.tx.date);
+          <div className="queue-column">
+            <h2 className="queue-title">Transit/Ready ({incomingReady.length})</h2>
+            {incomingReady.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: `6px solid ${t.status === 'ready' ? 'var(--accent-green)' : 'var(--warning-yellow)'}`, animationDelay: `${i * 0.05}s` }}>
+                <span className={`status-badge ${t.status === 'ready' ? 'status-ready' : 'status-incoming'}`}>
+                  {t.status === 'ready' ? 'Waiting at Door' : 'On The Way'}
+                </span>
+                <h3 style={{margin: '8px 0 12px 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
+                {t.status === 'incoming' ? (
+                  <button onClick={() => changeStatus(t.id, 'status', 'ready')} className="btn-green" style={{boxShadow: 'none'}}>Mark "Ready at Door"</button>
+                ) : (
+                  <button onClick={() => setPromptConfig({ isOpen: true, ticketId: t.id, expectedPlate: t.vehicle?.licensePlate })} className="btn-outline" style={{borderColor: 'var(--accent-green)', color: 'var(--accent-green)', boxShadow: 'none'}}>
+                    Verify Plate & Handover
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
-                return (
-                  <div key={venue.id} className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', padding: '0', overflow: 'hidden'}}>
-                    <div style={{background: '#f8fafc', padding: '16px 24px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px'}}>
-                      <h3 style={{margin: 0, fontWeight: 800, color: 'var(--dev-black)'}}>{venue.name} <span style={{color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500}}>({venue.id})</span></h3>
-                      <div style={{display: 'flex', gap: '24px'}}>
-                        <div style={{textAlign: 'right'}}>
-                          <div style={{fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase'}}>Wash Rev</div>
-                          <div style={{fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-blue)'}}>${washRev.toLocaleString()}</div>
-                        </div>
-                        <div style={{textAlign: 'right'}}>
-                          <div style={{fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase'}}>Total Tips</div>
-                          <div style={{fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-green)'}}>${tipRev.toLocaleString()}</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {ledger.length === 0 ? (
-                       <p style={{padding: '24px', color: 'var(--text-muted)', margin: 0, textAlign: 'center'}}>No transactions processed yet.</p>
-                    ) : (
-                      <div style={{overflowX: 'auto'}}>
-                        <table className="luxury-table" style={{boxShadow: 'none', borderRadius: 0}}>
-                          <thead><tr><th>Date & Time</th><th>Service Type</th><th>Plate</th><th>Method</th><th>Card Info</th><th>Amount</th><th>Status</th></tr></thead>
-                          <tbody>
-                            {ledger.map((row, i) => {
-                              const { date, time } = formatTxDateTime(row.tx.date);
-                              return (
-                                <tr key={i}>
-                                  <td style={{fontWeight: 600, color: 'var(--dev-black)'}}>{date} <span style={{color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px'}}>{time}</span></td>
-                                  <td style={{fontWeight: 800, color: row.type === 'Car Wash' ? 'var(--accent-blue)' : 'var(--accent-green)'}}>{row.type}</td>
-                                  <td style={{fontWeight: 700}}>{row.vehicle}</td>
-                                  <td style={{fontWeight: 600}}>{row.tx.method}</td>
-                                  <td style={{fontFamily: 'monospace', color: 'var(--text-muted)'}}>**** {row.tx.last4}</td>
-                                  <td style={{fontWeight: 800}}>${row.tx.amount}.00</td>
-                                  <td><span style={{background: row.tx.status === 'Done' ? '#ecfdf5' : '#fef2f2', color: row.tx.status === 'Done' ? 'var(--accent-green)' : 'var(--danger-red)', padding: '4px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem'}}>{row.tx.status}</span></td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+          <div className="queue-column">
+            <h2 className="queue-title">Parked ({parked.length})</h2>
+            {parked.map((t, i) => (
+              <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid #cbd5e1', animationDelay: `${i * 0.05}s` }}>
+                <button className="edit-icon-btn" onClick={() => setDraftToEdit(t)}>✏️</button>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <h3 style={{margin: 0, fontWeight: 700}}>{t.vehicle?.make || 'Unknown'}</h3>
+                  <span className="status-badge status-parked" style={{background: '#f8fafc', border: '1px solid #e2e8f0'}}>{t.parkingSpot}</span>
+                </div>
+                <p style={{margin: 0, color: 'var(--text-muted)', fontWeight: 600}}>{t.vehicle?.licensePlate || ''}</p>
+                {t.wantsWash && (
+                  <div style={{marginTop: '4px', padding: '8px', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid #bae6fd'}}>
+                    {t.washStatus === 'queued' && <span style={{color: 'var(--warning-yellow)'}}>🫧 Wash Queued</span>}
+                    {t.washStatus === 'washing' && <span style={{color: 'var(--accent-blue)'}}>🫧 Washing In Progress</span>}
+                    {t.washStatus === 'completed' && <span style={{color: 'var(--accent-green)'}}>✨ Wash Completed</span>}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       
-      <CustomConfirmWidget isOpen={devConfirm.isOpen} title={devConfirm.title} message={devConfirm.message} onConfirm={devConfirm.onConfirm} onCancel={devConfirm.onCancel} isDanger={devConfirm.isDanger} />
+      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
+
+      {quickQrId && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in">
+            <h2 className="heading-brand" style={{color: 'var(--draft-purple)'}}>TICKET READY</h2>
+            <p style={{color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500}}>Guest can scan this now. You can fill out the car details later from the "Needs Info" queue.</p>
+            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '0 0 24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-md)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${quickQrId}`)}`} alt="QR Code" style={{display: 'block'}} />
+            </div>
+            <button onClick={() => setQuickQrId(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close & Return</button>
+          </div>
+        </div>
+      )}
+
+      <CustomPromptWidget isOpen={promptConfig.isOpen} title="Verify Handover" message="Type the license plate number of this vehicle to confirm you are handing the keys to the correct guest." expectedValue={promptConfig.expectedPlate || 'N/A'} onMatch={() => { changeStatus(promptConfig.ticketId, 'status', 'retrieved'); setPromptConfig({ ...promptConfig, isOpen: false }); }} onCancel={() => setPromptConfig({ ...promptConfig, isOpen: false })} />
+
+      {showScannerModal && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in" style={{maxWidth: '400px'}}>
+            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest App</h3>
+            <div style={{background: '#000', height: '220px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '24px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
+              <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite'}}></div>
+              <p style={{fontWeight: 600, letterSpacing: '1px'}}>Camera Active...</p>
+            </div>
+            <p style={{color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', fontWeight: 500}}>Point camera at the guest's Sky Valet App to instantly retrieve their vehicle and membership details.</p>
+            <button onClick={() => setShowScannerModal(false)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Scanner</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// MASTER ADMIN DASHBOARD (For Hotel Managers)
+// ------------------------------------------------------------------
+function MasterAdminView({ parkingMap, venueId }) {
+  const [history, setHistory] = useState([]);
+  const [parkedCars, setParkedCars] = useState([]);
+  const [activeTab, setActiveTab] = useState('operations');
+  const [draftToEdit, setDraftToEdit] = useState(null);
+  const [editingMap, setEditingMap] = useState([]);
+  const [qrModalTicket, setQrModalTicket] = useState(null);
+  const [knownPlates, setKnownPlates] = useState({});
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true });
+  
+  const [venueSettings, setVenueSettings] = useState(DEFAULT_VENUE_SETTINGS);
+  const [newLocationInput, setNewLocationInput] = useState('');
+
+  const currentDomain = window.location.origin;
+
+  useEffect(() => { setEditingMap(JSON.parse(JSON.stringify(parkingMap || []))); }, [parkingMap]);
+
+  useEffect(() => {
+    const unsubscribeTickets = onValue(ref(db, 'tickets'), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] })).filter(t => t.venueId === venueId);
+        
+        // Bulletproof timestamp sorting to prevent crashes on old data
+        setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => ((b.timestamps && b.timestamps.parkedAt) || 0) - ((a.timestamps && a.timestamps.parkedAt) || 0)));
+        setHistory(allTickets.filter(t => t.status === "retrieved").sort((a, b) => ((b.timestamps && b.timestamps.retrievedAt) || 0) - ((a.timestamps && a.timestamps.retrievedAt) || 0)));
+        
+        const memory = {};
+        allTickets.forEach(t => { 
+          if(t.vehicle?.licensePlate && typeof t.vehicle.licensePlate === 'string') {
+            memory[t.vehicle.licensePlate.toUpperCase()] = t; 
+          }
+        });
+        setKnownPlates(memory);
+      }
+    });
+
+    const unsubscribeSettings = onValue(ref(db, `venues/${venueId}/settings`), (snapshot) => {
+      if (snapshot.exists()) setVenueSettings(snapshot.val());
+      else { set(ref(db, `venues/${venueId}/settings`), DEFAULT_VENUE_SETTINGS); setVenueSettings(DEFAULT_VENUE_SETTINGS); }
+    });
+
+    return () => { unsubscribeTickets(); unsubscribeSettings(); };
+  }, [venueId]);
+
+  const formatDateTime = (timestamp) => {
+    if (!timestamp) return { date: '-', time: '-' };
+    const dateObj = new Date(timestamp);
+    return { date: dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }), time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+  };
+
+  const occupiedSpots = parkedCars.map(t => t.parkingSpot);
+
+  const handleSaveMap = async () => {
+    setConfirmConfig({
+      isOpen: true, title: "Save Floor Plan", message: "Push these changes to the live database?", isDanger: false,
+      onConfirm: async () => { await set(ref(db, `venues/${venueId}/parkingMap`), editingMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  const moveZone = (index, direction) => {
+    const newMap = [...editingMap];
+    if (direction === 'up' && index > 0) [newMap[index - 1], newMap[index]] = [newMap[index], newMap[index - 1]];
+    else if (direction === 'down' && index < newMap.length - 1) [newMap[index + 1], newMap[index]] = [newMap[index], newMap[index + 1]];
+    setEditingMap(newMap);
+  };
+
+  const addZone = () => {
+    let nextZoneName = "Zone A";
+    if (editingMap.length > 0) {
+      const lastZone = editingMap[editingMap.length - 1].zone.trim();
+      const match = lastZone.match(/^(Zone\s+)([A-Y])$/i); 
+      if (match) nextZoneName = match[1] + String.fromCharCode(match[2].charCodeAt(0) + 1);
+      else nextZoneName = lastZone + " (New)";
+    }
+    setEditingMap([...editingMap, { zone: nextZoneName, spots: [] }]);
+  };
+
+  const removeZone = (index) => {
+    setConfirmConfig({
+      isOpen: true, title: "Delete Zone", message: "Delete this entire zone? All parking spots inside will be lost.", isDanger: true,
+      onConfirm: () => { const newMap = [...editingMap]; newMap.splice(index, 1); setEditingMap(newMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  const updateSpotName = (zoneIdx, spotIdx, val) => { const newMap = [...editingMap]; newMap[zoneIdx].spots[spotIdx] = val; setEditingMap(newMap); };
+
+  const removeSpot = (zoneIdx, spotIdx) => {
+    setConfirmConfig({
+      isOpen: true, title: "Remove Spot", message: "Delete this parking spot from the floor plan?", isDanger: true,
+      onConfirm: () => { const newMap = [...editingMap]; newMap[zoneIdx].spots.splice(spotIdx, 1); setEditingMap(newMap); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  const addSpotToZone = (zoneIdx) => {
+    const newMap = [...editingMap];
+    const prefix = getZonePrefix(newMap[zoneIdx].zone);
+    let newNum = newMap[zoneIdx].spots.length + 1;
+    let newSpotName = `${prefix}-${newNum}`;
+    while (newMap[zoneIdx].spots.includes(newSpotName)) { newNum++; newSpotName = `${prefix}-${newNum}`; }
+    newMap[zoneIdx].spots.push(newSpotName);
+    setEditingMap(newMap);
+  };
+
+  const handleToggleWash = async (e) => { await update(ref(db, `venues/${venueId}/settings`), { carWashEnabled: e.target.checked }); };
+  const handlePriceChange = async (e) => { await update(ref(db, `venues/${venueId}/settings`), { carWashPrice: Number(e.target.value) }); };
+  const handleAddLocation = async () => {
+    if (!newLocationInput.trim()) return;
+    const locs = [...(venueSettings.returnLocations || []), newLocationInput.trim()];
+    await update(ref(db, `venues/${venueId}/settings`), { returnLocations: locs });
+    setNewLocationInput('');
+  };
+  const handleRemoveLocation = async (index) => {
+    const locs = [...(venueSettings.returnLocations || [])];
+    locs.splice(index, 1);
+    await update(ref(db, `venues/${venueId}/settings`), { returnLocations: locs });
+  };
+  
+  const handleAdminDelete = (id) => {
+    setConfirmConfig({
+      isOpen: true, title: "Delete Ticket?", message: "Are you sure you want to permanently delete this active ticket from the system?", isDanger: true,
+      onConfirm: async () => { await set(ref(db, `tickets/${id}`), null); setConfirmConfig({ ...confirmConfig, isOpen: false }); },
+      onCancel: () => setConfirmConfig({ ...confirmConfig, isOpen: false })
+    });
+  };
+
+  return (
+    <div className="app-container">
+      <div className="dashboard-wrapper">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <h1 className="heading-dashboard">Management Overview</h1>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
+          </div>
+          <button onClick={() => setDraftToEdit({ id: 'new' })} className="btn-green" style={{width: 'auto', padding: '12px 32px'}}>+ Add Vehicle</button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Live Operations</button>
+          <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Metrics</button>
+          <button className={activeTab === 'map' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Map Editor</button>
+          <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Settings</button>
+        </div>
+
+        <div>
+          <div style={{ overflowX: 'auto' }}>
+            
+            {activeTab === 'operations' && (
+              <table className="luxury-table animate-slide-up">
+                <thead><tr><th>Vehicle</th><th>Plate</th><th>Spot</th><th>Valet Status</th><th>Wash Status</th><th>Time Parked</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {parkedCars.map(t => {
+                    const { time } = formatDateTime(t.timestamps?.parkedAt);
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Waiting for details'} {t.vehicle?.model || ''}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || '-'}</td>
+                        <td style={{ fontWeight: '800' }}>{t.parkingSpot || '-'}</td>
+                        <td>
+                          {t.status === 'draft' && <span className="status-badge status-draft">Draft</span>}
+                          {t.status === 'parked' && <span className="status-badge status-parked">Parked</span>}
+                          {t.status === 'requested' && <span className="status-badge status-requested">Requested</span>}
+                          {t.status === 'incoming' && <span className="status-badge status-incoming">Transit</span>}
+                          {t.status === 'ready' && <span className="status-badge status-ready">Ready</span>}
+                        </td>
+                        <td>
+                          {!t.wantsWash && <span style={{color: 'var(--text-muted)', fontWeight: 600}}>Not Ordered</span>}
+                          {t.wantsWash && t.washStatus === 'queued' && <span className="status-badge wash-queued">Queued</span>}
+                          {t.wantsWash && t.washStatus === 'washing' && <span className="status-badge wash-washing">Washing</span>}
+                          {t.wantsWash && t.washStatus === 'completed' && <span className="status-badge wash-completed">Completed</span>}
+                        </td>
+                        <td style={{ fontWeight: 500 }}>{t.status === 'draft' ? '-' : time}</td>
+                        <td style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => setDraftToEdit(t)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Edit</button>
+                          <button onClick={() => setQrModalTicket(t.id)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>QR</button>
+                          <button onClick={() => handleAdminDelete(t.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Del</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {parkedCars.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No cars currently on site.</td></tr>}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === 'metrics' && (
+              <table className="luxury-table animate-slide-up">
+                <thead><tr><th>Vehicle</th><th>Plate</th><th>Arrival Date</th><th>Wash</th><th>Tip</th><th>Retrieval Time</th></tr></thead>
+                <tbody>
+                  {history.map(t => {
+                    const { date } = formatDateTime(t.timestamps?.parkedAt);
+                    
+                    const retrievedAt = (t.timestamps && t.timestamps.retrievedAt) ? t.timestamps.retrievedAt : 0;
+                    const requestedAt = (t.timestamps && t.timestamps.requestedAt) ? t.timestamps.requestedAt : 0;
+                    const ms = (retrievedAt > requestedAt && requestedAt > 0) ? retrievedAt - requestedAt : 0;
+                    
+                    const mins = Math.floor(ms / 60000);
+                    const secs = ((ms % 60000) / 1000).toFixed(0);
+                    
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ color: 'var(--text-main)', fontWeight: '700' }}>{t.vehicle?.make || 'Unknown'} {t.vehicle?.model || ''}</td>
+                        <td style={{ fontWeight: 600 }}>{t.vehicle?.licensePlate || ''}</td>
+                        <td style={{ fontWeight: 500 }}>{date}</td>
+                        <td style={{ fontWeight: 700, color: t.washPaid ? '#0ea5e9' : 'var(--text-muted)' }}>{t.washPaid ? 'Yes' : 'No'}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--accent-green)' }}>{t.tippedAmount ? `$${t.tippedAmount}` : '-'}</td>
+                        <td style={{ color: mins > 5 ? 'var(--danger-red)' : 'var(--accent-green)', fontWeight: '800' }}>{mins}m {secs}s</td>
+                      </tr>
+                    );
+                  })}
+                  {history.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted)'}}>No completed retrieval data.</td></tr>}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === 'settings' && (
+              <div style={{maxWidth: '800px', margin: '0 auto'}} className="animate-slide-up">
+                
+                <div className="editor-card" style={{borderColor: venueSettings.tier === 1 ? 'var(--card-border)' : 'var(--warning-yellow)', borderWidth: venueSettings.tier === 2 ? '2px' : '1px'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                    <h3 style={{margin: 0, fontWeight: 800, fontSize: '1.5rem'}}>Service Options</h3>
+                    <span style={{background: venueSettings.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: venueSettings.tier === 1 ? '#475569' : '#fff', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase'}}>
+                      {venueSettings.tier === 1 ? 'Standard Tier' : 'Premium Tier'}
+                    </span>
+                  </div>
+                  
+                  <div className="settings-row" style={{opacity: venueSettings.tier === 1 ? 0.5 : 1}}>
+                    <div>
+                      <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Enable Car Wash Service</p>
+                      <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500}}>Allow guests to request a wash on their ticket.</p>
+                      {venueSettings.tier === 1 && <p style={{margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--danger-red)', fontWeight: 700}}>Please contact software provider to unlock.</p>}
+                    </div>
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={venueSettings.tier === 1 ? false : venueSettings.carWashEnabled} onChange={handleToggleWash} disabled={venueSettings.tier === 1} />
+                      <span className="toggle-slider" style={{cursor: venueSettings.tier === 1 ? 'not-allowed' : 'pointer'}}></span>
+                    </label>
+                  </div>
+                  
+                  <div className="settings-row" style={{borderBottom: 'none', opacity: venueSettings.tier === 1 ? 0.5 : 1}}>
+                    <div>
+                      <p style={{margin: '0 0 4px 0', fontWeight: 700}}>Car Wash Price ($)</p>
+                    </div>
+                    <input type="number" className="vibrant-input" style={{width: '100px', marginBottom: 0, padding: '12px', textAlign: 'center'}} value={venueSettings.carWashPrice || 25} onChange={handlePriceChange} disabled={venueSettings.tier === 1} />
+                  </div>
+                </div>
+
+                <div className="editor-card">
+                  <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Return Locations (Deliver To)</h3>
+                  <p style={{fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '16px', fontWeight: 500}}>These are the physical places a guest can request their car be brought to.</p>
+                  
+                  {(venueSettings.returnLocations || []).map((loc, i) => (
+                    <div key={i} className="settings-row" style={{padding: '12px 0'}}>
+                      <span style={{fontWeight: 600}}>{loc}</span>
+                      <button onClick={() => handleRemoveLocation(i)} style={{background: 'transparent', border: 'none', color: 'var(--danger-red)', cursor: 'pointer', fontWeight: 'bold'}}>Remove</button>
+                    </div>
+                  ))}
+                  
+                  <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
+                    <input type="text" className="vibrant-input" placeholder="e.g. Back Entrance" value={newLocationInput} onChange={e => setNewLocationInput(e.target.value)} style={{marginBottom: 0}} />
+                    <button onClick={handleAddLocation} className="btn-green" style={{width: '120px'}}>Add</button>
+                  </div>
+                </div>
+              </div>
+            )}
+              
+            {activeTab === 'map' && (
+              <div style={{maxWidth: '1000px', margin: '0 auto'}}>
+                <p style={{color: 'var(--text-muted)', marginBottom: '32px', fontSize: '1rem', fontWeight: 500}}>Changes made here will instantly update the interactive floor map for all valets. Tap a spot to rename it.</p>
+                {editingMap.map((section, idx) => (
+                  <div key={idx} className="editor-card" style={{ animationDelay: `${idx * 0.1}s` }}>
+                    <div className="editor-zone-header">
+                      <input type="text" value={section.zone} onChange={(e) => { const newMap = [...editingMap]; newMap[idx].zone = e.target.value; setEditingMap(newMap); }} className="vibrant-input editor-zone-input" />
+                      <div className="editor-zone-actions">
+                        <button onClick={() => moveZone(idx, 'up')} disabled={idx === 0} className="btn-outline" style={{padding: '8px 16px'}}>↑</button>
+                        <button onClick={() => moveZone(idx, 'down')} disabled={idx === editingMap.length - 1} className="btn-outline" style={{padding: '8px 16px'}}>↓</button>
+                        <button onClick={() => removeZone(idx)} className="btn-action" style={{padding: '8px 16px', width: 'auto', boxShadow: 'none'}}>Delete</button>
+                      </div>
+                    </div>
+                    <div className="parking-map" style={{maxHeight: 'none', overflowY: 'visible', marginTop: '24px'}}>
+                      {section.spots.map((spot, sIdx) => (
+                        <div key={sIdx} style={{ position: 'relative' }}>
+                          <input value={spot} onChange={(e) => updateSpotName(idx, sIdx, e.target.value)} className="spot-edit-input" />
+                          <button onClick={() => removeSpot(idx, sIdx)} className="spot-delete-btn" title="Remove Spot">✕</button>
+                        </div>
+                      ))}
+                      <div className="spot-add-btn" onClick={() => addSpotToZone(idx)} title="Add New Spot">+</div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{display: 'flex', gap: '24px', marginTop: '40px'}}>
+                  <button onClick={addZone} className="btn-outline" style={{flex: 1, padding: '16px', fontSize: '1.05rem'}}>+ Add New Zone</button>
+                  <button onClick={handleSaveMap} className="btn-green" style={{flex: 2, padding: '16px', fontSize: '1.05rem'}}>Save Floor Plan to Live Database</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit.id === 'new' ? null : draftToEdit} />}
+      {qrModalTicket && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in" style={{width: '90%'}}>
+            <h2 className="heading-brand" style={{color: 'var(--accent-green)'}}>DIGITAL TICKET</h2>
+            <div style={{background: '#fff', padding: '20px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${qrModalTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            </div>
+            <button onClick={() => setQrModalTicket(null)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Ticket</button>
+          </div>
+        </div>
+      )}
+      <CustomConfirmWidget isOpen={confirmConfig.isOpen} title={confirmConfig.title} message={confirmConfig.message} onConfirm={confirmConfig.onConfirm} onCancel={confirmConfig.onCancel} isDanger={confirmConfig.isDanger} />
     </div>
   );
 }
@@ -1028,11 +1278,7 @@ function App() {
   if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   
   if (!userRole) return <LoginView />;
-  
-  // Route to Developer / Super Admin
   if (userRole === "developer") return <DeveloperView />;
-  
-  // Route to Venue-Specific Apps
   if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} venueId={userVenueId} />;
   if (userRole === "wash_team") return <WashBayView venueId={userVenueId} />;
   
