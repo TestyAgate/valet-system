@@ -5,10 +5,10 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getAuth, creat
 import { initializeApp, getApps } from 'firebase/app';
 
 // ------------------------------------------------------------------
-// INJECTED CSS FOR VIBRANT, ENERGETIC APP UI & SHADOWS
+// INJECTED CSS FOR VIBRANT, ENERGETIC APP UI, LANDING PAGE & SHADOWS
 // ------------------------------------------------------------------
 const vibrantStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
   :root {
     --bg-color: #f4f7f6;
@@ -44,32 +44,33 @@ const vibrantStyles = `
   @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   @keyframes scanLaser { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+  @keyframes floatSlow { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
   
   .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-  .vibrant-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); text-align: center; position: relative; overflow: hidden; }
+  .vibrant-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); text-align: center; position: relative; overflow: hidden; box-sizing: border-box; }
   
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px;}
+  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-ui);}
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
   
-  .btn-blue { background: var(--accent-blue); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn-blue); display: flex; justify-content: center; align-items: center; gap: 8px;}
+  .btn-blue { background: var(--accent-blue); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn-blue); display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-ui);}
   .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4); background: var(--accent-blue-hover); }
 
-  .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
+  .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); font-family: var(--font-ui);}
   .btn-purple:hover { transform: translateY(-2px); filter: brightness(1.1); }
   
-  .btn-dev { background: var(--dev-black); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-md); }
+  .btn-dev { background: var(--dev-black); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-md); font-family: var(--font-ui);}
   .btn-dev:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
-  .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
+  .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); font-family: var(--font-ui);}
   .btn-action:hover { background: var(--danger-red); color: white; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); font-family: var(--font-ui);}
   .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
   
   .btn-apple-pay { background: #000; color: #fff; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
@@ -128,7 +129,7 @@ const vibrantStyles = `
   .wash-washing { background: #e0f2fe; color: var(--accent-blue); border: 1px solid #bae6fd; }
   .wash-completed { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
 
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease-out; overflow-y: auto;}
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease-out; overflow-y: auto;}
   
   .contact-bar { display: flex; gap: 12px; margin-top: 16px; }
   .btn-contact { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; transition: transform 0.2s; box-shadow: var(--shadow-sm); border: 1px solid var(--card-border); }
@@ -149,19 +150,38 @@ const vibrantStyles = `
   .toggle-switch input:checked + .toggle-slider { background-color: var(--accent-green); }
   .toggle-switch input:checked + .toggle-slider:before { transform: translateX(26px); }
   .toggle-switch input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
+
+  /* LANDING PAGE & VIP GARAGE STYLES */
+  .landing-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .landing-hero { position: relative; border-radius: 28px; overflow: hidden; max-width: 1350px; margin: 0 auto 64px auto; min-height: 580px; display: flex; align-items: center; padding: 64px; box-sizing: border-box; background: #0f172a; color: white; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.25); }
+  .landing-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.42; filter: contrast(1.1); }
+  .landing-hero-gradient { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.75) 55%, rgba(15,23,42,0.25) 100%); }
+  .landing-hero-content { position: relative; z-index: 2; max-width: 640px; text-align: left; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 24px; backdrop-filter: blur(8px); }
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1350px; margin: 0 auto 80px auto; padding: 0 24px; box-sizing: border-box; }
+  .feature-card { background: #fff; border: 1px solid var(--card-border); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-md); transition: all 0.3s ease; display: flex; flex-direction: column; text-align: left; }
+  .feature-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .feature-img { width: 100%; height: 200px; object-fit: cover; }
+  .garage-car-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 22px; padding: 28px; position: relative; overflow: hidden; box-shadow: var(--shadow-lg); text-align: left; display: flex; flex-direction: column; justify-content: space-between; min-height: 210px; }
+  .plate-pill { background: #fef08a; color: #0f172a; font-weight: 900; padding: 6px 14px; border-radius: 8px; font-family: monospace; font-size: 1.05rem; letter-spacing: 1.5px; border: 2px solid #0f172a; display: inline-block; box-shadow: var(--shadow-sm); }
+
+  @media (max-width: 768px) {
+    .landing-nav { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
+    .landing-hero { padding: 36px 24px; margin: 0 12px 48px 12px; border-radius: 20px; min-height: auto; }
+  }
 `;
 
 const CAR_DATABASE = {
   "Abarth": ["595", "695"], "Acura": ["MDX", "RDX"], "Alfa Romeo": ["Giulia", "Stelvio"],
-  "Audi": ["A3", "A4", "Q5", "Q7", "e-tron"], "Bentley": ["Bentayga", "Continental GT"], 
-  "BMW": ["3-Series", "5-Series", "X5", "X7", "M Models"], "Bugatti": ["Chiron"], 
-  "Cadillac": ["Escalade"], "Chevrolet": ["Tahoe", "Corvette"], "Ferrari": ["F8", "Roma", "Purosangue"], 
-  "Ford": ["Mustang", "F-150"], "Honda": ["Accord", "Civic"], "Hyundai": ["Tucson", "Ioniq 5"],
-  "Jeep": ["Wrangler", "Grand Cherokee"], "Kia": ["Telluride", "Sportage"], "Lamborghini": ["Urus", "Huracan"],
-  "Land Rover": ["Range Rover", "Defender"], "Lexus": ["RX", "LX"], "Maserati": ["Levante", "Grecale"], 
-  "McLaren": ["720S", "Artura"], "Mercedes-Benz": ["C-Class", "S-Class", "G-Class", "GLE"],
-  "Nissan": ["Patrol", "Altima"], "Porsche": ["911", "Macan", "Cayenne"], "Rolls-Royce": ["Cullinan", "Ghost"], 
-  "Tesla": ["Model 3", "Model Y"], "Toyota": ["Land Cruiser", "Camry", "RAV4"], "Volvo": ["XC60", "XC90"]
+  "Audi": ["A3", "A4", "Q5", "Q7", "e-tron", "RS6", "R8"], "Bentley": ["Bentayga", "Continental GT", "Flying Spur"], 
+  "BMW": ["3-Series", "5-Series", "7-Series", "X5", "X7", "M3", "M5"], "Bugatti": ["Chiron"], 
+  "Cadillac": ["Escalade", "CT5"], "Chevrolet": ["Tahoe", "Corvette"], "Ferrari": ["F8", "Roma", "Purosangue", "SF90"], 
+  "Ford": ["Mustang", "F-150", "Bronco"], "Honda": ["Accord", "Civic"], "Hyundai": ["Tucson", "Ioniq 5"],
+  "Jeep": ["Wrangler", "Grand Cherokee"], "Kia": ["Telluride", "Sportage", "EV6"], "Lamborghini": ["Urus", "Huracan", "Revuelto"],
+  "Land Rover": ["Range Rover", "Range Rover Sport", "Defender"], "Lexus": ["RX", "LX", "IS"], "Maserati": ["Levante", "Grecale", "MC20"], 
+  "McLaren": ["720S", "750S", "Artura"], "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "G-Class", "GLE", "AMG GT"],
+  "Nissan": ["Patrol", "GT-R", "Altima"], "Porsche": ["911", "Taycan", "Panamera", "Macan", "Cayenne"], "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Spectre"], 
+  "SEAT": ["Leon FR", "Ibiza", "Ateca"], "Tesla": ["Model 3", "Model Y", "Model S", "Cybertruck"], "Toyota": ["Land Cruiser", "Camry", "RAV4", "Supra"], "Volvo": ["XC60", "XC90"]
 };
 
 const COUNTRY_CODES = [
@@ -294,14 +314,542 @@ function Autocomplete({ options, value, onChange, placeholder, style, isObject }
 }
 
 // ------------------------------------------------------------------
-// LOG ARRIVAL MODAL (Edit / Create)
+// PUBLIC LUXURY LANDING PAGE (OPENING VIEW BEFORE SIGN IN)
 // ------------------------------------------------------------------
-function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPlates, editingTicket = null }) {
+function LandingPageView({ onNavigateAuth, onOpenTicket }) {
+  const [ticketCodeInput, setTicketCodeInput] = useState('');
+
+  const handleTicketLookup = (e) => {
+    e.preventDefault();
+    if (!ticketCodeInput.trim()) return;
+    const cleaned = ticketCodeInput.trim().includes('ticket=')
+      ? new URLSearchParams(ticketCodeInput.split('?')[1]).get('ticket')
+      : ticketCodeInput.trim();
+    if (cleaned) onOpenTicket(cleaned);
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
+      {/* Top Navbar */}
+      <nav className="landing-nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '1.3rem', boxShadow: 'var(--shadow-btn)' }}>S</div>
+          <div>
+            <span style={{ fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.5px', color: 'var(--text-main)' }}>SKY VALET</span>
+            <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-green)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>VIP Mobility & Fleet</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.95rem' }}>Member Sign In</button>
+          <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '10px 22px', fontSize: '0.95rem' }}>Join VIP Garage</button>
+          <button onClick={() => onNavigateAuth('staff_login')} className="btn-dev" style={{ width: 'auto', padding: '10px 18px', fontSize: '0.85rem' }}>Staff Portal</button>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <div style={{ padding: '0 20px' }}>
+        <section className="landing-hero animate-scale-in">
+          <img className="landing-hero-bg" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1800&q=80" alt="Luxury Porsche at Hotel Valet" />
+          <div className="landing-hero-gradient" />
+          
+          <div className="landing-hero-content">
+            <div className="hero-badge">✨ Zero-Wait Digital Valet Ecosystem</div>
+            <h1 style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)', fontWeight: 900, margin: '0 0 20px 0', lineHeight: 1.08, letterSpacing: '-1.5px' }}>
+              Arrive Like Royalty. Leave Without Waiting.
+            </h1>
+            <p style={{ fontSize: '1.15rem', color: '#cbd5e1', lineHeight: 1.6, marginBottom: '32px', fontWeight: 400 }}>
+              Register your vehicles once in the Sky Valet VIP Garage. Flash your digital pass at any partner 5-star hotel or restaurant, track live wash bay progress, and summon your car to the front door with a single tap.
+            </p>
+            
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '36px' }}>
+              <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '18px 32px', fontSize: '1.1rem' }}>
+                🚘 Register Your Car — Free
+              </button>
+              <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '18px 28px', background: 'rgba(255,255,255,0.1)', color: 'white', borderColor: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)' }}>
+                Open My VIP Pass
+              </button>
+            </div>
+
+            {/* Instant Ticket Lookup Bar */}
+            <form onSubmit={handleTicketLookup} style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', gap: '10px', maxWidth: '480px' }}>
+              <input
+                type="text"
+                placeholder="Have a paper/QR ticket ID? (e.g. ticket_173...)"
+                value={ticketCodeInput}
+                onChange={(e) => setTicketCodeInput(e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: 'white', padding: '10px 14px', flex: 1, fontSize: '0.95rem', outline: 'none', fontFamily: 'var(--font-ui)' }}
+              />
+              <button type="submit" className="btn-blue" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Track Car</button>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      {/* Why Use Sky Valet - 4 Visual Pillars */}
+      <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 48px auto', padding: '0 24px' }}>
+        <span style={{ color: 'var(--accent-green)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', fontSize: '0.85rem' }}>Why Drivers & Venues Choose Us</span>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '8px 0 12px 0', letterSpacing: '-1px' }}>Engineered for Effortless Luxury</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>No more lost paper tickets, no more standing in the heat or rain waiting for your keys.</p>
+      </div>
+
+      <section className="feature-grid">
+        <div className="feature-card">
+          <img className="feature-img" src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&q=80" alt="VIP Garage Pass" />
+          <div style={{ padding: '24px' }}>
+            <span className="status-badge status-ready" style={{ marginBottom: '12px' }}>1-Second Drop-Off</span>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.35rem', fontWeight: 800 }}>Digital VIP Fleet Garage</h3>
+            <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 500 }}>
+              Save all your vehicles in your personal garage. Show your QR Express Pass to the valet runner and walk straight into the venue—zero forms or waiting.
+            </p>
+          </div>
+        </div>
+
+        <div className="feature-card">
+          <img className="feature-img" src="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=800&q=80" alt="Luxury Car Detailing" />
+          <div style={{ padding: '24px' }}>
+            <span className="status-badge wash-washing" style={{ marginBottom: '12px' }}>Live Detailing</span>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.35rem', fontWeight: 800 }}>1-Tap Wash Bay & Tracking</h3>
+            <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 500 }}>
+              Order a full luxury wash while you dine using Apple Pay or Google Pay. Watch your car move from Queued to Washing to Shining in real time.
+            </p>
+          </div>
+        </div>
+
+        <div className="feature-card">
+          <img className="feature-img" src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80" alt="Five Star Hotel Entrance" />
+          <div style={{ padding: '24px' }}>
+            <span className="status-badge status-incoming" style={{ marginBottom: '12px' }}>Pinpoint Delivery</span>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.35rem', fontWeight: 800 }}>Summon Before You Pay the Bill</h3>
+            <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 500 }}>
+              Request your car from your table and choose which entrance you're walking out of. Your vehicle is running and waiting at the curb the second you step outside.
+            </p>
+          </div>
+        </div>
+
+        <div className="feature-card">
+          <img className="feature-img" src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80" alt="Secure Key Handover" />
+          <div style={{ padding: '24px' }}>
+            <span className="status-badge status-draft" style={{ marginBottom: '12px' }}>Anti-Theft Security</span>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.35rem', fontWeight: 800 }}>Verified Plate Handover</h3>
+            <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 500 }}>
+              Every vehicle is logged to an exact GPS-mapped parking zone and requires mandatory license plate verification before keys are ever released.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* B2B SaaS Banner for Hotels & Restaurants */}
+      <section style={{ maxWidth: '1300px', margin: '0 auto 64px auto', padding: '0 24px', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '24px', padding: '48px', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', boxShadow: 'var(--shadow-lg)' }}>
+          <div style={{ maxWidth: '680px', textAlign: 'left' }}>
+            <span style={{ color: '#38bdf8', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>For Hotels, Resorts & Fine Dining</span>
+            <h3 style={{ fontSize: '2rem', fontWeight: 900, margin: '8px 0 12px 0' }}>Upgrade Your Venue to Sky Valet SaaS</h3>
+            <p style={{ color: '#94a3b8', margin: 0, lineHeight: 1.6, fontSize: '1.05rem' }}>
+              Multi-tenant cloud dispatch, custom interactive floor maps, dedicated wash bay pipelines, and instant mobile tipping for your valet runners.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={() => onNavigateAuth('staff_login')} className="btn-green" style={{ width: 'auto', padding: '16px 28px' }}>Partner Portal Login</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// UNIFIED AUTH VIEW (Customer Register, Customer Login, & Staff Login)
+// ------------------------------------------------------------------
+function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
+  const [mode, setMode] = useState(initialMode); // 'customer_login' | 'customer_register' | 'staff_login'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [countryCode, setCountryCode] = useState('+971');
+  const [phone, setPhone] = useState('');
+  const [firstCarMake, setFirstCarMake] = useState('');
+  const [firstCarModel, setFirstCarModel] = useState('');
+  const [firstCarColor, setFirstCarColor] = useState('');
+  const [firstCarPlate, setFirstCarPlate] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const availableMakes = Object.keys(CAR_DATABASE);
+  const availableModels = CAR_DATABASE[firstCarMake] || [];
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+
+    try {
+      if (mode === 'customer_register') {
+        if (!fullName.trim() || !phone.trim()) {
+          setError('Please enter your name and phone number.');
+          setSubmitting(false);
+          return;
+        }
+        const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        const uid = cred.user.uid;
+        const vipCode = `VIP-${Math.floor(1000 + Math.random() * 9000)}`;
+        const fullPhone = `${countryCode} ${phone.trim()}`;
+
+        const initialGarage = {};
+        if (firstCarPlate.trim() && firstCarMake.trim()) {
+          const carId = `car_${Date.now()}`;
+          initialGarage[carId] = {
+            id: carId,
+            make: firstCarMake.trim(),
+            model: firstCarModel.trim(),
+            color: firstCarColor.trim() || 'Black',
+            licensePlate: firstCarPlate.trim().toUpperCase(),
+            vipCode
+          };
+        }
+
+        await set(ref(db, `users/${uid}`), {
+          role: 'customer',
+          name: fullName.trim(),
+          email: email.trim(),
+          phone: fullPhone,
+          vipCode,
+          garage: initialGarage,
+          createdAt: Date.now()
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+      }
+    } catch (err) {
+      setError(err.message || 'Authentication failed. Please check your credentials.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="app-container center-wrapper">
+      <div className="vibrant-card animate-scale-in" style={{ maxWidth: mode === 'customer_register' ? '520px' : '430px', padding: '40px 32px' }}>
+        {onBackToLanding && (
+          <button onClick={onBackToLanding} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', padding: 0, fontFamily: 'var(--font-ui)' }}>
+            ← Back to Home
+          </button>
+        )}
+
+        {/* Mode Switcher Tabs */}
+        <div style={{ display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '14px', marginBottom: '28px', gap: '6px' }}>
+          <button type="button" onClick={() => { setMode('customer_login'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'customer_login' ? '#fff' : 'transparent', color: mode === 'customer_login' ? 'var(--text-main)' : 'var(--text-muted)', boxShadow: mode === 'customer_login' ? 'var(--shadow-sm)' : 'none' }}>
+            VIP Login
+          </button>
+          <button type="button" onClick={() => { setMode('customer_register'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'customer_register' ? '#fff' : 'transparent', color: mode === 'customer_register' ? 'var(--accent-green)' : 'var(--text-muted)', boxShadow: mode === 'customer_register' ? 'var(--shadow-sm)' : 'none' }}>
+            Register
+          </button>
+          <button type="button" onClick={() => { setMode('staff_login'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'staff_login' ? 'var(--dev-black)' : 'transparent', color: mode === 'staff_login' ? '#fff' : 'var(--text-muted)' }}>
+            Staff
+          </button>
+        </div>
+
+        <h2 className="heading-brand" style={{ marginBottom: '8px', fontSize: '1.85rem' }}>
+          {mode === 'customer_register' ? 'CREATE VIP GARAGE' : mode === 'staff_login' ? 'STAFF PORTAL' : 'WELCOME BACK'}
+        </h2>
+        <p style={{ color: 'var(--text-muted)', marginTop: 0, marginBottom: '28px', fontWeight: 500, fontSize: '0.95rem' }}>
+          {mode === 'customer_register'
+            ? 'Save your vehicles once for instant QR drop-off & live tracking.'
+            : mode === 'staff_login'
+            ? 'Authenticate with your venue or developer credentials.'
+            : 'Sign in to access your saved vehicles and live valet tickets.'}
+        </p>
+
+        {error && <p style={{ color: 'var(--danger-red)', fontSize: '0.9rem', marginBottom: '20px', background: '#fef2f2', padding: '12px', borderRadius: '10px', fontWeight: 600, border: '1px solid #fecaca' }}>{error}</p>}
+
+        <form onSubmit={handleAuth} style={{ textAlign: 'left' }}>
+          {mode === 'customer_register' && (
+            <>
+              <input type="text" placeholder="Full Name" required className="vibrant-input" style={{ marginBottom: '14px' }} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 2fr', gap: '12px', marginBottom: '14px' }}>
+                <Autocomplete options={COUNTRY_CODES} value={countryCode} onChange={(val) => setCountryCode(val)} placeholder="+ Code" isObject={true} style={{ marginBottom: 0 }} />
+                <input type="tel" placeholder="Mobile Number" required className="vibrant-input" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              </div>
+            </>
+          )}
+
+          <input type="email" placeholder={mode === 'staff_login' ? "Staff Email" : "Email Address"} required className="vibrant-input" style={{ marginBottom: '14px' }} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+          <input type="password" placeholder="Password (Min 6 chars)" required minLength={6} className="vibrant-input" style={{ marginBottom: '20px' }} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'customer_register' ? 'new-password' : 'current-password'} />
+
+          {mode === 'customer_register' && (
+            <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--card-border)', marginBottom: '24px' }}>
+              <p style={{ margin: '0 0 12px 0', fontWeight: 800, fontSize: '0.85rem', color: 'var(--accent-green)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                🚘 Add Your Primary Vehicle (Optional)
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <Autocomplete options={availableMakes} value={firstCarMake} onChange={(val) => { setFirstCarMake(val); setFirstCarModel(''); }} placeholder="Make (e.g. Porsche)" isObject={false} />
+                <Autocomplete options={availableModels} value={firstCarModel} onChange={(val) => setFirstCarModel(val)} placeholder="Model (e.g. 911)" isObject={false} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <input placeholder="Color (e.g. Black)" className="vibrant-input" value={firstCarColor} onChange={(e) => setFirstCarColor(e.target.value)} />
+                <input placeholder="License Plate" className="vibrant-input" style={{ textTransform: 'uppercase', fontWeight: 700 }} value={firstCarPlate} onChange={(e) => setFirstCarPlate(e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          <button type="submit" disabled={submitting} className={mode === 'staff_login' ? "btn-dev" : "btn-green"}>
+            {submitting ? 'Please wait...' : mode === 'customer_register' ? 'Create My VIP Garage' : 'Sign In'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// CUSTOMER VIP GARAGE & LIVE TRACKING DASHBOARD
+// ------------------------------------------------------------------
+function CustomerGarageView({ userProfile, uid, onOpenLiveTicket }) {
+  const [activeTab, setActiveTab] = useState('garage'); // 'garage' | 'history'
+  const [myTickets, setMyTickets] = useState([]);
+  const [allVenues, setAllVenues] = useState({});
+  const [showAddCarModal, setShowAddCarModal] = useState(false);
+  const [selectedPassCar, setSelectedPassCar] = useState(null);
+  const [newCar, setNewCar] = useState({ make: '', model: '', color: '', plate: '' });
+
+  const garageCars = userProfile?.garage ? Object.values(userProfile.garage) : [];
+  const myPlates = garageCars.map(c => (c.licensePlate || '').toUpperCase()).filter(Boolean);
+
+  useEffect(() => {
+    const unsubVenues = onValue(ref(db, 'venues'), (snap) => {
+      if (snap.exists()) setAllVenues(snap.val());
+    });
+
+    const unsubTickets = onValue(ref(db, 'tickets'), (snap) => {
+      if (snap.exists()) {
+        const data = snap.val();
+        const all = Object.keys(data).map(k => ({ id: k, ...data[k] }));
+        const matched = all.filter(t =>
+          t.customerId === uid ||
+          (t.vehicle?.licensePlate && myPlates.includes(t.vehicle.licensePlate.toUpperCase()))
+        );
+        setMyTickets(matched.sort((a, b) => ((b.timestamps && b.timestamps.parkedAt) || 0) - ((a.timestamps && a.timestamps.parkedAt) || 0)));
+      } else {
+        setMyTickets([]);
+      }
+    });
+
+    return () => { unsubVenues(); unsubTickets(); };
+  }, [uid, JSON.stringify(myPlates)]);
+
+  const handleAddCar = async (e) => {
+    e.preventDefault();
+    if (!newCar.make || !newCar.plate) return;
+    const carId = `car_${Date.now()}`;
+    const carCode = `VIP-${Math.floor(1000 + Math.random() * 9000)}`;
+    await set(ref(db, `users/${uid}/garage/${carId}`), {
+      id: carId,
+      make: newCar.make,
+      model: newCar.model,
+      color: newCar.color || 'Black',
+      licensePlate: newCar.plate.toUpperCase(),
+      vipCode: carCode
+    });
+    setNewCar({ make: '', model: '', color: '', plate: '' });
+    setShowAddCarModal(false);
+  };
+
+  const handleDeleteCar = async (carId) => {
+    await remove(ref(db, `users/${uid}/garage/${carId}`));
+  };
+
+  const activeParkedTickets = myTickets.filter(t => t.status !== 'retrieved');
+  const pastTickets = myTickets.filter(t => t.status === 'retrieved');
+  const availableMakes = Object.keys(CAR_DATABASE);
+  const availableModels = CAR_DATABASE[newCar.make] || [];
+
+  return (
+    <div className="app-container">
+      <div className="dashboard-wrapper" style={{ maxWidth: '1050px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '28px' }}>
+          <div>
+            <span style={{ color: 'var(--accent-green)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>VIP Member Garage</span>
+            <h1 className="heading-dashboard">Welcome, {userProfile?.name || 'VIP Guest'}</h1>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={() => setShowAddCarModal(true)} className="btn-green" style={{ width: 'auto', padding: '12px 24px' }}>+ Add Vehicle</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{ width: 'auto', padding: '12px 20px' }}>Logout</button>
+          </div>
+        </div>
+
+        {/* LIVE ACTIVE VALET TICKET BANNER */}
+        {activeParkedTickets.length > 0 && (
+          <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {activeParkedTickets.map(activeT => {
+              const venueName = allVenues[activeT.venueId]?.name || 'Partner Venue';
+              return (
+                <div key={activeT.id} className="animate-scale-in" style={{ background: 'linear-gradient(135deg, #065f46 0%, #10b981 100%)', color: 'white', borderRadius: '20px', padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', boxShadow: 'var(--shadow-btn)' }}>
+                  <div>
+                    <span style={{ background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                      🟢 Live Parked Vehicle • {venueName}
+                    </span>
+                    <h3 style={{ margin: '10px 0 4px 0', fontSize: '1.6rem', fontWeight: 900 }}>
+                      {activeT.vehicle?.make} {activeT.vehicle?.model} ({activeT.vehicle?.licensePlate})
+                    </h3>
+                    <p style={{ margin: 0, opacity: 0.9, fontWeight: 600 }}>
+                      Status: <strong style={{ textTransform: 'uppercase' }}>{activeT.status}</strong> {activeT.parkingSpot ? `• Spot ${activeT.parkingSpot}` : ''} {activeT.wantsWash ? `• 🫧 Wash: ${activeT.washStatus}` : ''}
+                    </p>
+                  </div>
+                  <button onClick={() => onOpenLiveTicket(activeT.id)} className="btn-outline" style={{ width: 'auto', background: 'white', color: '#065f46', border: 'none', padding: '14px 24px', fontWeight: 800 }}>
+                    Open Live Controls & Request Car →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Navigation Tabs */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          <button onClick={() => setActiveTab('garage')} className={activeTab === 'garage' ? 'btn-dev' : 'btn-outline'} style={{ width: 'auto', padding: '12px 28px' }}>
+            🚘 My Saved Fleet ({garageCars.length})
+          </button>
+          <button onClick={() => setActiveTab('history')} className={activeTab === 'history' ? 'btn-dev' : 'btn-outline'} style={{ width: 'auto', padding: '12px 28px' }}>
+            🧾 Past Visits & Receipts ({pastTickets.length})
+          </button>
+        </div>
+
+        {/* MY GARAGE TAB */}
+        {activeTab === 'garage' && (
+          <div className="animate-slide-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '24px' }}>
+            {garageCars.map(car => (
+              <div key={car.id} className="garage-car-card">
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                    <span className="plate-pill">{car.licensePlate}</span>
+                    <button onClick={() => handleDeleteCar(car.id)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#cbd5e1', borderRadius: '8px', padding: '6px 10px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}>
+                      Remove
+                    </button>
+                  </div>
+                  <h3 style={{ fontSize: '1.65rem', fontWeight: 900, margin: '0 0 4px 0' }}>{car.make} {car.model}</h3>
+                  <p style={{ margin: 0, color: '#94a3b8', fontWeight: 600 }}>Exterior: {car.color} • Pass: <span style={{ color: '#34d399', fontFamily: 'monospace' }}>{car.vipCode || userProfile?.vipCode}</span></p>
+                </div>
+
+                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', gap: '10px' }}>
+                  <button onClick={() => setSelectedPassCar(car)} className="btn-green" style={{ padding: '12px', fontSize: '0.95rem' }}>
+                    📲 Show Valet QR Pass
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {garageCars.length === 0 && (
+              <div className="editor-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 24px' }}>
+                <h3 style={{ marginTop: 0, fontSize: '1.4rem', fontWeight: 800 }}>Your VIP Garage is Empty</h3>
+                <p style={{ color: 'var(--text-muted)', maxWidth: '420px', margin: '0 auto 24px auto', fontWeight: 500 }}>
+                  Add your car once so valets at partner hotels and restaurants can scan your digital pass in 1 second.
+                </p>
+                <button onClick={() => setShowAddCarModal(true)} className="btn-green" style={{ width: 'auto', margin: '0 auto', display: 'inline-flex' }}>+ Add Your First Vehicle</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PAST VISITS & RECEIPTS TAB */}
+        {activeTab === 'history' && (
+          <div className="animate-slide-up" style={{ overflowX: 'auto' }}>
+            <table className="luxury-table">
+              <thead>
+                <tr><th>Date</th><th>Venue</th><th>Vehicle</th><th>Car Wash</th><th>Valet Tip</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {pastTickets.map(t => {
+                  const d = t.timestamps?.parkedAt ? new Date(t.timestamps.parkedAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
+                  const venueName = allVenues[t.venueId]?.name || t.venueId;
+                  return (
+                    <tr key={t.id}>
+                      <td style={{ fontWeight: 600 }}>{d}</td>
+                      <td style={{ fontWeight: 800 }}>{venueName}</td>
+                      <td style={{ fontWeight: 700 }}>{t.vehicle?.make} {t.vehicle?.model} ({t.vehicle?.licensePlate})</td>
+                      <td style={{ fontWeight: 700, color: t.washPaid ? 'var(--accent-blue)' : 'var(--text-muted)' }}>
+                        {t.washPaid ? `Paid ($${t.washTransaction?.amount || 25})` : 'None'}
+                      </td>
+                      <td style={{ fontWeight: 700, color: t.tippedAmount ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                        {t.tippedAmount ? `$${t.tippedAmount}.00` : '-'}
+                      </td>
+                      <td><span className="status-badge status-ready">Delivered</span></td>
+                    </tr>
+                  );
+                })}
+                {pastTickets.length === 0 && (
+                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>No past valet visits recorded yet.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ADD VEHICLE MODAL */}
+      {showAddCarModal && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in" style={{ textAlign: 'left' }}>
+            <h3 style={{ marginTop: 0, fontSize: '1.5rem', fontWeight: 800 }}>Add Vehicle to Garage</h3>
+            <form onSubmit={handleAddCar}>
+              <Autocomplete options={availableMakes} value={newCar.make} onChange={(val) => setNewCar({ ...newCar, make: val, model: '' })} placeholder="Vehicle Make (e.g. BMW)" isObject={false} />
+              <Autocomplete options={availableModels} value={newCar.model} onChange={(val) => setNewCar({ ...newCar, model: val })} placeholder="Vehicle Model (e.g. M5)" isObject={false} />
+              <input placeholder="Exterior Color (e.g. Matte Black)" required className="vibrant-input" style={{ marginBottom: '16px' }} value={newCar.color} onChange={e => setNewCar({ ...newCar, color: e.target.value })} />
+              <input placeholder="License Plate Number" required className="vibrant-input" style={{ marginBottom: '24px', textTransform: 'uppercase', fontWeight: 800 }} value={newCar.plate} onChange={e => setNewCar({ ...newCar, plate: e.target.value })} />
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="submit" className="btn-green" style={{ flex: 2 }}>Save to Garage</button>
+                <button type="button" onClick={() => setShowAddCarModal(false)} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* VIP EXPRESS QR PASS MODAL */}
+      {selectedPassCar && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in">
+            <div style={{ background: '#0f172a', color: 'white', margin: '-32px -32px 24px -32px', padding: '24px' }}>
+              <span style={{ color: '#34d399', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Sky Valet Express Pass</span>
+              <h3 style={{ margin: '6px 0 0 0', fontSize: '1.6rem', fontWeight: 900 }}>{selectedPassCar.make} {selectedPassCar.model}</h3>
+              <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontWeight: 600 }}>{selectedPassCar.licensePlate} • {selectedPassCar.color}</p>
+            </div>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 16px 0', fontWeight: 500 }}>
+              Show this pass to the valet runner. They can scan the QR or enter your Express Code below:
+            </p>
+
+            <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', display: 'inline-block', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-md)', marginBottom: '16px' }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(selectedPassCar.vipCode || selectedPassCar.licensePlate)}`}
+                alt="VIP Car QR"
+                style={{ display: 'block' }}
+              />
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '2px dashed #cbd5e1', marginBottom: '24px' }}>
+              <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Valet Express Code / Plate</span>
+              <strong style={{ fontSize: '1.5rem', fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--text-main)' }}>
+                {selectedPassCar.vipCode || selectedPassCar.licensePlate}
+              </strong>
+            </div>
+
+            <button onClick={() => setSelectedPassCar(null)} className="btn-outline" style={{ width: '100%' }}>Done</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// LOG ARRIVAL MODAL (Edit / Create / Pre-filled from VIP Scan)
+// ------------------------------------------------------------------
+function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPlates, editingTicket = null, prefillVipData = null }) {
   const [newlyCreatedTicket, setNewlyCreatedTicket] = useState(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
-  const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: '' });
+  const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: '', customerId: null });
 
   useEffect(() => {
     if (editingTicket && editingTicket.vehicle) {
@@ -309,10 +857,19 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       setFormData({
         make: editingTicket.vehicle.make || '', model: editingTicket.vehicle.model || '',
         color: editingTicket.vehicle.color || '', plate: editingTicket.vehicle.licensePlate || '',
-        spot: editingTicket.parkingSpot || '', countryCode: phoneParts[0] || '+971', phone: phoneParts[1] || ''
+        spot: editingTicket.parkingSpot || '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
+        customerId: editingTicket.customerId || null
+      });
+    } else if (prefillVipData) {
+      const phoneParts = (prefillVipData.phone || "").split(' ');
+      setFormData({
+        make: prefillVipData.make || '', model: prefillVipData.model || '',
+        color: prefillVipData.color || '', plate: prefillVipData.licensePlate || '',
+        spot: '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
+        customerId: prefillVipData.customerId || null
       });
     }
-  }, [editingTicket]);
+  }, [editingTicket, prefillVipData]);
 
   const currentDomain = window.location.origin;
   const availableMakes = Object.keys(CAR_DATABASE);
@@ -332,6 +889,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
     if (editingTicket) {
       await update(ref(db, `tickets/${editingTicket.id}`), {
         guestPhone: fullPhone,
+        customerId: formData.customerId || null,
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
         parkingSpot: formData.spot,
         status: editingTicket.status === "draft" ? "parked" : editingTicket.status, 
@@ -341,7 +899,9 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
     } else {
       const ticketId = `ticket_${Date.now()}`;
       await set(ref(db, `tickets/${ticketId}`), {
-        venueId: venueId, guestPhone: fullPhone,
+        venueId: venueId,
+        guestPhone: fullPhone,
+        customerId: formData.customerId || null,
         vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
         parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
         timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
@@ -358,7 +918,8 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       const phoneParts = (past.guestPhone || "").split(' ');
       setFormData({
         ...formData, plate: plate, make: past.vehicle?.make || '', model: past.vehicle?.model || '',
-        color: past.vehicle?.color || '', countryCode: phoneParts[0] || '+971', phone: phoneParts[1] || ''
+        color: past.vehicle?.color || '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
+        customerId: past.customerId || null
       });
     }
   };
@@ -370,6 +931,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         {newlyCreatedTicket ? (
           <div className="animate-slide-up">
             <h2 className="heading-brand" style={{color: 'var(--accent-green)'}}>TICKET ACTIVE</h2>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>If this guest is a registered VIP member, this ticket is already live in their app.</p>
             <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
               <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
@@ -399,10 +961,16 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="animate-slide-up">
-            <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '24px'}}>
-              {editingTicket && editingTicket.id !== 'new' ? 'EDIT DETAILS' : 'LOG ARRIVAL'}
+            <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '16px'}}>
+              {editingTicket && editingTicket.id !== 'new' ? 'EDIT DETAILS' : prefillVipData ? '⚡ VIP PASS SCANNED' : 'LOG ARRIVAL'}
             </h2>
             
+            {prefillVipData && (
+              <div style={{ background: '#ecfdf5', color: '#065f46', padding: '10px 14px', borderRadius: '10px', marginBottom: '16px', fontWeight: 700, fontSize: '0.9rem', border: '1px solid #a7f3d0' }}>
+                ✓ Auto-filled from {prefillVipData.ownerName || 'VIP'}'s Garage. Just pick a spot!
+              </div>
+            )}
+
             {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '2px solid #fecaca', boxShadow: 'var(--shadow-sm)'}}>{errorMsg}</div>}
 
             <input placeholder="License Plate (Auto-fills if known)" className="vibrant-input" style={{marginBottom: '16px', textTransform: 'uppercase', borderColor: 'var(--warning-yellow)'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} onBlur={handlePlateBlur} autoComplete="off" />
@@ -438,7 +1006,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
 // ------------------------------------------------------------------
 // GUEST VIEW COMPONENT (PUBLIC TRACKER)
 // ------------------------------------------------------------------
-function GuestTicketView({ ticketId }) {
+function GuestTicketView({ ticketId, onBack }) {
   const [ticket, setTicket] = useState(null);
   const [venueSettings, setVenueSettings] = useState(DEFAULT_VENUE_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -488,7 +1056,15 @@ function GuestTicketView({ ticketId }) {
   };
 
   if (loading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>LOADING TICKET...</div></div>;
-  if (!ticket) return <div className="app-container center-wrapper"><div className="vibrant-card animate-scale-in">Ticket not found or expired.</div></div>;
+  if (!ticket) return (
+    <div className="app-container center-wrapper">
+      <div className="vibrant-card animate-scale-in">
+        <h3 style={{ marginTop: 0 }}>Ticket Not Found</h3>
+        <p style={{ color: 'var(--text-muted)' }}>This ticket ID does not exist or has expired.</p>
+        {onBack && <button onClick={onBack} className="btn-outline" style={{ width: '100%', marginTop: '16px' }}>← Return</button>}
+      </div>
+    </div>
+  );
 
   const { vehicle, status, parkedByPhone, parkedByName, wantsWash, washStatus } = ticket;
 
@@ -503,6 +1079,7 @@ function GuestTicketView({ ticketId }) {
           <p style={{color: 'var(--text-muted)', marginBottom: '32px', fontWeight: 500}}>Your valet is currently logging your vehicle details and parking it safely. This screen will update automatically.</p>
           <div style={{display: 'flex', justifyContent: 'center'}}><div style={{width: '40px', height: '40px', border: '4px solid #e2e8f0', borderTopColor: 'var(--draft-purple)', borderRadius: '50%', animation: 'spin 1s linear infinite'}} /></div>
           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          {onBack && <button onClick={onBack} className="btn-outline" style={{ width: '100%', marginTop: '24px' }}>← Back</button>}
         </div>
       </div>
     );
@@ -516,6 +1093,11 @@ function GuestTicketView({ ticketId }) {
     <div className="app-container center-wrapper">
       <div className="vibrant-card animate-slide-up" style={{padding: '24px'}}>
         <div style={{background: 'var(--accent-green)', padding: '24px', margin: '-24px -24px 24px -24px', color: 'white', boxShadow: 'var(--shadow-sm)'}}>
+          {onBack && (
+            <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', marginBottom: '8px', fontFamily: 'var(--font-ui)' }}>
+              ← Back to Garage
+            </button>
+          )}
           <h2 style={{margin: 0, fontSize: '1.5rem', fontWeight: 800}}>SKY VALET</h2>
           <p style={{margin: '4px 0 0 0', opacity: 0.9, fontSize: '0.9rem', fontWeight: 500}}>Digital Parking Pass</p>
         </div>
@@ -627,35 +1209,6 @@ function GuestTicketView({ ticketId }) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// ------------------------------------------------------------------
-// LOGIN COMPONENT
-// ------------------------------------------------------------------
-function LoginView() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try { await signInWithEmailAndPassword(auth, email, password); } 
-    catch (err) { setError('Invalid credentials.'); }
-  };
-
-  return (
-    <div className="app-container center-wrapper">
-      <div className="vibrant-card animate-scale-in" style={{ padding: '48px 32px' }}>
-        <h2 className="heading-brand" style={{marginBottom: '40px'}}>STAFF PORTAL</h2>
-        {error && <p style={{ color: 'var(--danger-red)', fontSize: '0.95rem', marginBottom: '24px', background: '#fef2f2', padding: '12px', borderRadius: '8px', fontWeight: 600, border: '1px solid #fecaca' }}>{error}</p>}
-        <form onSubmit={handleLogin}>
-          <input type="email" placeholder="Staff Email" required className="vibrant-input" style={{marginBottom: '20px'}} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-          <input type="password" placeholder="Password" required className="vibrant-input" style={{marginBottom: '32px'}} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-          <button type="submit" className="btn-green">Authenticate</button>
-        </form>
-      </div>
     </div>
   );
 }
@@ -1063,11 +1616,16 @@ function WashBayView({ venueId }) {
 }
 
 // ------------------------------------------------------------------
-// VALET DISPATCHER DASHBOARD
+// VALET DISPATCHER DASHBOARD (With Working VIP Pass Scanner)
 // ------------------------------------------------------------------
 function ValetDashboardView({ parkingMap, venueId }) {
   const [tickets, setTickets] = useState([]);
   const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scanInputCode, setScanInputCode] = useState('');
+  const [scanError, setScanError] = useState('');
+  const [registeredVipCars, setRegisteredVipCars] = useState([]);
+  const [scannedVipPrefill, setScannedVipPrefill] = useState(null);
+
   const [quickQrId, setQuickQrId] = useState(null);
   const [draftToEdit, setDraftToEdit] = useState(null); 
   const [knownPlates, setKnownPlates] = useState({});
@@ -1091,8 +1649,50 @@ function ValetDashboardView({ parkingMap, venueId }) {
         setKnownPlates(memory);
       } else { setTickets([]); }
     });
-    return () => unsubscribe();
+
+    // Load registered VIP customer vehicles so the Valet Scanner can match them
+    const unsubUsers = onValue(ref(db, 'users'), (snap) => {
+      if (snap.exists()) {
+        const usersObj = snap.val();
+        const vipList = [];
+        Object.keys(usersObj).forEach(uid => {
+          const u = usersObj[uid];
+          if (u.garage) {
+            Object.values(u.garage).forEach(car => {
+              vipList.push({
+                ...car,
+                customerId: uid,
+                ownerName: u.name || 'VIP Member',
+                phone: u.phone || '+971 500000000'
+              });
+            });
+          }
+        });
+        setRegisteredVipCars(vipList);
+      }
+    });
+
+    return () => { unsubscribe(); unsubUsers(); };
   }, [venueId]);
+
+  const handleVipScanLookup = (e) => {
+    e.preventDefault();
+    setScanError('');
+    const query = scanInputCode.trim().toUpperCase();
+    if (!query) return;
+
+    const match = registeredVipCars.find(
+      c => (c.vipCode && c.vipCode.toUpperCase() === query) || (c.licensePlate && c.licensePlate.toUpperCase() === query)
+    );
+
+    if (match) {
+      setShowScannerModal(false);
+      setScanInputCode('');
+      setScannedVipPrefill(match);
+    } else {
+      setScanError('No registered VIP vehicle found with that Pass Code or Plate.');
+    }
+  };
 
   const changeStatus = async (ticketId, field, newStatus) => {
     const updates = { [field]: newStatus };
@@ -1121,10 +1721,10 @@ function ValetDashboardView({ parkingMap, venueId }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <h1 className="heading-dashboard">Dispatcher</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none', width: 'auto'}}>Logout</button>
           </div>
           <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
-            <button onClick={() => setShowScannerModal(true)} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
+            <button onClick={() => { setScanError(''); setShowScannerModal(true); }} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
             <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
           </div>
         </div>
@@ -1205,7 +1805,17 @@ function ValetDashboardView({ parkingMap, venueId }) {
         </div>
       </div>
       
-      {draftToEdit && <LogArrivalModal onClose={() => setDraftToEdit(null)} venueId={venueId} parkingMap={parkingMap} occupiedSpots={occupiedSpots} knownPlates={knownPlates} editingTicket={draftToEdit} />}
+      {(draftToEdit || scannedVipPrefill) && (
+        <LogArrivalModal
+          onClose={() => { setDraftToEdit(null); setScannedVipPrefill(null); }}
+          venueId={venueId}
+          parkingMap={parkingMap}
+          occupiedSpots={occupiedSpots}
+          knownPlates={knownPlates}
+          editingTicket={draftToEdit}
+          prefillVipData={scannedVipPrefill}
+        />
+      )}
 
       {quickQrId && (
         <div className="modal-overlay">
@@ -1222,16 +1832,47 @@ function ValetDashboardView({ parkingMap, venueId }) {
 
       <CustomPromptWidget isOpen={promptConfig.isOpen} title="Verify Handover" message="Type the license plate number of this vehicle to confirm you are handing the keys to the correct guest." expectedValue={promptConfig.expectedPlate || 'N/A'} onMatch={() => { changeStatus(promptConfig.ticketId, 'status', 'retrieved'); setPromptConfig({ ...promptConfig, isOpen: false }); }} onCancel={() => setPromptConfig({ ...promptConfig, isOpen: false })} />
 
+      {/* WORKING VIP SCANNER MODAL */}
       {showScannerModal && (
         <div className="modal-overlay">
-          <div className="vibrant-card animate-scale-in" style={{maxWidth: '400px'}}>
-            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest App</h3>
-            <div style={{background: '#000', height: '220px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '24px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
+          <div className="vibrant-card animate-scale-in" style={{maxWidth: '440px'}}>
+            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest VIP Pass</h3>
+            <div style={{background: '#000', height: '190px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '20px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
               <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite'}}></div>
-              <p style={{fontWeight: 600, letterSpacing: '1px'}}>Camera Active...</p>
+              <p style={{fontWeight: 600, letterSpacing: '1px'}}>Optical Scanner Active...</p>
             </div>
-            <p style={{color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', fontWeight: 500}}>Point camera at the guest's Sky Valet App to instantly retrieve their vehicle and membership details.</p>
-            <button onClick={() => setShowScannerModal(false)} className="btn-outline" style={{width: '100%', padding: '16px'}}>Close Scanner</button>
+
+            {scanError && <div style={{ background: '#fef2f2', color: 'var(--danger-red)', padding: '10px', borderRadius: '8px', marginBottom: '12px', fontSize: '0.85rem', fontWeight: 700 }}>{scanError}</div>}
+
+            <form onSubmit={handleVipScanLookup} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <input
+                type="text"
+                placeholder="Type VIP Code (e.g. VIP-1234) or Plate"
+                className="vibrant-input"
+                style={{ textTransform: 'uppercase', fontWeight: 700 }}
+                value={scanInputCode}
+                onChange={(e) => setScanInputCode(e.target.value)}
+              />
+              <button type="submit" className="btn-green" style={{ width: 'auto', padding: '0 20px' }}>Load</button>
+            </form>
+
+            {registeredVipCars.length > 0 && (
+              <div style={{ textAlign: 'left', marginBottom: '20px', maxHeight: '130px', overflowY: 'auto', background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Quick-Tap Registered VIPs:</span>
+                {registeredVipCars.map((c, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => { setShowScannerModal(false); setScannedVipPrefill(c); }}
+                    style={{ padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 700, fontSize: '0.9rem', borderBottom: '1px solid #e2e8f0' }}
+                  >
+                    <span>{c.make} {c.model} ({c.licensePlate})</span>
+                    <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>{c.vipCode}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button onClick={() => setShowScannerModal(false)} className="btn-outline" style={{width: '100%', padding: '14px'}}>Close Scanner</button>
           </div>
         </div>
       )}
@@ -1379,7 +2020,7 @@ function MasterAdminView({ parkingMap, venueId }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <h1 className="heading-dashboard">Management Overview</h1>
-            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none'}}>Logout</button>
+            <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none', width: 'auto'}}>Logout</button>
           </div>
           <button onClick={() => setDraftToEdit({ id: 'new' })} className="btn-green" style={{width: 'auto', padding: '12px 32px'}}>+ Add Vehicle</button>
         </div>
@@ -1564,13 +2205,17 @@ function MasterAdminView({ parkingMap, venueId }) {
 }
 
 // ------------------------------------------------------------------
-// APP ROUTER (Role-Based Access)
+// APP ROUTER (Landing Page + Customer Garage + Staff Role Access)
 // ------------------------------------------------------------------
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [userVenueId, setUserVenueId] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [currentUid, setCurrentUid] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [isGuest, setIsGuest] = useState(false);
+  
+  const [activeTicketOverlay, setActiveTicketOverlay] = useState(null);
+  const [authScreenMode, setAuthScreenMode] = useState(null); // null = show Landing Page
   const [globalParkingMap, setGlobalParkingMap] = useState([]);
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -1582,34 +2227,46 @@ function App() {
     document.head.appendChild(styleSheet);
 
     if (requestedTicketId) {
-      setIsGuest(true);
-      setAuthLoading(false);
-      return () => document.head.removeChild(styleSheet);
+      setActiveTicketOverlay(requestedTicketId);
     }
 
+    let unsubUserProfile = null;
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      if (unsubUserProfile) { unsubUserProfile(); unsubUserProfile = null; }
+
       if (currentUser) {
-        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          setUserRole(userData.role || "valet_runner"); 
-          setUserVenueId(userData.venueId || "venue_001");
-        } else {
-          setUserRole("valet_runner");
-          setUserVenueId("venue_001");
-        }
+        setCurrentUid(currentUser.uid);
+        unsubUserProfile = onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            setUserProfile(userData);
+            setUserRole(userData.role || "customer");
+            setUserVenueId(userData.venueId || "venue_001");
+          } else {
+            setUserRole("valet_runner");
+            setUserVenueId("venue_001");
+          }
+          setAuthLoading(false);
+        });
       } else {
+        setCurrentUid(null);
+        setUserProfile(null);
         setUserRole(null);
         setUserVenueId(null);
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
     });
 
-    return () => { unsubscribeAuth(); document.head.removeChild(styleSheet); };
+    return () => {
+      unsubscribeAuth();
+      if (unsubUserProfile) unsubUserProfile();
+      document.head.removeChild(styleSheet);
+    };
   }, [requestedTicketId]);
 
   useEffect(() => {
-    if (!userVenueId || userRole === 'developer') return;
+    if (!userVenueId || userRole === 'developer' || userRole === 'customer') return;
     
     const unsubscribeMap = onValue(ref(db, `venues/${userVenueId}/parkingMap`), (snapshot) => {
       if (snapshot.exists()) {
@@ -1623,9 +2280,45 @@ function App() {
   }, [userVenueId, userRole]);
 
   if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>AUTHENTICATING...</div></div>;
-  if (isGuest) return <GuestTicketView ticketId={requestedTicketId} />;
   
-  if (!userRole) return <LoginView />;
+  // Direct QR Ticket Tracker View (from URL or Customer Garage / Landing lookup)
+  if (activeTicketOverlay) {
+    return (
+      <GuestTicketView
+        ticketId={activeTicketOverlay}
+        onBack={!requestedTicketId ? () => setActiveTicketOverlay(null) : null}
+      />
+    );
+  }
+  
+  // Public Visitors: Show Luxury Landing Page first, then Auth Screen when clicked
+  if (!userRole) {
+    if (!authScreenMode) {
+      return (
+        <LandingPageView
+          onNavigateAuth={(mode) => setAuthScreenMode(mode)}
+          onOpenTicket={(id) => setActiveTicketOverlay(id)}
+        />
+      );
+    }
+    return (
+      <LoginView
+        initialMode={authScreenMode}
+        onBackToLanding={() => setAuthScreenMode(null)}
+      />
+    );
+  }
+
+  // Logged-In Routes
+  if (userRole === "customer") {
+    return (
+      <CustomerGarageView
+        userProfile={userProfile}
+        uid={currentUid}
+        onOpenLiveTicket={(id) => setActiveTicketOverlay(id)}
+      />
+    );
+  }
   if (userRole === "developer") return <DeveloperView />;
   if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} venueId={userVenueId} />;
   if (userRole === "wash_team") return <WashBayView venueId={userVenueId} />;
