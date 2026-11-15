@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
 import { ref, onValue, update, set, get, remove } from 'firebase/database';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { initializeApp, getApps } from 'firebase/app';
 
 // ------------------------------------------------------------------
@@ -35,8 +35,9 @@ const vibrantStyles = `
     --shadow-btn-blue: 0 4px 14px rgba(14, 165, 233, 0.3);
   }
 
-  body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-  .app-container { min-height: 100vh; display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; }
+  html, body, #root { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100vw !important; min-height: 100vh; display: block !important; background-color: var(--bg-color) !important; color: var(--text-main) !important; font-family: var(--font-ui); -webkit-font-smoothing: antialiased; overflow-x: hidden !important; text-align: left; }
+  h1, h2, h3, h4, h5, h6, p { color: inherit; }
+  .app-container { min-height: 100vh; width: 100%; display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; }
   .center-wrapper { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 48px); }
   .dashboard-wrapper { max-width: 1400px; margin: 0 auto; width: 100%; animation: fadeIn 0.4s ease-out; }
 
@@ -166,8 +167,12 @@ const vibrantStyles = `
   .plate-pill { background: #fef08a; color: #0f172a; font-weight: 900; padding: 6px 14px; border-radius: 8px; font-family: monospace; font-size: 1.05rem; letter-spacing: 1.5px; border: 2px solid #0f172a; display: inline-block; box-shadow: var(--shadow-sm); }
 
   @media (max-width: 768px) {
-    .landing-nav { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
-    .landing-hero { padding: 36px 24px; margin: 0 12px 48px 12px; border-radius: 20px; min-height: auto; }
+    .app-container { padding: 14px; }
+    .landing-nav { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+    .landing-hero { padding: 28px 20px; margin: 0 12px 40px 12px; border-radius: 20px; min-height: auto; }
+    .feature-grid { grid-template-columns: 1fr !important; padding: 0 16px; margin-bottom: 48px; }
+    .vibrant-card { padding: 24px 18px; }
+    .heading-dashboard { font-size: 1.6rem; }
   }
 `;
 
@@ -339,10 +344,9 @@ function LandingPageView({ onNavigateAuth, onOpenTicket }) {
             <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-green)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>VIP Mobility & Fleet</span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.95rem' }}>Member Sign In</button>
-          <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '10px 22px', fontSize: '0.95rem' }}>Join VIP Garage</button>
-          <button onClick={() => onNavigateAuth('staff_login')} className="btn-dev" style={{ width: 'auto', padding: '10px 18px', fontSize: '0.85rem' }}>Staff Portal</button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button onClick={() => onNavigateAuth('customer_login')} className="btn-outline" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.95rem' }}>Login</button>
+          <button onClick={() => onNavigateAuth('customer_register')} className="btn-green" style={{ width: 'auto', padding: '10px 20px', fontSize: '0.95rem' }}>Register</button>
         </div>
       </nav>
 
@@ -477,12 +481,16 @@ function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
   const availableMakes = Object.keys(CAR_DATABASE);
   const availableModels = CAR_DATABASE[firstCarMake] || [];
 
+  const unlockInput = (e) => e.target.removeAttribute('readonly');
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
     try {
+      await setPersistence(auth, browserSessionPersistence);
+
       if (mode === 'customer_register') {
         if (!fullName.trim() || !phone.trim()) {
           setError('Please enter your name and phone number.');
@@ -517,10 +525,26 @@ function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
           createdAt: Date.now()
         });
       } else {
-        await signInWithEmailAndPassword(auth, email.trim(), password);
+        const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+        const snap = await get(ref(db, `users/${cred.user.uid}`));
+        const role = snap.exists() ? (snap.val().role || 'customer') : 'valet_runner';
+
+        // Strict portal separation: block staff from customer login & vice-versa
+        if (mode === 'customer_login' && role !== 'customer') {
+          await signOut(auth);
+          setError('Staff accounts cannot sign in here. Scroll to the bottom of the home page and use Partner Portal Login.');
+          setSubmitting(false);
+          return;
+        }
+        if (mode === 'staff_login' && role === 'customer') {
+          await signOut(auth);
+          setError('Customer accounts must sign in using the regular Customer Login.');
+          setSubmitting(false);
+          return;
+        }
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      setError('Invalid email or password.');
     } finally {
       setSubmitting(false);
     }
@@ -535,45 +559,44 @@ function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
           </button>
         )}
 
-        {/* Mode Switcher Tabs */}
-        <div style={{ display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '14px', marginBottom: '28px', gap: '6px' }}>
-          <button type="button" onClick={() => { setMode('customer_login'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'customer_login' ? '#fff' : 'transparent', color: mode === 'customer_login' ? 'var(--text-main)' : 'var(--text-muted)', boxShadow: mode === 'customer_login' ? 'var(--shadow-sm)' : 'none' }}>
-            VIP Login
-          </button>
-          <button type="button" onClick={() => { setMode('customer_register'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'customer_register' ? '#fff' : 'transparent', color: mode === 'customer_register' ? 'var(--accent-green)' : 'var(--text-muted)', boxShadow: mode === 'customer_register' ? 'var(--shadow-sm)' : 'none' }}>
-            Register
-          </button>
-          <button type="button" onClick={() => { setMode('staff_login'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'staff_login' ? 'var(--dev-black)' : 'transparent', color: mode === 'staff_login' ? '#fff' : 'var(--text-muted)' }}>
-            Staff
-          </button>
-        </div>
+        {/* Customer Tabs (Hidden when inside Staff Portal) */}
+        {mode !== 'staff_login' && (
+          <div style={{ display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '14px', marginBottom: '28px', gap: '6px' }}>
+            <button type="button" onClick={() => { setMode('customer_login'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'customer_login' ? '#fff' : 'transparent', color: mode === 'customer_login' ? 'var(--text-main)' : 'var(--text-muted)', boxShadow: mode === 'customer_login' ? 'var(--shadow-sm)' : 'none' }}>
+              Login
+            </button>
+            <button type="button" onClick={() => { setMode('customer_register'); setError(''); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-ui)', background: mode === 'customer_register' ? '#fff' : 'transparent', color: mode === 'customer_register' ? 'var(--accent-green)' : 'var(--text-muted)', boxShadow: mode === 'customer_register' ? 'var(--shadow-sm)' : 'none' }}>
+              Register
+            </button>
+          </div>
+        )}
 
         <h2 className="heading-brand" style={{ marginBottom: '8px', fontSize: '1.85rem' }}>
-          {mode === 'customer_register' ? 'CREATE VIP GARAGE' : mode === 'staff_login' ? 'STAFF PORTAL' : 'WELCOME BACK'}
+          {mode === 'customer_register' ? 'CREATE ACCOUNT' : mode === 'staff_login' ? 'STAFF PORTAL' : 'WELCOME BACK'}
         </h2>
         <p style={{ color: 'var(--text-muted)', marginTop: 0, marginBottom: '28px', fontWeight: 500, fontSize: '0.95rem' }}>
           {mode === 'customer_register'
             ? 'Save your vehicles once for instant QR drop-off & live tracking.'
             : mode === 'staff_login'
-            ? 'Authenticate with your venue or developer credentials.'
+            ? 'Authorized venue & developer personnel only.'
             : 'Sign in to access your saved vehicles and live valet tickets.'}
         </p>
 
         {error && <p style={{ color: 'var(--danger-red)', fontSize: '0.9rem', marginBottom: '20px', background: '#fef2f2', padding: '12px', borderRadius: '10px', fontWeight: 600, border: '1px solid #fecaca' }}>{error}</p>}
 
-        <form onSubmit={handleAuth} style={{ textAlign: 'left' }}>
+        <form onSubmit={handleAuth} autoComplete="off" style={{ textAlign: 'left' }}>
           {mode === 'customer_register' && (
             <>
-              <input type="text" placeholder="Full Name" required className="vibrant-input" style={{ marginBottom: '14px' }} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              <input type="text" placeholder="Full Name" required className="vibrant-input" style={{ marginBottom: '14px' }} value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="off" />
               <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 2fr', gap: '12px', marginBottom: '14px' }}>
                 <Autocomplete options={COUNTRY_CODES} value={countryCode} onChange={(val) => setCountryCode(val)} placeholder="+ Code" isObject={true} style={{ marginBottom: 0 }} />
-                <input type="tel" placeholder="Mobile Number" required className="vibrant-input" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <input type="tel" placeholder="Mobile Number" required className="vibrant-input" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="off" />
               </div>
             </>
           )}
 
-          <input type="email" placeholder={mode === 'staff_login' ? "Staff Email" : "Email Address"} required className="vibrant-input" style={{ marginBottom: '14px' }} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-          <input type="password" placeholder="Password (Min 6 chars)" required minLength={6} className="vibrant-input" style={{ marginBottom: '20px' }} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'customer_register' ? 'new-password' : 'current-password'} />
+          <input type="email" name="sky_auth_email_field" readOnly onFocus={unlockInput} placeholder={mode === 'staff_login' ? "Staff Email" : "Email Address"} required className="vibrant-input" style={{ marginBottom: '14px' }} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+          <input type="password" name="sky_auth_pass_field" readOnly onFocus={unlockInput} placeholder="Password (Min 6 chars)" required minLength={6} className="vibrant-input" style={{ marginBottom: '20px' }} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
 
           {mode === 'customer_register' && (
             <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--card-border)', marginBottom: '24px' }}>
@@ -585,14 +608,14 @@ function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
                 <Autocomplete options={availableModels} value={firstCarModel} onChange={(val) => setFirstCarModel(val)} placeholder="Model (e.g. 911)" isObject={false} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <input placeholder="Color (e.g. Black)" className="vibrant-input" value={firstCarColor} onChange={(e) => setFirstCarColor(e.target.value)} />
-                <input placeholder="License Plate" className="vibrant-input" style={{ textTransform: 'uppercase', fontWeight: 700 }} value={firstCarPlate} onChange={(e) => setFirstCarPlate(e.target.value)} />
+                <input placeholder="Color (e.g. Black)" className="vibrant-input" value={firstCarColor} onChange={(e) => setFirstCarColor(e.target.value)} autoComplete="off" />
+                <input placeholder="License Plate" className="vibrant-input" style={{ textTransform: 'uppercase', fontWeight: 700 }} value={firstCarPlate} onChange={(e) => setFirstCarPlate(e.target.value)} autoComplete="off" />
               </div>
             </div>
           )}
 
           <button type="submit" disabled={submitting} className={mode === 'staff_login' ? "btn-dev" : "btn-green"}>
-            {submitting ? 'Please wait...' : mode === 'customer_register' ? 'Create My VIP Garage' : 'Sign In'}
+            {submitting ? 'Please wait...' : mode === 'customer_register' ? 'Create Account' : 'Login'}
           </button>
         </form>
       </div>
@@ -2366,6 +2389,25 @@ function App() {
     });
     return () => unsubscribeMap();
   }, [userVenueId, userRole]);
+
+  // Trap browser Back-Swipe / Back Button so it navigates inside the app instead of exiting the site
+  useEffect(() => {
+    window.history.pushState({ skyValetInternal: true }, '');
+    const handlePopState = () => {
+      if (activeTicketOverlay && !requestedTicketId) {
+        setActiveTicketOverlay(null);
+        window.history.pushState({ skyValetInternal: true }, '');
+      } else if (!userRole && authScreenMode) {
+        setAuthScreenMode(null);
+        window.history.pushState({ skyValetInternal: true }, '');
+      } else if (userRole) {
+        // Keep logged-in users inside their dashboard when swiping back
+        window.history.pushState({ skyValetInternal: true }, '');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [activeTicketOverlay, authScreenMode, userRole, requestedTicketId]);
 
   if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>AUTHENTICATING...</div></div>;
   
