@@ -626,7 +626,7 @@ function ValetDashboardView({ parkingMap }) {
         setTickets(all.filter(t => t.venueId === currentVenueId && t.status !== "retrieved"));
         
         const memory = {};
-        all.forEach(t => { if(t.vehicle?.licensePlate) memory[t.vehicle.licensePlate.toUpperCase()] = t; });
+        all.forEach(t => { if(t && t.vehicle && t.vehicle.licensePlate) memory[t.vehicle.licensePlate.toUpperCase()] = t; });
         setKnownPlates(memory);
       } else { setTickets([]); }
     });
