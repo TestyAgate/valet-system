@@ -72,9 +72,9 @@ const vibrantStyles = `
   .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
   .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
   
-  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 14px; border-radius: 8px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
+  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
   .btn-apple-pay:hover { background: #222; transform: translateY(-2px); }
-  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 14px; border-radius: 8px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
+  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
   .btn-google-pay:hover { background: #f8f9fa; transform: translateY(-2px); }
 
   .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -102,6 +102,11 @@ const vibrantStyles = `
   .spot-add-btn { background: #f1f5f9; color: var(--text-muted); border: 2px dashed #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 10px; min-height: 52px; transition: all 0.2s; box-sizing: border-box;}
   .spot-add-btn:hover { background: #e2e8f0; color: var(--text-main); border-style: solid; box-shadow: var(--shadow-sm);}
   
+  .editor-zone-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; }
+  .editor-zone-input { width: 60%; margin-bottom: 0 !important; font-size: 1.35rem; color: var(--text-main); font-weight: 800; background: transparent; border: none; border-bottom: 2px solid var(--card-border); padding: 8px 0; border-radius: 0; }
+  .editor-zone-input:focus { outline: none; border-color: var(--accent-green); background: transparent; box-shadow: none; }
+  .editor-zone-actions { display: flex; gap: 12px; }
+
   .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 32px; align-items: start; }
   @media (min-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
   
@@ -125,21 +130,25 @@ const vibrantStyles = `
 
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease-out; overflow-y: auto;}
   
-  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); }
+  .contact-bar { display: flex; gap: 12px; margin-top: 16px; }
+  .btn-contact { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; transition: transform 0.2s; box-shadow: var(--shadow-sm); border: 1px solid var(--card-border); }
+  .btn-contact:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); color: var(--text-main); }
   .luxury-table th { padding: 16px; border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; background: #f8fafc;}
-  .luxury-table td { padding: 20px 16px; border-bottom: 1px solid var(--card-border); }
+  .luxury-table td { padding: 20px 16px; border-bottom: 1px solid var(--card-border); color: var(--text-main); }
   
   .metric-card { background: #fff; border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md); text-align: left; }
   .metric-value { font-size: 2.5rem; font-weight: 800; margin: 8px 0; color: var(--text-main); }
   
   .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--card-border); }
-  .toggle-switch { position: relative; width: 54px; height: 28px; display: inline-block; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-switch { position: relative; width: 54px; height: 28px; display: inline-block; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
   .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
   .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: var(--shadow-sm); }
-  input:checked + .toggle-slider { background-color: var(--accent-green); }
-  input:checked + .toggle-slider:before { transform: translateX(26px); }
-  input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
+  .toggle-switch input:checked + .toggle-slider { background-color: var(--accent-green); }
+  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(26px); }
+  .toggle-switch input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
 `;
 
 const CAR_DATABASE = {
@@ -182,16 +191,16 @@ const getZonePrefix = (zoneName) => {
 // ------------------------------------------------------------------
 // WIDGETS & LOGOS
 // ------------------------------------------------------------------
-function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true }) {
+function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true, singleButton = false }) {
   if (!isOpen) return null;
   return (
     <div className="modal-overlay" style={{ zIndex: 1100 }}>
       <div className="vibrant-card animate-scale-in" style={{ maxWidth: '400px', padding: '32px' }}>
-        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--text-main)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
+        <h3 style={{ color: isDanger ? 'var(--danger-red)' : 'var(--accent-green)', marginTop: 0, fontWeight: 800, fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6', fontSize: '1rem', fontWeight: 500 }}>{message}</p>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--dev-black)' }}>{confirmText}</button>
-          <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>
+          <button onClick={onConfirm} className={isDanger ? "btn-action" : "btn-green"} style={{ flex: 1, border: 'none', color: 'white', background: isDanger ? 'var(--danger-red)' : 'var(--accent-green)' }}>{confirmText}</button>
+          {!singleButton && <button onClick={onCancel} className="btn-outline" style={{ flex: 1 }}>Cancel</button>}
         </div>
       </div>
     </div>
@@ -230,20 +239,23 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
 }
 
 const ApplePayLogo = () => (
-  <svg width="50" height="20" viewBox="0 0 50 20" fill="white" style={{marginRight: '8px'}}>
-    <path d="M18.8,10.6c0-2.4,1.9-4,2.1-4c-1.1-1.7-2.9-1.9-3.5-2c-1.5-0.1-3,0.9-3.8,0.9c-0.8,0-2-0.9-3.3-0.9 C8.2,4.6,6.3,5.7,5.2,7.7C2.9,11.5,4.5,17,6.5,19.8c1,1.4,2.1,3,3.7,3c1.5,0,2-0.9,3.7-0.9c1.7,0,2.2,0.9,3.8,0.9 c1.6,0,2.6-1.7,3.6-3.1c1.2-1.7,1.6-3.4,1.6-3.5C22.8,16.2,18.8,14.5,18.8,10.6z M16.6,3c0.8-1,1.3-2.3,1.1-3.7 C16.5,0,15.1,0.7,14.3,1.7C13.6,2.5,13,3.8,13.2,5.2C14.6,5.3,15.8,4.1,16.6,3z"/>
-    <text x="25" y="18" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" fontSize="18" fontWeight="600" fill="white">Pay</text>
-  </svg>
+  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '1.25rem', fontWeight: 600, color: '#fff', fontFamily: '-apple-system, BlinkMacSystemFont, "Outfit", sans-serif' }}>
+    <svg width="17" height="20" viewBox="0 0 384 512" fill="currentColor" style={{ marginBottom: '2px' }}>
+      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+    </svg>
+    <span>Pay</span>
+  </span>
 );
 
 const GooglePayLogo = () => (
-  <span style={{fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', color: '#3c4043'}}>
-    <svg width="45" height="18" viewBox="0 0 45 18" fill="none">
-      <path d="M16.9 8.2h-3.6v-3h3.6c.7 0 1.3.2 1.8.6.5.4.7 1 .7 1.6 0 .6-.2 1.2-.7 1.6-.4.4-1 .6-1.8.6zm.3 2.1c1.1-.3 1.9-.8 2.5-1.6.6-.8.9-1.8.9-2.9 0-1.1-.3-2-.9-2.8-.6-.8-1.5-1.3-2.5-1.6C16.2.2 15 0 13.5 0H9v17.5h3.2v-6.6h1.3c1.5 0 2.7-.2 3.7-.6z" fill="#5F6368"/>
-      <path d="M3.7 17.5V5.5h1.2v11.9H3.7z" fill="#5F6368"/>
-      <path d="M9.8 17.5V.2h1.2v17.3H9.8z" fill="#5F6368"/>
-      <path d="M19 0h-1.2v17.5H19V0z" fill="#5F6368"/>
+  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '1.25rem', fontWeight: 600, color: '#3c4043', fontFamily: '"Outfit", sans-serif' }}>
+    <svg width="20" height="20" viewBox="0 0 48 48">
+      <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#EA4335" d="M39.89 42.19c4.22-3.83 6.64-9.52 6.64-16.19 0-1.25-.13-2.47-.35-3.64H24v9.06h12.59c-.58 3.01-2.27 5.56-4.7 7.28l7.73 6.01h.27z"/>
     </svg>
+    <span>Pay</span>
   </span>
 );
 
@@ -559,7 +571,7 @@ function GuestTicketView({ ticketId }) {
             <h3 style={{fontSize: '1.5rem', fontWeight: 800, margin: '0 0 24px 0'}}>Confirm Return Details</h3>
             <p style={{textAlign: 'left', fontWeight: 600, marginBottom: '8px'}}>Deliver my car to:</p>
             <select className="vibrant-input" style={{marginBottom: '32px', cursor: 'pointer'}} value={requestDetails.location} onChange={(e) => setRequestDetails({...requestDetails, location: e.target.value})}>
-              {venueSettings.returnLocations.map(loc => <option key={loc}>{loc}</option>)}
+              {(venueSettings.returnLocations || ["Main Entrance"]).map(loc => <option key={loc}>{loc}</option>)}
             </select>
             <div style={{display: 'flex', gap: '12px'}}>
               <button onClick={submitVehicleRequest} className="btn-green" style={{flex: 2}}>Confirm Request</button>
@@ -644,6 +656,340 @@ function LoginView() {
           <button type="submit" className="btn-green">Authenticate</button>
         </form>
       </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// SUPER ADMIN DASHBOARD (DEVELOPER SAAS PORTAL)
+// ------------------------------------------------------------------
+function DeveloperView() {
+  const [activeTab, setActiveTab] = useState('venues');
+  const [allVenues, setAllVenues] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [allTickets, setAllTickets] = useState([]);
+  
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState('valet_runner');
+  const [newUserVenue, setNewUserVenue] = useState('');
+  const [devConfirm, setDevConfirm] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: true, singleButton: false, confirmText: 'Confirm' });
+
+  const [newVenueId, setNewVenueId] = useState('');
+  const [newVenueName, setNewVenueName] = useState('');
+  const [newVenueTier, setNewVenueTier] = useState(1);
+
+  useEffect(() => {
+    const unsubVenues = onValue(ref(db, 'venues'), (snap) => {
+      if(snap.exists()) setAllVenues(Object.keys(snap.val()).map(k => ({ id: k, ...snap.val()[k] })));
+      else setAllVenues([]);
+    });
+    const unsubUsers = onValue(ref(db, 'users'), (snap) => {
+      if(snap.exists()) setAllUsers(Object.keys(snap.val()).map(k => ({ uid: k, ...snap.val()[k] })));
+      else setAllUsers([]);
+    });
+    const unsubTickets = onValue(ref(db, 'tickets'), (snap) => {
+      if(snap.exists()) setAllTickets(Object.keys(snap.val()).map(k => ({ id: k, ...snap.val()[k] })));
+      else setAllTickets([]);
+    });
+    return () => { unsubVenues(); unsubUsers(); unsubTickets(); };
+  }, []);
+
+  const showNotice = (title, message, isDanger = false) => {
+    setDevConfirm({
+      isOpen: true, title, message, isDanger, singleButton: true, confirmText: "OK",
+      onConfirm: () => setDevConfirm(prev => ({ ...prev, isOpen: false })),
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const handleCreateVenue = async (e) => {
+    e.preventDefault();
+    const cleanId = newVenueId.trim();
+    await set(ref(db, `venues/${cleanId}`), {
+      name: newVenueName, type: "hotel", isActive: true,
+      settings: { tier: newVenueTier, carWashEnabled: newVenueTier === 2, carWashPrice: 25, returnLocations: ["Main Entrance"] }
+    });
+    setNewVenueId(''); setNewVenueName('');
+    showNotice("Venue Created", `${newVenueName} (${cleanId}) is now live on Tier ${newVenueTier}.`, false);
+  };
+
+  const handleProvisionUser = async (e) => {
+    e.preventDefault();
+    if (!newUserVenue) return showNotice("Venue Required", "Please select a venue to assign this staff account to.", true);
+    
+    try {
+      const appOptions = auth.app.options;
+      const secondaryApp = getApps().find(app => app.name === "StaffCreator") || initializeApp(appOptions, "StaffCreator");
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
+      const newUid = userCredential.user.uid;
+      
+      await set(ref(db, `users/${newUid}`), { role: newUserRole, venueId: newUserVenue, email: newEmail });
+      await secondaryAuth.signOut();
+      
+      const createdEmail = newEmail;
+      setNewEmail(''); setNewPassword('');
+      showNotice("Account Created", `Staff login for ${createdEmail} has been provisioned and linked to ${newUserVenue}.`, false);
+      
+    } catch (error) {
+      showNotice("Creation Error", error.message, true);
+    }
+  };
+
+  const handleResetPassword = async (emailToReset) => {
+    if(!emailToReset) return showNotice("Missing Email", "This legacy user has no email stored in the database. Delete the account and recreate it to enable password resets.", true);
+    try {
+      await sendPasswordResetEmail(auth, emailToReset);
+      showNotice("Reset Email Sent", `A password reset link has been emailed to ${emailToReset}.`, false);
+    } catch(err) {
+      showNotice("Reset Failed", err.message, true);
+    }
+  };
+
+  const promptToggleTier = (venueId, currentTier) => {
+    setDevConfirm({
+      isOpen: true, singleButton: false, confirmText: "Confirm Change",
+      title: "Change SaaS Tier",
+      message: `Are you sure you want to ${currentTier === 1 ? 'UPGRADE this venue to Premium (Tier 2)?' : 'DOWNGRADE this venue to Standard (Tier 1)?'}`,
+      isDanger: currentTier === 2,
+      onConfirm: async () => {
+        await update(ref(db, `venues/${venueId}/settings`), { tier: currentTier === 1 ? 2 : 1 });
+        setDevConfirm(prev => ({ ...prev, isOpen: false }));
+      },
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const promptDeleteVenue = (venueId) => {
+    setDevConfirm({
+      isOpen: true, singleButton: false, confirmText: "Delete Venue",
+      title: "Delete Venue?",
+      message: `CRITICAL: Are you sure you want to completely delete ${venueId}? This will destroy all their settings and parking maps.`,
+      isDanger: true,
+      onConfirm: async () => {
+        await remove(ref(db, `venues/${venueId}`));
+        setDevConfirm(prev => ({ ...prev, isOpen: false }));
+      },
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const promptDeleteStaff = (uid, email) => {
+    setDevConfirm({
+      isOpen: true, singleButton: false, confirmText: "Delete Account",
+      title: "Delete Staff Account?",
+      message: `Are you sure you want to remove access for ${email || uid}? They will immediately be locked out of the platform.`,
+      isDanger: true,
+      onConfirm: async () => {
+        await remove(ref(db, `users/${uid}`));
+        setDevConfirm(prev => ({ ...prev, isOpen: false }));
+      },
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const formatTxDateTime = (timestamp) => {
+    if (!timestamp) return { date: '-', time: '-' };
+    const d = new Date(timestamp);
+    return { date: d.toLocaleDateString([], {month: 'short', day: 'numeric', year: 'numeric'}), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+  };
+
+  return (
+    <div className="app-container" style={{backgroundColor: '#0f172a'}}>
+      <div className="dashboard-wrapper">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+          <h1 className="heading-dashboard" style={{color: 'white'}}>SaaS Control Room</h1>
+          <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', background: 'transparent', color: 'white', borderColor: 'rgba(255,255,255,0.2)', boxShadow: 'none'}}>Logout</button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+          <button className={activeTab === 'venues' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'venues' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('venues')}>Client Venues</button>
+          <button className={activeTab === 'users' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'users' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('users')}>Staff Creation</button>
+          <button className={activeTab === 'finance' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'finance' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('finance')}>Global Revenue</button>
+        </div>
+
+        <div>
+          {activeTab === 'venues' && (
+            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
+              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', boxSizing: 'border-box'}}>
+                <h3 style={{marginTop: 0, fontWeight: 800, color: 'var(--dev-black)'}}>Add New Client Venue</h3>
+                <form onSubmit={handleCreateVenue} style={{display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap'}}>
+                  <input placeholder="Venue ID (e.g. venue_002)" required className="vibrant-input dev-focus" value={newVenueId} onChange={e => setNewVenueId(e.target.value.toLowerCase().replace(/\s+/g, '_'))} style={{flex: 1, minWidth: '150px'}} />
+                  <input placeholder="Display Name (e.g. North Platte)" required className="vibrant-input dev-focus" value={newVenueName} onChange={e => setNewVenueName(e.target.value)} style={{flex: 2, minWidth: '200px'}} />
+                  <select className="vibrant-input dev-focus" value={newVenueTier} onChange={e => setNewVenueTier(Number(e.target.value))} style={{flex: 1, minWidth: '150px'}}>
+                    <option value={1}>Tier 1 (Standard)</option>
+                    <option value={2}>Tier 2 (Premium Wash)</option>
+                  </select>
+                  <button type="submit" className="btn-dev" style={{width: 'auto', whiteSpace: 'nowrap'}}>Create Venue</button>
+                </form>
+              </div>
+
+              <div style={{background: 'white', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow-lg)'}}>
+                <table className="luxury-table" style={{boxShadow: 'none', margin: 0}}>
+                  <thead><tr><th>Venue ID</th><th>Display Name</th><th>SaaS Tier</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {allVenues.map(v => (
+                      <tr key={v.id}>
+                        <td style={{fontWeight: '800', color: 'var(--dev-black)'}}>{v.id}</td>
+                        <td style={{fontWeight: '600', color: 'var(--dev-black)'}}>{v.name || 'Unnamed Venue'}</td>
+                        <td>
+                          <span style={{background: v.settings?.tier === 1 ? '#cbd5e1' : 'var(--warning-yellow)', color: v.settings?.tier === 1 ? '#475569' : '#fff', padding: '4px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem'}}>
+                            Tier {v.settings?.tier || 1}
+                          </span>
+                        </td>
+                        <td style={{color: 'var(--accent-green)', fontWeight: 700}}>Active</td>
+                        <td style={{display: 'flex', gap: '8px'}}>
+                          <button onClick={() => promptToggleTier(v.id, v.settings?.tier || 1)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Change Tier</button>
+                          <button onClick={() => promptDeleteVenue(v.id)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'users' && (
+            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
+              <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', boxSizing: 'border-box'}}>
+                <h3 style={{marginTop: 0, fontWeight: 800, color: 'var(--dev-black)'}}>Create Staff Account</h3>
+                <p style={{color: 'var(--text-muted)', marginBottom: '16px', fontWeight: 500}}>Generate logins for hotel managers and valets here. They cannot create accounts themselves.</p>
+                
+                <input type="email" style={{display: 'none'}} />
+                <input type="password" style={{display: 'none'}} />
+                
+                <form onSubmit={handleProvisionUser} style={{display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap'}} autoComplete="off">
+                  <input type="email" name="new-staff-email" placeholder="Staff Email" required className="vibrant-input dev-focus" value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{flex: 1, minWidth: '200px'}} autoComplete="off" />
+                  <input type="password" name="new-staff-password" placeholder="Password (Min 6 chars)" required className="vibrant-input dev-focus" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={{flex: 1, minWidth: '200px'}} minLength={6} autoComplete="new-password" />
+                  
+                  <select className="vibrant-input dev-focus" value={newUserRole} onChange={e => setNewUserRole(e.target.value)} style={{flex: 1, minWidth: '200px'}}>
+                    <option value="valet_runner">Valet Runner</option>
+                    <option value="wash_team">Wash Team</option>
+                    <option value="master_admin">Master Admin (Hotel Mgr)</option>
+                    <option value="developer">SaaS Developer (Super Admin)</option>
+                  </select>
+                  
+                  <select className="vibrant-input dev-focus" value={newUserVenue} onChange={e => setNewUserVenue(e.target.value)} required style={{flex: 1, minWidth: '200px'}}>
+                    <option value="" disabled>Assign to Venue...</option>
+                    {allVenues.map(v => <option key={v.id} value={v.id}>{v.name || v.id}</option>)}
+                  </select>
+                  
+                  <button type="submit" className="btn-dev" style={{width: 'auto', whiteSpace: 'nowrap'}}>Create Account</button>
+                </form>
+              </div>
+
+              {allVenues.map(venue => {
+                const venueUsers = allUsers.filter(u => u.venueId === venue.id);
+                return (
+                  <div key={venue.id} className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', padding: '0', overflow: 'hidden', boxSizing: 'border-box'}}>
+                    <div style={{background: '#f8fafc', padding: '16px 24px', borderBottom: '1px solid var(--card-border)'}}>
+                      <h3 style={{margin: 0, fontWeight: 800, color: 'var(--dev-black)'}}>{venue.name} <span style={{color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500}}>({venue.id})</span></h3>
+                    </div>
+                    {venueUsers.length === 0 ? (
+                       <p style={{padding: '24px', color: 'var(--text-muted)', margin: 0, textAlign: 'center'}}>No staff accounts active.</p>
+                    ) : (
+                      <table className="luxury-table" style={{boxShadow: 'none', borderRadius: 0}}>
+                        <thead><tr><th>Email / UID</th><th>Assigned Role</th><th>Account Actions</th></tr></thead>
+                        <tbody>
+                          {venueUsers.map(u => (
+                            <tr key={u.uid}>
+                              <td>
+                                <div style={{fontWeight: '800', color: 'var(--dev-black)'}}>{u.email || 'Unknown Email (Legacy)'}</div>
+                                <div style={{fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: '0.8rem'}}>{u.uid}</div>
+                              </td>
+                              <td style={{fontWeight: '700', textTransform: 'capitalize', color: 'var(--dev-black)'}}>{(u.role || 'none').replace('_', ' ')}</td>
+                              <td style={{display: 'flex', gap: '8px'}}>
+                                <button onClick={() => handleResetPassword(u.email)} className="btn-outline" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Reset Pass</button>
+                                <button onClick={() => promptDeleteStaff(u.uid, u.email)} className="btn-action" style={{padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none'}}>Delete</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {activeTab === 'finance' && (
+            <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
+              
+              {allVenues.map(venue => {
+                const venueTransactions = allTickets.filter(t => t.venueId === venue.id && (t.washTransaction || t.tipTransaction));
+                const washRev = venueTransactions.filter(t => t.washTransaction).reduce((acc, t) => acc + (t.washTransaction.amount || 0), 0);
+                const tipRev = venueTransactions.filter(t => t.tipTransaction).reduce((acc, t) => acc + (t.tipTransaction.amount || 0), 0);
+                
+                let ledger = [];
+                venueTransactions.forEach(t => {
+                  if(t.washTransaction) ledger.push({ type: 'Car Wash', tx: t.washTransaction, vehicle: t.vehicle?.licensePlate || 'Unknown' });
+                  if(t.tipTransaction) ledger.push({ type: 'Valet Tip', tx: t.tipTransaction, vehicle: t.vehicle?.licensePlate || 'Unknown' });
+                });
+                ledger.sort((a, b) => (b.tx?.date || 0) - (a.tx?.date || 0));
+
+                return (
+                  <div key={venue.id} className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', padding: '0', overflow: 'hidden', boxSizing: 'border-box'}}>
+                    <div style={{background: '#f8fafc', padding: '16px 24px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px'}}>
+                      <h3 style={{margin: 0, fontWeight: 800, color: 'var(--dev-black)'}}>{venue.name} <span style={{color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500}}>({venue.id})</span></h3>
+                      <div style={{display: 'flex', gap: '24px'}}>
+                        <div style={{textAlign: 'right'}}>
+                          <div style={{fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase'}}>Wash Rev</div>
+                          <div style={{fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-blue)'}}>${washRev.toLocaleString()}</div>
+                        </div>
+                        <div style={{textAlign: 'right'}}>
+                          <div style={{fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase'}}>Total Tips</div>
+                          <div style={{fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-green)'}}>${tipRev.toLocaleString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {ledger.length === 0 ? (
+                       <p style={{padding: '24px', color: 'var(--text-muted)', margin: 0, textAlign: 'center'}}>No transactions processed yet.</p>
+                    ) : (
+                      <div style={{overflowX: 'auto'}}>
+                        <table className="luxury-table" style={{boxShadow: 'none', borderRadius: 0}}>
+                          <thead><tr><th>Date & Time</th><th>Service Type</th><th>Plate</th><th>Method</th><th>Card Info</th><th>Amount</th><th>Status</th></tr></thead>
+                          <tbody>
+                            {ledger.map((row, i) => {
+                              const { date, time } = formatTxDateTime(row.tx.date);
+                              return (
+                                <tr key={i}>
+                                  <td style={{fontWeight: 600, color: 'var(--dev-black)'}}>{date} <span style={{color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px'}}>{time}</span></td>
+                                  <td style={{fontWeight: 800, color: row.type === 'Car Wash' ? 'var(--accent-blue)' : 'var(--accent-green)'}}>{row.type}</td>
+                                  <td style={{fontWeight: 700, color: 'var(--dev-black)'}}>{row.vehicle}</td>
+                                  <td style={{fontWeight: 600, color: 'var(--dev-black)'}}>{row.tx.method}</td>
+                                  <td style={{fontFamily: 'monospace', color: 'var(--text-muted)'}}>**** {row.tx.last4}</td>
+                                  <td style={{fontWeight: 800, color: 'var(--dev-black)'}}>${row.tx.amount}.00</td>
+                                  <td><span style={{background: row.tx.status === 'Done' ? '#ecfdf5' : '#fef2f2', color: row.tx.status === 'Done' ? 'var(--accent-green)' : 'var(--danger-red)', padding: '4px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem'}}>{row.tx.status}</span></td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <CustomConfirmWidget
+        isOpen={devConfirm.isOpen}
+        title={devConfirm.title}
+        message={devConfirm.message}
+        onConfirm={devConfirm.onConfirm}
+        onCancel={devConfirm.onCancel}
+        isDanger={devConfirm.isDanger}
+        singleButton={devConfirm.singleButton}
+        confirmText={devConfirm.confirmText}
+      />
     </div>
   );
 }
@@ -919,7 +1265,6 @@ function MasterAdminView({ parkingMap, venueId }) {
         const data = snapshot.val();
         const allTickets = Object.keys(data).map(key => ({ id: key, ...data[key] })).filter(t => t.venueId === venueId);
         
-        // Bulletproof timestamp sorting to prevent crashes on old data
         setParkedCars(allTickets.filter(t => t.status !== "retrieved").sort((a, b) => ((b.timestamps && b.timestamps.parkedAt) || 0) - ((a.timestamps && a.timestamps.parkedAt) || 0)));
         setHistory(allTickets.filter(t => t.status === "retrieved").sort((a, b) => ((b.timestamps && b.timestamps.retrievedAt) || 0) - ((a.timestamps && a.timestamps.retrievedAt) || 0)));
         
@@ -930,6 +1275,9 @@ function MasterAdminView({ parkingMap, venueId }) {
           }
         });
         setKnownPlates(memory);
+      } else {
+        setParkedCars([]);
+        setHistory([]);
       }
     });
 
@@ -1037,10 +1385,10 @@ function MasterAdminView({ parkingMap, venueId }) {
         </div>
 
         <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Live Operations</button>
-          <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Metrics</button>
-          <button className={activeTab === 'map' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Map Editor</button>
-          <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap' }}>Settings</button>
+          <button className={activeTab === 'operations' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('operations')} style={{ padding: '12px 28px', whiteSpace: 'nowrap', width: 'auto' }}>Live Operations</button>
+          <button className={activeTab === 'metrics' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('metrics')} style={{ padding: '12px 28px', whiteSpace: 'nowrap', width: 'auto' }}>Metrics</button>
+          <button className={activeTab === 'map' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('map')} style={{ padding: '12px 28px', whiteSpace: 'nowrap', width: 'auto' }}>Map Editor</button>
+          <button className={activeTab === 'settings' ? 'btn-green' : 'btn-outline'} onClick={() => setActiveTab('settings')} style={{ padding: '12px 28px', whiteSpace: 'nowrap', width: 'auto' }}>Settings</button>
         </div>
 
         <div>
@@ -1132,8 +1480,8 @@ function MasterAdminView({ parkingMap, venueId }) {
                       {venueSettings.tier === 1 && <p style={{margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--danger-red)', fontWeight: 700}}>Please contact software provider to unlock.</p>}
                     </div>
                     <label className="toggle-switch">
-                      <input type="checkbox" checked={venueSettings.tier === 1 ? false : venueSettings.carWashEnabled} onChange={handleToggleWash} disabled={venueSettings.tier === 1} />
-                      <span className="toggle-slider" style={{cursor: venueSettings.tier === 1 ? 'not-allowed' : 'pointer'}}></span>
+                      <input type="checkbox" checked={venueSettings.tier === 1 ? false : Boolean(venueSettings.carWashEnabled)} onChange={handleToggleWash} disabled={venueSettings.tier === 1} />
+                      <span className="toggle-slider"></span>
                     </label>
                   </div>
                   
