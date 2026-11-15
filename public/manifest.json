@@ -1,0 +1,15 @@
+{
+  "short_name": "Valet",
+  "name": "Sky Valet App",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Apple_logo_grey.svg/512px-Apple_logo_grey.svg.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f4f7f6",
+  "display": "standalone",
+  "theme_color": "#10b981"
+}
