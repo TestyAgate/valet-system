@@ -1059,12 +1059,22 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         ) : (
           <form onSubmit={handleSubmit} className="animate-slide-up">
             <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '16px'}}>
-              {editingTicket && editingTicket.id !== 'new' ? 'EDIT DETAILS' : prefillVipData ? '⚡ VIP PASS SCANNED' : 'LOG ARRIVAL'}
+              {editingTicket && editingTicket.id !== 'new'
+                ? 'EDIT DETAILS'
+                : prefillVipData
+                ? (prefillVipData.isVipMember ? '👑 VIP PASS SCANNED' : '⚡ GUEST PASS SCANNED')
+                : 'LOG ARRIVAL'}
             </h2>
             
             {prefillVipData && (
-              <div style={{ background: '#ecfdf5', color: '#065f46', padding: '10px 14px', borderRadius: '10px', marginBottom: '16px', fontWeight: 700, fontSize: '0.9rem', border: '1px solid #a7f3d0' }}>
-                ✓ Auto-filled from {prefillVipData.ownerName || 'VIP'}'s Garage. Just pick a spot!
+              <div style={{
+                background: prefillVipData.isVipMember ? '#fef3c7' : '#ecfdf5',
+                color: prefillVipData.isVipMember ? '#b45309' : '#065f46',
+                padding: '10px 14px', borderRadius: '10px', marginBottom: '16px', fontWeight: 700, fontSize: '0.9rem',
+                border: prefillVipData.isVipMember ? '1px solid #f59e0b' : '1px solid #a7f3d0'
+              }}>
+                {prefillVipData.isVipMember ? '👑 VIP Black Card Member — ' : '✓ '}
+                Auto-filled from {prefillVipData.ownerName || 'Guest'}'s Garage. Just pick a spot!
               </div>
             )}
 
@@ -1764,7 +1774,7 @@ function ValetDashboardView({ parkingMap, venueId }) {
       } else { setTickets([]); }
     });
 
-    // Load registered VIP customer vehicles so the Valet Scanner can match them
+    // Load registered customer vehicles and strip "VIP-" unless they have an active subscription
     const unsubUsers = onValue(ref(db, 'users'), (snap) => {
       if (snap.exists()) {
         const usersObj = snap.val();
@@ -1772,15 +1782,17 @@ function ValetDashboardView({ parkingMap, venueId }) {
         Object.keys(usersObj).forEach(uid => {
           const u = usersObj[uid];
           if (u.garage) {
+            const isVip = Boolean(u.isVipMember);
             Object.values(u.garage).forEach(car => {
-              const rawDigits = (car.vipCode || u.vipCode || '').replace(/\D/g, '');
+              const rawDigits = String(car.vipCode || u.vipCode || '').replace(/\D/g, '');
               vipList.push({
                 ...car,
-                vipCode: u.isVipMember ? `VIP-${rawDigits}` : rawDigits,
+                rawCode: rawDigits,
+                vipCode: isVip ? `VIP-${rawDigits}` : rawDigits,
                 customerId: uid,
-                ownerName: u.name || (u.isVipMember ? 'VIP Member' : 'Member'),
+                ownerName: u.name || 'Guest',
                 phone: u.phone || '+971 500000000',
-                isVipMember: Boolean(u.isVipMember)
+                isVipMember: isVip
               });
             });
           }
@@ -1792,22 +1804,105 @@ function ValetDashboardView({ parkingMap, venueId }) {
     return () => { unsubscribe(); unsubUsers(); };
   }, [venueId]);
 
-  const handleVipScanLookup = (e) => {
-    e.preventDefault();
-    setScanError('');
-    const query = scanInputCode.trim().toUpperCase();
-    if (!query) return;
+  const videoRef = useRef(null);
 
-    const match = registeredVipCars.find(
-      c => (c.vipCode && c.vipCode.toUpperCase() === query) || (c.licensePlate && c.licensePlate.toUpperCase() === query)
+  const matchScannedCode = (rawText) => {
+    const query = String(rawText || '').trim().toUpperCase();
+    if (!query) return false;
+    const digitsOnly = query.replace(/\D/g, '');
+
+    const match = registeredVipCars.find(c =>
+      (c.vipCode && c.vipCode.toUpperCase() === query) ||
+      (c.rawCode && digitsOnly && c.rawCode === digitsOnly) ||
+      (c.licensePlate && c.licensePlate.toUpperCase() === query)
     );
 
     if (match) {
       setShowScannerModal(false);
       setScanInputCode('');
       setScannedVipPrefill(match);
-    } else {
-      setScanError('No registered VIP vehicle found with that Pass Code or Plate.');
+      return true;
+    }
+    return false;
+  };
+
+  // Live Camera QR Scanner when modal opens
+  useEffect(() => {
+    if (!showScannerModal) return;
+    let stream = null;
+    let scanInterval = null;
+    let isCancelled = false;
+
+    const startCamera = async () => {
+      try {
+        // Load jsQR fallback in background for browsers without native BarcodeDetector
+        if (!('BarcodeDetector' in window) && !window.jsQR) {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+          document.body.appendChild(script);
+        }
+
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+
+        if (isCancelled) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.setAttribute('playsinline', true);
+          await videoRef.current.play();
+        }
+
+        const nativeDetector = 'BarcodeDetector' in window
+          ? new window.BarcodeDetector({ formats: ['qr_code'] })
+          : null;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        scanInterval = setInterval(async () => {
+          if (!videoRef.current || videoRef.current.readyState !== 4) return;
+          try {
+            if (nativeDetector) {
+              const codes = await nativeDetector.detect(videoRef.current);
+              if (codes.length > 0 && codes[0].rawValue) {
+                matchScannedCode(codes[0].rawValue);
+              }
+            } else if (window.jsQR) {
+              canvas.width = videoRef.current.videoWidth;
+              canvas.height = videoRef.current.videoHeight;
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+              const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = window.jsQR(imgData.data, imgData.width, imgData.height);
+              if (code && code.data) {
+                matchScannedCode(code.data);
+              }
+            }
+          } catch (e) { /* ignore frame read errors */ }
+        }, 250);
+      } catch (err) {
+        setScanError('Camera permission denied or unavailable. Type pass code below.');
+      }
+    };
+
+    startCamera();
+
+    return () => {
+      isCancelled = true;
+      if (scanInterval) clearInterval(scanInterval);
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    };
+  }, [showScannerModal, registeredVipCars]);
+
+  const handleVipScanLookup = (e) => {
+    e.preventDefault();
+    setScanError('');
+    if (!matchScannedCode(scanInputCode)) {
+      setScanError('No registered vehicle found with that Pass Code or Plate.');
     }
   };
 
@@ -1828,8 +1923,8 @@ function ValetDashboardView({ parkingMap, venueId }) {
 
   const drafts = tickets.filter(t => t.status === "draft");
   const requested = tickets
-  .filter(t => t.status === "requested")
-  .sort((a, b) => (b.isVipMember ? 1 : 0) - (a.isVipMember ? 1 : 0));
+    .filter(t => t.status === "requested")
+    .sort((a, b) => (b.isVipMember ? 1 : 0) - (a.isVipMember ? 1 : 0));
   const incomingReady = tickets.filter(t => t.status === "incoming" || t.status === "ready");
   const parked = tickets.filter(t => t.status === "parked");
   const occupiedSpots = parked.map(t => t.parkingSpot);
@@ -1843,7 +1938,7 @@ function ValetDashboardView({ parkingMap, venueId }) {
             <button onClick={() => signOut(auth)} className="btn-outline" style={{fontSize: '0.85rem', padding: '8px 16px', boxShadow: 'none', width: 'auto'}}>Logout</button>
           </div>
           <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
-            <button onClick={() => { setScanError(''); setShowScannerModal(true); }} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest App</button>
+            <button onClick={() => { setScanError(''); setShowScannerModal(true); }} className="btn-outline" style={{width: 'auto', background: 'white'}}>📷 Scan Guest Pass</button>
             <button onClick={handleQuickDropOff} className="btn-purple" style={{width: 'auto'}}>⚡ Quick QR Drop-Off</button>
           </div>
         </div>
@@ -1866,10 +1961,10 @@ function ValetDashboardView({ parkingMap, venueId }) {
               <div key={t.id} className="ticket-card" style={{ borderLeft: '6px solid var(--danger-red)', animationDelay: `${i * 0.05}s` }}>
                 <span className="status-badge status-requested">Needs Retrieval</span>
                 {t.isVipMember && (
-  <span className="status-badge" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #f59e0b' }}>
-    👑 VIP PRIORITY #1
-  </span>
-)}
+                  <span className="status-badge" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #f59e0b' }}>
+                    👑 VIP PRIORITY #1
+                  </span>
+                )}
                 <h3 style={{margin: '8px 0 0 0', fontWeight: 800}}>{t.vehicle?.make || 'Unknown'} <span style={{color: 'var(--text-muted)'}}>{t.vehicle?.licensePlate || ''}</span></h3>
                 <p style={{margin: '4px 0 0 0', fontWeight: 700}}>Spot: {t.parkingSpot}</p>
                 {t.wantsWash && (
@@ -1956,14 +2051,14 @@ function ValetDashboardView({ parkingMap, venueId }) {
 
       <CustomPromptWidget isOpen={promptConfig.isOpen} title="Verify Handover" message="Type the license plate number of this vehicle to confirm you are handing the keys to the correct guest." expectedValue={promptConfig.expectedPlate || 'N/A'} onMatch={() => { changeStatus(promptConfig.ticketId, 'status', 'retrieved'); setPromptConfig({ ...promptConfig, isOpen: false }); }} onCancel={() => setPromptConfig({ ...promptConfig, isOpen: false })} />
 
-      {/* WORKING VIP SCANNER MODAL */}
+      {/* WORKING CAMERA & CODE SCANNER MODAL */}
       {showScannerModal && (
         <div className="modal-overlay">
           <div className="vibrant-card animate-scale-in" style={{maxWidth: '440px'}}>
-            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest VIP Pass</h3>
-            <div style={{background: '#000', height: '190px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '20px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
-              <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite'}}></div>
-              <p style={{fontWeight: 600, letterSpacing: '1px'}}>Optical Scanner Active...</p>
+            <h3 style={{marginTop: 0, fontWeight: 800, fontSize: '1.5rem'}}>Scan Guest Pass</h3>
+            <div style={{background: '#000', height: '220px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '20px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8)'}}>
+              <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline />
+              <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--accent-green)', boxShadow: '0 0 15px 2px var(--accent-green)', animation: 'scanLaser 2s linear infinite', pointerEvents: 'none'}}></div>
             </div>
 
             {scanError && <div style={{ background: '#fef2f2', color: 'var(--danger-red)', padding: '10px', borderRadius: '8px', marginBottom: '12px', fontSize: '0.85rem', fontWeight: 700 }}>{scanError}</div>}
@@ -1971,7 +2066,7 @@ function ValetDashboardView({ parkingMap, venueId }) {
             <form onSubmit={handleVipScanLookup} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
               <input
                 type="text"
-                placeholder="Type VIP Code (e.g. VIP-1234) or Plate"
+                placeholder="Pass Code (e.g. 4359) or Plate"
                 className="vibrant-input"
                 style={{ textTransform: 'uppercase', fontWeight: 700 }}
                 value={scanInputCode}
@@ -1981,8 +2076,8 @@ function ValetDashboardView({ parkingMap, venueId }) {
             </form>
 
             {registeredVipCars.length > 0 && (
-              <div style={{ textAlign: 'left', marginBottom: '20px', maxHeight: '130px', overflowY: 'auto', background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Quick-Tap Registered VIPs:</span>
+              <div style={{ textAlign: 'left', marginBottom: '20px', maxHeight: '140px', overflowY: 'auto', background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Registered Guest Vehicles:</span>
                 {registeredVipCars.map((c, idx) => (
                   <div
                     key={idx}
@@ -1990,7 +2085,9 @@ function ValetDashboardView({ parkingMap, venueId }) {
                     style={{ padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 700, fontSize: '0.9rem', borderBottom: '1px solid #e2e8f0' }}
                   >
                     <span>{c.make} {c.model} ({c.licensePlate})</span>
-                    <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>{c.vipCode}</span>
+                    <span style={{ color: c.isVipMember ? '#f59e0b' : 'var(--accent-green)', fontFamily: 'monospace', fontWeight: 800 }}>
+                      {c.isVipMember ? `👑 ${c.vipCode}` : c.rawCode}
+                    </span>
                   </div>
                 ))}
               </div>
