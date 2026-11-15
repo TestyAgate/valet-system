@@ -245,67 +245,10 @@ function CustomPromptWidget({ isOpen, title, message, expectedValue, onMatch, on
 
   useEffect(() => { setVal(''); setErrorMsg(''); }, [isOpen]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setErrorMsg('');
-
-    if (!formData.plate || !formData.make || !formData.color || !formData.spot || !formData.phone) {
-      setErrorMsg('⚠️ Please fill in all details and select a parking spot.');
-      return;
-    }
-
-    const normalizedPlate = formData.plate.trim().toUpperCase();
-
-    // Prevent parking the same vehicle twice while it still has an active ticket
-    const activeSnap = await get(ref(db, 'tickets'));
-    if (activeSnap.exists()) {
-      const allTickets = activeSnap.val();
-      const duplicateId = Object.keys(allTickets).find(id => {
-        const t = allTickets[id];
-        const samePlate = t.vehicle?.licensePlate?.trim().toUpperCase() === normalizedPlate;
-        const isStillParked = t.status !== 'retrieved';
-        const isNotCurrentEdit = !editingTicket || id !== editingTicket.id;
-        return samePlate && isStillParked && isNotCurrentEdit;
-      });
-
-      if (duplicateId) {
-        const dup = allTickets[duplicateId];
-        setErrorMsg(`⚠️ ${normalizedPlate} is already parked (${dup.parkingSpot || 'Draft'})!`);
-        return;
-      }
-    }
-
-    const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
-    
-    if (editingTicket) {
-      await update(ref(db, `tickets/${editingTicket.id}`), {
-        guestPhone: fullPhone,
-        customerId: formData.customerId || null,
-        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: normalizedPlate },
-        parkingSpot: formData.spot,
-        status: editingTicket.status === "draft" ? "parked" : editingTicket.status, 
-        "timestamps/parkedAt": editingTicket.status === "draft" ? Date.now() : (editingTicket.timestamps?.parkedAt || Date.now())
-      });
-      onClose();
-    } else {
-      const ticketId = `ticket_${Date.now()}`;
-      await set(ref(db, `tickets/${ticketId}`), {
-        venueId: venueId,
-        guestPhone: fullPhone,
-        customerId: formData.customerId || null,
-        isVipMember: Boolean(formData.isVipMember),
-        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: normalizedPlate },
-        parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
-        timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
-      });
-
-      // Registered guests get the ticket straight in their app—close modal instead of showing a QR popup
-      if (formData.customerId || prefillVipData) {
-        onClose();
-      } else {
-        setNewlyCreatedTicket(ticketId);
-      }
-    }
+    if (val.trim().toUpperCase() === expectedValue.trim().toUpperCase()) { onMatch(); } 
+    else { setErrorMsg('Incorrect License Plate. Do not hand over keys.'); }
   };
 
   if (!isOpen) return null;
@@ -1037,13 +980,34 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       return;
     }
 
+    const normalizedPlate = formData.plate.trim().toUpperCase();
+
+    // Prevent parking the same vehicle twice while it still has an active ticket
+    const activeSnap = await get(ref(db, 'tickets'));
+    if (activeSnap.exists()) {
+      const allTickets = activeSnap.val();
+      const duplicateId = Object.keys(allTickets).find(id => {
+        const t = allTickets[id];
+        const samePlate = t.vehicle?.licensePlate?.trim().toUpperCase() === normalizedPlate;
+        const isStillParked = t.status !== 'retrieved';
+        const isNotCurrentEdit = !editingTicket || id !== editingTicket.id;
+        return samePlate && isStillParked && isNotCurrentEdit;
+      });
+
+      if (duplicateId) {
+        const dup = allTickets[duplicateId];
+        setErrorMsg(`⚠️ ${normalizedPlate} is already parked (${dup.parkingSpot || 'Draft'})!`);
+        return;
+      }
+    }
+
     const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
     
     if (editingTicket) {
       await update(ref(db, `tickets/${editingTicket.id}`), {
         guestPhone: fullPhone,
         customerId: formData.customerId || null,
-        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
+        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: normalizedPlate },
         parkingSpot: formData.spot,
         status: editingTicket.status === "draft" ? "parked" : editingTicket.status, 
         "timestamps/parkedAt": editingTicket.status === "draft" ? Date.now() : (editingTicket.timestamps?.parkedAt || Date.now())
@@ -1056,11 +1020,17 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         guestPhone: fullPhone,
         customerId: formData.customerId || null,
         isVipMember: Boolean(formData.isVipMember),
-        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: formData.plate.toUpperCase() },
+        vehicle: { make: formData.make, model: formData.model, color: formData.color, licensePlate: normalizedPlate },
         parkingSpot: formData.spot, status: "parked", parkedByUserId: auth.currentUser.uid,
         timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
       });
-      setNewlyCreatedTicket(ticketId);
+
+      // Registered guests get the ticket straight in their app—close modal instead of showing a QR popup
+      if (formData.customerId || prefillVipData) {
+        onClose();
+      } else {
+        setNewlyCreatedTicket(ticketId);
+      }
     }
   };
 
