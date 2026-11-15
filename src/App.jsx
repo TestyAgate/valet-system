@@ -608,7 +608,7 @@ function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
           {mode === 'customer_register' && (
             <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--card-border)', marginBottom: '24px' }}>
               <p style={{ margin: '0 0 12px 0', fontWeight: 800, fontSize: '0.85rem', color: 'var(--accent-green)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                🚘 Add Your Primary Vehicle (Optional)
+                🚘 Add Your Primary Vehicle
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <Autocomplete options={availableMakes} value={firstCarMake} onChange={(val) => { setFirstCarMake(val); setFirstCarModel(''); }} placeholder="Make (e.g. Porsche)" isObject={false} />
