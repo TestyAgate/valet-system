@@ -1593,6 +1593,7 @@ function DeveloperView() {
   const [newVenueId, setNewVenueId] = useState('');
   const [newVenueName, setNewVenueName] = useState('');
   const [newVenueTier, setNewVenueTier] = useState(1);
+  const [customerSearch, setCustomerSearch] = useState('');
 
   useEffect(() => {
     const unsubVenues = onValue(ref(db, 'venues'), (snap) => {
@@ -1705,6 +1706,72 @@ function DeveloperView() {
     });
   };
 
+  const promptDeleteCustomer = (uid, email) => {
+    setDevConfirm({
+      isOpen: true, singleButton: false, confirmText: "Delete Customer",
+      title: "Delete Customer Account?",
+      message: `Permanently delete ${email || uid} and their saved garage? This cannot be undone.`,
+      isDanger: true,
+      onConfirm: async () => {
+        await remove(ref(db, `users/${uid}`));
+        setDevConfirm(prev => ({ ...prev, isOpen: false }));
+      },
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const promptToggleCustomerVip = (customer) => {
+    const currentlyVip = Boolean(customer.isVipMember);
+    setDevConfirm({
+      isOpen: true, singleButton: false,
+      confirmText: currentlyVip ? "Revoke VIP" : "Activate VIP",
+      title: currentlyVip ? "Revoke Black Card?" : "Grant Black Card VIP?",
+      message: currentlyVip
+        ? `Remove VIP Black Card privileges for ${customer.email || customer.name}?`
+        : `Manually activate VIP Black Card for ${customer.email || customer.name}?`,
+      isDanger: currentlyVip,
+      onConfirm: async () => {
+        if (currentlyVip) {
+          await update(ref(db, `users/${customer.uid}`), {
+            isVipMember: false,
+            "vipSubscription/status": "Revoked"
+          });
+        } else {
+          await update(ref(db, `users/${customer.uid}`), {
+            isVipMember: true,
+            vipSubscription: {
+              plan: 'Sky Black Card',
+              price: 49,
+              method: customer.vipSubscription?.method || 'Admin Override',
+              last4: customer.vipSubscription?.last4 || 'COMP',
+              date: Date.now(),
+              status: 'Done'
+            }
+          });
+        }
+        setDevConfirm(prev => ({ ...prev, isOpen: false }));
+      },
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const promptForceReleaseTicket = (ticket) => {
+    setDevConfirm({
+      isOpen: true, singleButton: false, confirmText: "Force Release",
+      title: "Force Release Vehicle?",
+      message: `Mark ${ticket.vehicle?.make} (${ticket.vehicle?.licensePlate}) as Delivered to clear it from ${ticket.parkingSpot || 'active queue'}?`,
+      isDanger: false,
+      onConfirm: async () => {
+        await update(ref(db, `tickets/${ticket.id}`), {
+          status: 'retrieved',
+          "timestamps/retrievedAt": Date.now()
+        });
+        setDevConfirm(prev => ({ ...prev, isOpen: false }));
+      },
+      onCancel: () => setDevConfirm(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
   const formatTxDateTime = (timestamp) => {
     if (!timestamp) return { date: '-', time: '-' };
     const d = new Date(timestamp);
@@ -1723,6 +1790,7 @@ function DeveloperView() {
           <button className={activeTab === 'venues' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'venues' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('venues')}>Client Venues</button>
           <button className={activeTab === 'users' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'users' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('users')}>Staff Creation</button>
           <button className={activeTab === 'finance' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'finance' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('finance')}>Global Revenue</button>
+          <button className={activeTab === 'customers' ? 'btn-dev' : 'btn-outline'} style={activeTab !== 'customers' ? {background: 'transparent', color: 'white', width: 'auto'} : {background: 'white', color: 'var(--dev-black)', width: 'auto'}} onClick={() => setActiveTab('customers')}>Customers & Support</button>
         </div>
 
         <div>
@@ -1767,7 +1835,7 @@ function DeveloperView() {
             </div>
           )}
 
-          {activeTab === 'users' && (
+{activeTab === 'users' && (
             <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
               <div className="vibrant-card" style={{maxWidth: '100%', textAlign: 'left', boxSizing: 'border-box'}}>
                 <h3 style={{marginTop: 0, fontWeight: 800, color: 'var(--dev-black)'}}>Create Staff Account</h3>
@@ -1834,20 +1902,71 @@ function DeveloperView() {
           {activeTab === 'finance' && (
             <div className="animate-slide-up" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '24px'}}>
 
-              <div className="vibrant-card" style={{ maxWidth: '100%', textAlign: 'left', background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', color: 'white', border: '1px solid #4f46e5' }}>
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-    <div>
-      <span style={{ color: '#f59e0b', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>100% Platform Owner Revenue</span>
-      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.6rem', fontWeight: 900 }}>VIP Black Card Subscriptions</h3>
-    </div>
-    <div style={{ textAlign: 'right' }}>
-      <div style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700 }}>ACTIVE SUBSCRIBERS: {allUsers.filter(u => u.isVipMember).length}</div>
-      <div style={{ fontSize: '2rem', fontWeight: 900, color: '#34d399' }}>
-        ${(allUsers.filter(u => u.isVipMember).length * 49).toLocaleString()} / mo
-      </div>
-    </div>
-  </div>
-</div>
+              <div className="vibrant-card" style={{ maxWidth: '100%', textAlign: 'left', background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', color: 'white', border: '1px solid #4f46e5', boxSizing: 'border-box' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <span style={{ color: '#f59e0b', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>100% Platform Owner Revenue</span>
+                    <h3 style={{ margin: '4px 0 0 0', fontSize: '1.6rem', fontWeight: 900 }}>VIP Black Card Subscriptions</h3>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700 }}>ACTIVE SUBSCRIBERS: {allUsers.filter(u => u.isVipMember).length}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: '#34d399' }}>
+                      ${(allUsers.filter(u => u.isVipMember).length * 49).toLocaleString()} / mo
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* VIP BLACK CARD PAYMENT TRACKER LEDGER */}
+              <div className="vibrant-card" style={{ maxWidth: '100%', textAlign: 'left', padding: 0, overflow: 'hidden', boxSizing: 'border-box' }}>
+                <div style={{ background: '#f8fafc', padding: '16px 24px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <h3 style={{ margin: 0, fontWeight: 800, color: 'var(--dev-black)' }}>👑 VIP Membership Payment Ledger</h3>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                    Total Collected: ${(allUsers.filter(u => u.vipSubscription).length * 49).toLocaleString()}.00
+                  </span>
+                </div>
+                {allUsers.filter(u => u.vipSubscription || u.isVipMember).length === 0 ? (
+                  <p style={{ padding: '24px', color: 'var(--text-muted)', margin: 0, textAlign: 'center' }}>No VIP membership payments recorded yet.</p>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="luxury-table" style={{ boxShadow: 'none', borderRadius: 0 }}>
+                      <thead>
+                        <tr><th>Date & Time</th><th>Customer</th><th>Email</th><th>Method</th><th>Card Info</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+                      </thead>
+                      <tbody>
+                        {allUsers
+                          .filter(u => u.vipSubscription || u.isVipMember)
+                          .sort((a, b) => (b.vipSubscription?.date || 0) - (a.vipSubscription?.date || 0))
+                          .map(u => {
+                            const sub = u.vipSubscription || {};
+                            const { date, time } = formatTxDateTime(sub.date || u.createdAt);
+                            const isDone = u.isVipMember && sub.status !== 'Revoked';
+                            return (
+                              <tr key={u.uid}>
+                                <td style={{ fontWeight: 600, color: 'var(--dev-black)' }}>{date} <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px' }}>{time}</span></td>
+                                <td style={{ fontWeight: 800, color: 'var(--dev-black)' }}>{u.name || 'VIP Member'}</td>
+                                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{u.email || 'No Email'}</td>
+                                <td style={{ fontWeight: 600, color: 'var(--dev-black)' }}>{sub.method || 'Apple Pay'}</td>
+                                <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>**** {sub.last4 || '0000'}</td>
+                                <td style={{ fontWeight: 800, color: 'var(--dev-black)' }}>${sub.price || 49}.00</td>
+                                <td>
+                                  <span style={{ background: isDone ? '#ecfdf5' : '#fef2f2', color: isDone ? 'var(--accent-green)' : 'var(--danger-red)', padding: '4px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem' }}>
+                                    {isDone ? (sub.status || 'Done') : 'Revoked'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <button onClick={() => promptToggleCustomerVip(u)} className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem', boxShadow: 'none' }}>
+                                    {u.isVipMember ? 'Revoke' : 'Re-Activate'}
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
               
               {allVenues.map(venue => {
                 const venueTransactions = allTickets.filter(t => t.venueId === venue.id && (t.washTransaction || t.tipTransaction));
@@ -1907,6 +2026,168 @@ function DeveloperView() {
               })}
             </div>
           )}
+
+          {activeTab === 'customers' && (() => {
+            const customerList = allUsers.filter(u => u.role === 'customer' || (!u.venueId && u.role !== 'developer'));
+            const q = customerSearch.trim().toLowerCase();
+            const filteredCustomers = customerList.filter(u => {
+              if (!q) return true;
+              const cars = u.garage ? Object.values(u.garage) : [];
+              const carMatch = cars.some(c =>
+                (c.licensePlate || '').toLowerCase().includes(q) ||
+                (c.make || '').toLowerCase().includes(q) ||
+                (c.vipCode || '').toLowerCase().includes(q)
+              );
+              return (
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.name || '').toLowerCase().includes(q) ||
+                (u.phone || '').toLowerCase().includes(q) ||
+                (u.uid || '').toLowerCase().includes(q) ||
+                carMatch
+              );
+            });
+
+            return (
+              <div className="animate-slide-up" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+                {/* Support Search & Quick Metrics */}
+                <div className="vibrant-card" style={{ maxWidth: '100%', textAlign: 'left', boxSizing: 'border-box' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontWeight: 800, color: 'var(--dev-black)' }}>Customer Support & Account Directory</h3>
+                      <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500 }}>
+                        Search by email, name, phone, pass code, or license plate to recover passwords, manage VIP status, or fix stuck tickets.
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ background: '#f8fafc', padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--card-border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Customers</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--dev-black)' }}>{customerList.length}</div>
+                      </div>
+                      <div style={{ background: '#fef3c7', padding: '10px 16px', borderRadius: '12px', border: '1px solid #fde68a', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase' }}>VIP Members</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#b45309' }}>{customerList.filter(c => c.isVipMember).length}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="🔍 Search customer email, name, phone, plate, or pass code..."
+                    className="vibrant-input dev-focus"
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+
+                {/* Customer Directory Table */}
+                <div style={{ background: 'white', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow-lg)' }}>
+                  {filteredCustomers.length === 0 ? (
+                    <p style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', margin: 0 }}>No matching customer accounts found.</p>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="luxury-table" style={{ boxShadow: 'none', margin: 0 }}>
+                        <thead>
+                          <tr>
+                            <th>Customer & Email</th>
+                            <th>Phone</th>
+                            <th>Saved Fleet & Pass</th>
+                            <th>VIP & Payment</th>
+                            <th>Live Ticket Status</th>
+                            <th>Support Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredCustomers.map(c => {
+                            const cars = c.garage ? Object.values(c.garage) : [];
+                            const cPlates = cars.map(car => (car.licensePlate || '').toUpperCase()).filter(Boolean);
+                            const liveTicket = allTickets.find(t =>
+                              t.status !== 'retrieved' &&
+                              (t.customerId === c.uid || (t.vehicle?.licensePlate && cPlates.includes(t.vehicle.licensePlate.toUpperCase())))
+                            );
+                            const rawPass = String(c.vipCode || '0000').replace(/\D/g, '');
+
+                            return (
+                              <tr key={c.uid}>
+                                <td>
+                                  <div style={{ fontWeight: 800, color: 'var(--dev-black)' }}>{c.name || 'Unnamed Guest'}</div>
+                                  <div style={{ fontWeight: 600, color: 'var(--accent-blue)', fontSize: '0.9rem' }}>{c.email || 'No Email Saved'}</div>
+                                  <div style={{ fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: '0.75rem' }}>UID: {c.uid}</div>
+                                </td>
+                                <td style={{ fontWeight: 600, color: 'var(--dev-black)' }}>{c.phone || '-'}</td>
+                                <td>
+                                  {cars.length === 0 ? (
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No vehicles saved</span>
+                                  ) : (
+                                    cars.map((car, idx) => {
+                                      const carDigits = String(car.vipCode || rawPass).replace(/\D/g, '');
+                                      return (
+                                        <div key={idx} style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '4px', color: 'var(--dev-black)' }}>
+                                          🚘 {car.make} {car.model} <span style={{ fontFamily: 'monospace', background: '#fef08a', padding: '2px 6px', borderRadius: '4px' }}>{car.licensePlate}</span>
+                                          <span style={{ marginLeft: '6px', color: c.isVipMember ? '#d97706' : 'var(--accent-green)', fontFamily: 'monospace' }}>
+                                            ({c.isVipMember ? `VIP-${carDigits}` : carDigits})
+                                          </span>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </td>
+                                <td>
+                                  {c.isVipMember ? (
+                                    <div>
+                                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block', marginBottom: '4px' }}>
+                                        👑 VIP Active ($49)
+                                      </span>
+                                      {c.vipSubscription && (
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                          {c.vipSubscription.method} • **** {c.vipSubscription.last4}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Standard Free</span>
+                                  )}
+                                </td>
+                                <td>
+                                  {liveTicket ? (
+                                    <div>
+                                      <span className="status-badge status-requested" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>
+                                        {liveTicket.status} • {liveTicket.parkingSpot || 'Draft'}
+                                      </span>
+                                      <div style={{ marginTop: '6px' }}>
+                                        <button onClick={() => promptForceReleaseTicket(liveTicket)} className="btn-outline" style={{ padding: '4px 8px', fontSize: '0.75rem', color: 'var(--danger-red)', borderColor: '#fecaca' }}>
+                                          Force Release Car
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span style={{ color: 'var(--text-muted)', fontWeight: '0.85rem' }}>Not Parked</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                    <button onClick={() => handleResetPassword(c.email)} className="btn-outline" style={{ padding: '6px 10px', fontSize: '0.78rem', boxShadow: 'none', width: 'auto' }}>
+                                      Reset Pass
+                                    </button>
+                                    <button onClick={() => promptToggleCustomerVip(c)} className="btn-outline" style={{ padding: '6px 10px', fontSize: '0.78rem', boxShadow: 'none', width: 'auto', borderColor: '#f59e0b', color: '#b45309' }}>
+                                      {c.isVipMember ? 'Revoke VIP' : 'Make VIP'}
+                                    </button>
+                                    <button onClick={() => promptDeleteCustomer(c.uid, c.email)} className="btn-action" style={{ padding: '6px 10px', fontSize: '0.78rem', boxShadow: 'none', width: 'auto' }}>
+                                      Delete
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
       
