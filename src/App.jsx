@@ -242,18 +242,30 @@ const playNotificationChime = () => {
   } catch (e) { /* Ignore audio autoplay restrictions */ }
 };
 
-const triggerPushNotification = (title, body) => {
+const triggerPushNotification = async (title, body) => {
   playNotificationChime();
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
-  // 1. Trigger in-app iOS/Android style push banner at the top of the screen
+  // 1. Trigger in-app banner at the top of the screen
   window.dispatchEvent(new CustomEvent('sky-valet-notify', { detail: { title, body, id: Date.now() } }));
 
-  // 2. Trigger native OS/Phone notification if permitted
+  // 2. Trigger native Phone Status-Bar / Lock-Screen notification via Service Worker
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          await reg.showNotification(title, {
+            body,
+            vibrate: [200, 100, 200],
+            tag: 'sky-valet-' + Date.now(),
+            renotify: true
+          });
+          return;
+        }
+      }
       new Notification(title, { body, silent: false });
-    } catch (e) { /* Mobile Chrome fallback handled by in-app banner */ }
+    } catch (e) { /* Fallback handled by in-app banner */ }
   }
 };
 
@@ -261,8 +273,16 @@ function LiveNotificationToast() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
+    // Register background Service Worker for phone status-bar alerts
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
     if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().catch(() => {});
+      const askPermissionOnTap = () => {
+        Notification.requestPermission().catch(() => {});
+        window.removeEventListener('click', askPermissionOnTap);
+      };
+      window.addEventListener('click', askPermissionOnTap);
     }
     const handler = (e) => {
       setToast(e.detail);
@@ -279,8 +299,9 @@ function LiveNotificationToast() {
     <div
       onClick={() => setToast(null)}
       style={{
-        position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 99999, width: '92%', maxWidth: '420px',
+        position: 'fixed', top: '16px', left: '16px', right: '16px',
+        margin: '0 auto', maxWidth: '420px', boxSizing: 'border-box',
+        zIndex: 99999,
         background: 'rgba(15, 23, 42, 0.96)', color: 'white',
         padding: '16px 20px', borderRadius: '18px',
         boxShadow: '0 20px 40px rgba(0,0,0,0.35)', border: '1px solid rgba(52, 211, 153, 0.5)',
@@ -292,9 +313,9 @@ function LiveNotificationToast() {
       <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>
         🔔
       </div>
-      <div style={{ flex: 1, textAlign: 'left' }}>
-        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#34d399', marginBottom: '2px' }}>{toast.title}</div>
-        <div style={{ fontWeight: 500, fontSize: '0.88rem', color: '#f8fafc', lineHeight: 1.35 }}>{toast.body}</div>
+      <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#34d399', marginBottom: '2px', wordBreak: 'break-word' }}>{toast.title}</div>
+        <div style={{ fontWeight: 500, fontSize: '0.88rem', color: '#f8fafc', lineHeight: 1.35, wordBreak: 'break-word' }}>{toast.body}</div>
       </div>
     </div>
   );
