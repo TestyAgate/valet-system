@@ -55,37 +55,37 @@ const vibrantStyles = `
   .heading-brand { color: var(--text-main); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
   .heading-dashboard { color: var(--text-main); font-size: 2.25rem; margin: 0; font-weight: 700; letter-spacing: -1px; }
 
-  .btn-green { background: var(--accent-green); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-ui);}
+.btn-green { background: var(--accent-green); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-size: 0.98rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn); display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-ui); white-space: nowrap; }
   .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); background: var(--accent-green-hover); }
   .btn-green:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; }
   
-  .btn-blue { background: var(--accent-blue); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn-blue); display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-ui);}
+  .btn-blue { background: var(--accent-blue); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-size: 0.98rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn-blue); display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-ui); white-space: nowrap; }
   .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4); background: var(--accent-blue-hover); }
 
-  .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); font-family: var(--font-ui);}
+  .btn-purple { background: var(--draft-purple); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-size: 0.98rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); font-family: var(--font-ui); white-space: nowrap; }
   .btn-purple:hover { transform: translateY(-2px); filter: brightness(1.1); }
   
-  .btn-dev { background: var(--dev-black); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-md); font-family: var(--font-ui);}
+  .btn-dev { background: var(--dev-black); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-size: 0.98rem; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-md); font-family: var(--font-ui); white-space: nowrap; }
   .btn-dev:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
-  .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); font-family: var(--font-ui);}
+  .btn-action { background: #fee2e2; color: var(--danger-red); border: none; padding: 10px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); font-family: var(--font-ui); white-space: nowrap; }
   .btn-action:hover { background: var(--danger-red); color: white; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); font-family: var(--font-ui);}
+  .btn-outline { background: #fff; color: var(--text-main); border: 2px solid var(--card-border); padding: 11px 18px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); font-family: var(--font-ui); white-space: nowrap; }
   .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
   
-  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
+  .btn-apple-pay { background: #000; color: #fff; border: none; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
   .btn-apple-pay:hover { background: #222; transform: translateY(-2px); }
-  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
+  .btn-google-pay { background: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); }
   .btn-google-pay:hover { background: #f8f9fa; transform: translateY(-2px); }
 
-  .vibrant-input { background: #f8fafc; border: 2px solid var(--card-border); color: var(--text-main); padding: 16px; width: 100%; border-radius: 12px; box-sizing: border-box; font-family: var(--font-ui); font-size: 1rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-  .vibrant-input:focus { outline: none; border-color: var(--accent-green); background: #fff; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
-  .vibrant-input.dev-focus:focus { border-color: var(--dev-black); box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1); }
+  .vibrant-input { background: #f8fafc; border: 1.5px solid var(--card-border); color: var(--text-main); padding: 11px 14px; width: 100%; border-radius: 10px; box-sizing: border-box; font-family: var(--font-ui); font-size: 0.92rem; font-weight: 500; transition: all 0.2s ease; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
+  .vibrant-input:focus { outline: none; border-color: var(--accent-green); background: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12); }
+  .vibrant-input.dev-focus:focus { border-color: var(--dev-black); box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1); }
   
-  .autocomplete-container { position: relative; width: 100%; margin-bottom: 16px; }
-  .autocomplete-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 2px solid var(--accent-green); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 9999; box-shadow: var(--shadow-lg); list-style: none; padding: 8px; margin: 0; text-align: left; }
-  .autocomplete-item { padding: 12px 16px; cursor: pointer; color: var(--text-main); border-radius: 8px; font-weight: 500; }
+  .autocomplete-container { position: relative; width: 100%; margin-bottom: 12px; }
+  .autocomplete-dropdown { position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; width: max-content; max-width: 260px; background: #fff; border: 1.5px solid var(--accent-green); border-radius: 12px; max-height: 210px; overflow-y: auto; z-index: 9999; box-shadow: var(--shadow-lg); list-style: none; padding: 6px; margin: 0; text-align: left; }
+  .autocomplete-item { padding: 10px 14px; cursor: pointer; color: var(--text-main); border-radius: 8px; font-weight: 600; font-size: 0.9rem; white-space: nowrap; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .autocomplete-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
 
   .parking-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 16px; max-height: 50vh; overflow-y: auto; padding-right: 8px; }
@@ -197,7 +197,15 @@ const CAR_DATABASE = {
 };
 
 const COUNTRY_CODES = [
-  { label: "🇦🇪 UAE (+971)", value: "+971" }, { label: "🇮🇱 Israel (+972)", value: "+972" }, { label: "🇺🇸 USA/Canada (+1)", value: "+1" }, { label: "🇬🇧 UK (+44)", value: "+44" },
+  { label: "Israel", value: "+972" },
+  { label: "UAE", value: "+971" },
+  { label: "USA / Canada", value: "+1" },
+  { label: "UK", value: "+44" },
+  { label: "Jordan", value: "+962" },
+  { label: "Egypt", value: "+20" },
+  { label: "Saudi Arabia", value: "+966" },
+  { label: "Germany", value: "+49" },
+  { label: "France", value: "+33" }
 ];
 
 const DEFAULT_PARKING_MAP = [
@@ -395,29 +403,76 @@ const GooglePayLogo = () => (
 function Autocomplete({ options, value, onChange, placeholder, style, isObject }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFiltering, setIsFiltering] = useState(false);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (isObject) { const match = options.find(o => o.value === value); setSearchTerm(match ? match.label : value); } 
-    else { setSearchTerm(value); }
-  }, [value, options, isObject]);
+    setSearchTerm(value || '');
+    setIsFiltering(false);
+  }, [value]);
 
   useEffect(() => {
-    function handleClickOutside(event) { if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false); }
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setIsFiltering(false);
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const filteredOptions = options.filter(opt => {
+    if (!isFiltering || !searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return isObject
+      ? opt.label.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q)
+      : opt.toLowerCase().includes(q);
+  });
+
   return (
     <div className="autocomplete-container" ref={wrapperRef} style={style}>
-      <input type="text" className="vibrant-input" style={{ marginBottom: 0 }} placeholder={placeholder} value={searchTerm}
-        onChange={(e) => { setSearchTerm(e.target.value); setIsOpen(true); if (!isObject) onChange(e.target.value); }}
-        onFocus={() => setIsOpen(true)} required autoComplete="off" />
-      {isOpen && (
+      <input
+        type="text"
+        className="vibrant-input"
+        style={{ marginBottom: 0 }}
+        placeholder={placeholder}
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setIsFiltering(true);
+          setIsOpen(true);
+          onChange(e.target.value);
+        }}
+        onFocus={() => {
+          setIsFiltering(false);
+          setIsOpen(true);
+        }}
+        required
+        autoComplete="off"
+      />
+      {isOpen && filteredOptions.length > 0 && (
         <ul className="autocomplete-dropdown">
-          {options.filter(opt => (isObject ? opt.label : opt).toLowerCase().includes(searchTerm.toLowerCase())).map((opt, i) => (
-            <li key={i} className="autocomplete-item" onClick={() => { setSearchTerm(isObject ? opt.label : opt); onChange(isObject ? opt.value : opt); setIsOpen(false); }}>
-              {isObject ? opt.label : opt}
+          {filteredOptions.map((opt, i) => (
+            <li
+              key={i}
+              className="autocomplete-item"
+              onClick={() => {
+                const selectedVal = isObject ? opt.value : opt;
+                setSearchTerm(selectedVal);
+                onChange(selectedVal);
+                setIsFiltering(false);
+                setIsOpen(false);
+              }}
+            >
+              {isObject ? (
+                <>
+                  <span>{opt.label}</span>
+                  <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace', fontWeight: 800 }}>{opt.value}</span>
+                </>
+              ) : (
+                opt
+              )}
             </li>
           ))}
         </ul>
@@ -577,7 +632,7 @@ function LoginView({ initialMode = 'customer_login', onBackToLanding }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [countryCode, setCountryCode] = useState('+971');
+  const [countryCode, setCountryCode] = useState('');
   const [phone, setPhone] = useState('');
   const [firstCarMake, setFirstCarMake] = useState('');
   const [firstCarModel, setFirstCarModel] = useState('');
@@ -1189,7 +1244,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
-  const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', countryCode: '+971', phone: '', customerId: null });
+const [formData, setFormData] = useState({ make: '', model: '', color: '', plate: '', spot: '', countryCode: '', phone: '', customerId: null });
 
   useEffect(() => {
     if (editingTicket && editingTicket.vehicle) {
@@ -1197,7 +1252,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       setFormData({
         make: editingTicket.vehicle.make || '', model: editingTicket.vehicle.model || '',
         color: editingTicket.vehicle.color || '', plate: editingTicket.vehicle.licensePlate || '',
-        spot: editingTicket.parkingSpot || '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
+        spot: editingTicket.parkingSpot || '', countryCode: phoneParts[0] || '', phone: phoneParts.slice(1).join(' ') || '',
         customerId: editingTicket.customerId || null
       });
     } else if (prefillVipData) {
@@ -1205,7 +1260,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       setFormData({
         make: prefillVipData.make || '', model: prefillVipData.model || '',
         color: prefillVipData.color || '', plate: prefillVipData.licensePlate || '',
-        spot: '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
+        spot: '', countryCode: phoneParts[0] || '', phone: phoneParts.slice(1).join(' ') || '',
         customerId: prefillVipData.customerId || null,
         isVipMember: Boolean(prefillVipData.isVipMember)
       });
@@ -1220,7 +1275,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
     e.preventDefault();
     setErrorMsg('');
 
-    if (!formData.plate || !formData.make || !formData.color || !formData.spot || !formData.phone) {
+    if (!formData.plate || !formData.make || !formData.color || !formData.spot || !formData.countryCode || !formData.phone) {
       setErrorMsg('⚠️ Please fill in all details and select a parking spot.');
       return;
     }
@@ -1270,7 +1325,6 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
         timestamps: { parkedAt: Date.now(), requestedAt: null, retrievedAt: null }
       });
 
-      // Registered guests get the ticket straight in their app—close modal instead of showing a QR popup
       if (formData.customerId || prefillVipData) {
         onClose();
       } else {
@@ -1287,7 +1341,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
       const phoneParts = (past.guestPhone || "").split(' ');
       setFormData({
         ...formData, plate: plate, make: past.vehicle?.make || '', model: past.vehicle?.model || '',
-        color: past.vehicle?.color || '', countryCode: phoneParts[0] || '+971', phone: phoneParts.slice(1).join(' ') || '',
+        color: past.vehicle?.color || '', countryCode: phoneParts[0] || '', phone: phoneParts.slice(1).join(' ') || '',
         customerId: past.customerId || null
       });
     }
@@ -1295,20 +1349,20 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
 
   return (
     <div className="modal-overlay">
-      <div className="vibrant-card animate-scale-in" style={{width: '90%', maxWidth: isMapOpen ? '850px' : '460px', padding: '40px', maxHeight: '90vh', overflowY: 'auto', transition: 'max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'}}>
+      <div className="vibrant-card animate-scale-in" style={{width: '94%', maxWidth: isMapOpen ? '850px' : '420px', padding: '24px 20px', maxHeight: '90vh', overflowY: 'auto', transition: 'max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'}}>
         
         {newlyCreatedTicket ? (
           <div className="animate-slide-up">
             <h2 className="heading-brand" style={{color: 'var(--accent-green)'}}>TICKET ACTIVE</h2>
             <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>If this guest is a registered VIP member, this ticket is already live in their app.</p>
-            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '24px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
+            <div style={{background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', margin: '20px 0', border: '2px solid var(--card-border)', boxShadow: 'var(--shadow-lg)'}}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${currentDomain}/?ticket=${newlyCreatedTicket}`)}`} alt="QR Code" style={{display: 'block'}} />
             </div>
-            <button onClick={onClose} className="btn-outline" style={{width: '100%', padding: '16px'}}>Return to Dashboard</button>
+            <button onClick={onClose} className="btn-outline" style={{width: '100%'}}>Return to Dashboard</button>
           </div>
         ) : isMapOpen ? (
           <div className="animate-slide-up" style={{textAlign: 'left'}}>
-            <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
+            <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.5rem', marginBottom: '8px'}}>SELECT PARKING SPOT</h2>
             <div className="parking-map" style={{maxHeight: '60vh'}}>
               {parkingMap.map((section, idx) => (
                 <div key={idx} style={{display: 'contents'}}>
@@ -1326,11 +1380,11 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
                 </div>
               ))}
             </div>
-            <button onClick={() => setIsMapOpen(false)} className="btn-outline" style={{width: '100%', marginTop: '32px', padding: '16px'}}>Cancel Selection</button>
+            <button onClick={() => setIsMapOpen(false)} className="btn-outline" style={{width: '100%', marginTop: '24px'}}>Cancel Selection</button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="animate-slide-up">
-            <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.75rem', marginBottom: '16px'}}>
+            <h2 className="heading-brand" style={{color: 'var(--text-main)', fontSize: '1.5rem', marginBottom: '16px'}}>
               {editingTicket && editingTicket.id !== 'new'
                 ? 'EDIT DETAILS'
                 : prefillVipData
@@ -1342,7 +1396,7 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
               <div style={{
                 background: prefillVipData.isVipMember ? '#fef3c7' : '#ecfdf5',
                 color: prefillVipData.isVipMember ? '#b45309' : '#065f46',
-                padding: '10px 14px', borderRadius: '10px', marginBottom: '16px', fontWeight: 700, fontSize: '0.9rem',
+                padding: '10px 12px', borderRadius: '10px', marginBottom: '14px', fontWeight: 700, fontSize: '0.85rem',
                 border: prefillVipData.isVipMember ? '1px solid #f59e0b' : '1px solid #a7f3d0'
               }}>
                 {prefillVipData.isVipMember ? '👑 VIP Black Card Member — ' : '✓ '}
@@ -1350,31 +1404,31 @@ function LogArrivalModal({ onClose, venueId, parkingMap, occupiedSpots, knownPla
               </div>
             )}
 
-            {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '2px solid #fecaca', boxShadow: 'var(--shadow-sm)'}}>{errorMsg}</div>}
+            {errorMsg && <div style={{background: '#fef2f2', color: 'var(--danger-red)', padding: '12px', borderRadius: '10px', marginBottom: '16px', fontSize: '0.9rem', fontWeight: 600, border: '1.5px solid #fecaca'}}>{errorMsg}</div>}
 
-            <input placeholder="License Plate (Auto-fills if known)" className="vibrant-input" style={{marginBottom: '16px', textTransform: 'uppercase', borderColor: 'var(--warning-yellow)'}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} onBlur={handlePlateBlur} autoComplete="off" />
+            <input placeholder="License Plate (Auto-fills if known)" className="vibrant-input" style={{marginBottom: '12px', textTransform: 'uppercase', borderColor: 'var(--warning-yellow)', fontWeight: 700}} value={formData.plate} onChange={e => setFormData({...formData, plate: e.target.value})} onBlur={handlePlateBlur} autoComplete="off" />
 
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
-              <Autocomplete options={availableMakes} value={formData.make} onChange={(val) => setFormData({...formData, make: val, model: ''})} placeholder="Search or type Make" isObject={false} />
-              <Autocomplete options={availableModels} value={formData.model} onChange={(val) => setFormData({...formData, model: val})} placeholder="Search or type Model" isObject={false} />
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+              <Autocomplete options={availableMakes} value={formData.make} onChange={(val) => setFormData({...formData, make: val, model: ''})} placeholder="Make" isObject={false} />
+              <Autocomplete options={availableModels} value={formData.model} onChange={(val) => setFormData({...formData, model: val})} placeholder="Model" isObject={false} />
             </div>
             
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
-              <input placeholder="Color" className="vibrant-input" style={{marginBottom: '16px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} autoComplete="off" />
-              <input readOnly placeholder="Tap to Select Spot" className="vibrant-input" 
-                style={{marginBottom: '16px', textAlign: 'center', color: formData.spot ? 'var(--accent-green)' : 'var(--danger-red)', fontWeight: '700', cursor: 'pointer', border: formData.spot ? '2px solid var(--accent-green)' : '2px dashed var(--danger-red)'}} 
-                value={formData.spot || "Spot Missing!"} onClick={() => setIsMapOpen(true)} />
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+              <input placeholder="Color" className="vibrant-input" style={{marginBottom: '12px'}} value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} autoComplete="off" />
+              <input readOnly placeholder="Select Spot" className="vibrant-input" 
+                style={{marginBottom: '12px', textAlign: 'center', color: formData.spot ? 'var(--accent-green)' : 'var(--danger-red)', fontWeight: '700', cursor: 'pointer', border: formData.spot ? '1.5px solid var(--accent-green)' : '1.5px dashed var(--danger-red)'}} 
+                value={formData.spot || "Select Spot"} onClick={() => setIsMapOpen(true)} />
             </div>
             
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', alignItems: 'start'}}>
-              <Autocomplete options={COUNTRY_CODES} value={formData.countryCode} onChange={(val) => setFormData({...formData, countryCode: val})} placeholder="+ Code" isObject={true} />
-              <input type="tel" placeholder="Guest Phone" className="vibrant-input" style={{marginBottom: '24px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} autoComplete="off" />
+            <div style={{display: 'grid', gridTemplateColumns: '110px 1fr', gap: '12px', alignItems: 'start', marginBottom: '8px'}}>
+              <Autocomplete options={COUNTRY_CODES} value={formData.countryCode} onChange={(val) => setFormData({...formData, countryCode: val})} placeholder="Code (+)" isObject={true} />
+              <input type="tel" placeholder="Guest Phone" className="vibrant-input" style={{marginBottom: '12px'}} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} autoComplete="off" />
             </div>
 
-            <div style={{display: 'flex', gap: '16px'}}>
+            <div style={{display: 'flex', gap: '12px'}}>
               <button type="submit" className="btn-green" style={{flex: 2}}>
-  {editingTicket && editingTicket.id !== 'new' ? 'Save Update' : (prefillVipData || formData.customerId) ? 'Park Vehicle' : 'Generate Ticket'}
-</button>
+                {editingTicket && editingTicket.id !== 'new' ? 'Save Update' : (prefillVipData || formData.customerId) ? 'Park Vehicle' : 'Generate Ticket'}
+              </button>
               <button type="button" onClick={onClose} className="btn-outline" style={{flex: 1}}>Cancel</button>
             </div>
           </form>
