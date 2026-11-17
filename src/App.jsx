@@ -221,6 +221,86 @@ const getZonePrefix = (zoneName) => {
 };
 
 // ------------------------------------------------------------------
+// LIVE PHONE & IN-APP PUSH NOTIFICATION ENGINE
+// ------------------------------------------------------------------
+const playNotificationChime = () => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.45);
+  } catch (e) { /* Ignore audio autoplay restrictions */ }
+};
+
+const triggerPushNotification = (title, body) => {
+  playNotificationChime();
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+  // 1. Trigger in-app iOS/Android style push banner at the top of the screen
+  window.dispatchEvent(new CustomEvent('sky-valet-notify', { detail: { title, body, id: Date.now() } }));
+
+  // 2. Trigger native OS/Phone notification if permitted
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(title, { body, silent: false });
+    } catch (e) { /* Mobile Chrome fallback handled by in-app banner */ }
+  }
+};
+
+function LiveNotificationToast() {
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+    const handler = (e) => {
+      setToast(e.detail);
+      setTimeout(() => {
+        setToast(prev => (prev?.id === e.detail.id ? null : prev));
+      }, 6000);
+    };
+    window.addEventListener('sky-valet-notify', handler);
+    return () => window.removeEventListener('sky-valet-notify', handler);
+  }, []);
+
+  if (!toast) return null;
+  return (
+    <div
+      onClick={() => setToast(null)}
+      style={{
+        position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
+        zIndex: 99999, width: '92%', maxWidth: '420px',
+        background: 'rgba(15, 23, 42, 0.96)', color: 'white',
+        padding: '16px 20px', borderRadius: '18px',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.35)', border: '1px solid rgba(52, 211, 153, 0.5)',
+        backdropFilter: 'blur(12px)', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', gap: '14px',
+        animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+      }}
+    >
+      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>
+        🔔
+      </div>
+      <div style={{ flex: 1, textAlign: 'left' }}>
+        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#34d399', marginBottom: '2px' }}>{toast.title}</div>
+        <div style={{ fontWeight: 500, fontSize: '0.88rem', color: '#f8fafc', lineHeight: 1.35 }}>{toast.body}</div>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
 // WIDGETS & LOGOS
 // ------------------------------------------------------------------
 function CustomConfirmWidget({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", isDanger = true, singleButton = false }) {
@@ -640,27 +720,38 @@ function CustomerGarageView({ userProfile, uid, onOpenLiveTicket }) {
   const [showAddCarModal, setShowAddCarModal] = useState(false);
   const [selectedPassCar, setSelectedPassCar] = useState(null);
   const [showVipModal, setShowVipModal] = useState(false);
-const isSubscribed = Boolean(userProfile?.isVipMember);
-const getPassDisplay = (code) => {
-  const digits = (code || userProfile?.vipCode || '0000').replace(/\D/g, '');
-  return isSubscribed ? `VIP-${digits}` : digits;
-};
 
-const handleSubscribeVip = async (method) => {
-  const subRecord = {
-    plan: 'Sky Black Card',
-    price: 49,
-    method,
-    last4: Math.floor(1000 + Math.random() * 9000),
-    date: Date.now(),
-    status: 'Done'
+  // Direct Main-Page Tip State
+  const [tippingTicket, setTippingTicket] = useState(null);
+  const [selectedTipAmount, setSelectedTipAmount] = useState(0);
+  const [customTipInputs, setCustomTipInputs] = useState({});
+
+  const prevTicketStateRef = useRef({});
+  const initialLoadRef = useRef(true);
+
+  const isSubscribed = Boolean(userProfile?.isVipMember);
+  const getPassDisplay = (code) => {
+    const digits = (code || userProfile?.vipCode || '0000').replace(/\D/g, '');
+    return isSubscribed ? `VIP-${digits}` : digits;
   };
-  await update(ref(db, `users/${uid}`), {
-    isVipMember: true,
-    vipSubscription: subRecord
-  });
-  setShowVipModal(false);
-};
+
+  const handleSubscribeVip = async (method) => {
+    const subRecord = {
+      plan: 'Sky Black Card',
+      price: 49,
+      method,
+      last4: Math.floor(1000 + Math.random() * 9000),
+      date: Date.now(),
+      status: 'Done'
+    };
+    await update(ref(db, `users/${uid}`), {
+      isVipMember: true,
+      vipSubscription: subRecord
+    });
+    setShowVipModal(false);
+    triggerPushNotification('👑 Sky Black Card Activated', 'You now have #1 Priority Retrieval and 50% off all car washes!');
+  };
+
   const [newCar, setNewCar] = useState({ make: '', model: '', color: '', plate: '' });
 
   const garageCars = userProfile?.garage ? Object.values(userProfile.garage) : [];
@@ -679,6 +770,33 @@ const handleSubscribeVip = async (method) => {
           t.customerId === uid ||
           (t.vehicle?.licensePlate && myPlates.includes(t.vehicle.licensePlate.toUpperCase()))
         );
+
+        // Detect team moves and fire live phone notifications
+        matched.forEach(t => {
+          const prev = prevTicketStateRef.current[t.id];
+          const carLabel = `${t.vehicle?.make || 'Vehicle'} (${t.vehicle?.licensePlate || ''})`;
+
+          if (!initialLoadRef.current) {
+            if (!prev && t.status === 'parked') {
+              triggerPushNotification('🚗 Vehicle Safely Parked', `${carLabel} is secured in Spot ${t.parkingSpot}.`);
+            } else if (prev) {
+              if (prev.washStatus !== t.washStatus) {
+                if (t.washStatus === 'queued') triggerPushNotification('🫧 Car Wash Queued', `${carLabel} has been added to the wash bay queue.`);
+                if (t.washStatus === 'washing') triggerPushNotification('🧽 Washing Now!', `The detail team has started washing your ${carLabel}.`);
+                if (t.washStatus === 'completed') triggerPushNotification('✨ Car Wash Complete!', `Your ${carLabel} is spotless and shining.`);
+              }
+              if (prev.status !== t.status) {
+                if (t.status === 'requested') triggerPushNotification('📲 Request Received', `Valet team is preparing your ${carLabel}.`);
+                if (t.status === 'incoming') triggerPushNotification('🏃 Car On The Way!', `Your valet is bringing ${carLabel} to ${t.returnLocation || 'the entrance'}.`);
+                if (t.status === 'ready') triggerPushNotification('🟢 Car Ready at Door!', `Your ${carLabel} is waiting at ${t.returnLocation || 'the entrance'}!`);
+                if (t.status === 'retrieved') triggerPushNotification('🔑 Vehicle Delivered — Tip Valet', `Hope you enjoyed your visit! You can now tip your valet from your garage.`);
+              }
+            }
+          }
+          prevTicketStateRef.current[t.id] = { status: t.status, washStatus: t.washStatus };
+        });
+        initialLoadRef.current = false;
+
         setMyTickets(matched.sort((a, b) => ((b.timestamps && b.timestamps.parkedAt) || 0) - ((a.timestamps && a.timestamps.parkedAt) || 0)));
       } else {
         setMyTickets([]);
@@ -709,7 +827,31 @@ const handleSubscribeVip = async (method) => {
     await remove(ref(db, `users/${uid}/garage/${carId}`));
   };
 
+  const handleCompleteGarageTip = async (method) => {
+    if (!tippingTicket || !selectedTipAmount) return;
+    const transaction = {
+      date: Date.now(),
+      last4: Math.floor(1000 + Math.random() * 9000),
+      status: 'Done',
+      method,
+      amount: selectedTipAmount
+    };
+    await update(ref(db, `tickets/${tippingTicket.id}`), {
+      tippedAmount: selectedTipAmount,
+      tipTransaction: transaction
+    });
+    triggerPushNotification('💸 Tip Sent — Thank You!', `Your $${selectedTipAmount}.00 gratuity was sent to your valet.`);
+    setTippingTicket(null);
+    setSelectedTipAmount(0);
+  };
+
+  const handleDismissTip = async (ticketId) => {
+    await update(ref(db, `tickets/${ticketId}`), { tipSkipped: true });
+  };
+
   const activeParkedTickets = myTickets.filter(t => t.status !== 'retrieved');
+  // Keep delivered cars on the main page until the customer tips or dismisses
+  const awaitingTipTickets = myTickets.filter(t => t.status === 'retrieved' && !t.tippedAmount && !t.tipSkipped);
   const pastTickets = myTickets.filter(t => t.status === 'retrieved');
   const availableMakes = Object.keys(CAR_DATABASE);
   const availableModels = CAR_DATABASE[newCar.make] || [];
@@ -731,7 +873,7 @@ const handleSubscribeVip = async (method) => {
 
         {/* LIVE ACTIVE VALET TICKET BANNER */}
         {activeParkedTickets.length > 0 && (
-          <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {activeParkedTickets.map(activeT => {
               const venueName = allVenues[activeT.venueId]?.name || 'Partner Venue';
               return (
@@ -750,6 +892,71 @@ const handleSubscribeVip = async (method) => {
                   <button onClick={() => onOpenLiveTicket(activeT.id)} className="btn-outline" style={{ width: 'auto', background: 'white', color: '#065f46', border: 'none', padding: '14px 24px', fontWeight: 800 }}>
                     Open Live Controls & Request Car →
                   </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* DELIVERED VEHICLE — TIP YOUR VALET BANNER (Stays on Main Screen Until Tipped/Dismissed) */}
+        {awaitingTipTickets.length > 0 && (
+          <div style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {awaitingTipTickets.map(doneT => {
+              const venueName = allVenues[doneT.venueId]?.name || 'Partner Venue';
+              const customVal = customTipInputs[doneT.id] || '';
+              return (
+                <div key={doneT.id} className="animate-scale-in" style={{ background: '#ffffff', border: '2px solid var(--accent-green)', borderRadius: '20px', padding: '24px 28px', boxShadow: 'var(--shadow-lg)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <span className="status-badge status-ready" style={{ marginBottom: '8px' }}>
+                        🔑 Vehicle Delivered • {venueName}
+                      </span>
+                      <h3 style={{ margin: '4px 0', fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                        Leave a Tip for Your Valet ({doneT.vehicle?.make} {doneT.vehicle?.licensePlate})
+                      </h3>
+                      <p style={{ margin: 0, color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.95rem' }}>
+                        Your car has been handed over! Show your appreciation for {doneT.parkedByName || 'your valet runner'} with a 1-tap tip:
+                      </p>
+                    </div>
+                    <button onClick={() => handleDismissTip(doneT.id)} className="btn-outline" style={{ width: 'auto', padding: '8px 14px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      Skip / Dismiss ✕
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {[2, 5, 10, 20].map(amt => (
+                      <button
+                        key={amt}
+                        onClick={() => { setTippingTicket(doneT); setSelectedTipAmount(amt); }}
+                        className="btn-outline"
+                        style={{ width: 'auto', padding: '12px 22px', fontSize: '1.05rem', fontWeight: 800, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
+                      >
+                        Tip ${amt}
+                      </button>
+                    ))}
+                    <div style={{ display: 'flex', gap: '8px', flex: 1, minWidth: '180px' }}>
+                      <input
+                        type="number"
+                        placeholder="Custom ($)"
+                        className="vibrant-input"
+                        style={{ padding: '12px 14px', marginBottom: 0 }}
+                        value={customVal}
+                        onChange={(e) => setCustomTipInputs({ ...customTipInputs, [doneT.id]: e.target.value })}
+                      />
+                      <button
+                        onClick={() => {
+                          if (Number(customVal) > 0) {
+                            setTippingTicket(doneT);
+                            setSelectedTipAmount(Number(customVal));
+                          }
+                        }}
+                        className="btn-green"
+                        style={{ width: 'auto', padding: '12px 20px', whiteSpace: 'nowrap' }}
+                      >
+                        Send Tip
+                      </button>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -861,6 +1068,23 @@ const handleSubscribeVip = async (method) => {
           </div>
         )}
       </div>
+
+      {/* MAIN GARAGE TIP PAYMENT MODAL */}
+      {tippingTicket && (
+        <div className="modal-overlay">
+          <div className="vibrant-card animate-scale-in">
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0' }}>Confirm Valet Tip</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontWeight: 500 }}>
+              Gratuity for {tippingTicket.vehicle?.make} ({tippingTicket.vehicle?.licensePlate}): <strong style={{ color: 'var(--accent-green)', fontSize: '1.2rem' }}>${selectedTipAmount}.00</strong>
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+              <button onClick={() => handleCompleteGarageTip('Apple Pay')} className="btn-apple-pay"><ApplePayLogo /></button>
+              <button onClick={() => handleCompleteGarageTip('Google Pay')} className="btn-google-pay"><GooglePayLogo /></button>
+            </div>
+            <button onClick={() => setTippingTicket(null)} className="btn-outline" style={{ width: '100%' }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       {/* VIP SUBSCRIPTION CHECKOUT MODAL */}
 {showVipModal && (
@@ -1786,6 +2010,37 @@ function ValetDashboardView({ parkingMap, venueId }) {
 
   const currentDomain = window.location.origin;
 
+  const prevValetTicketsRef = useRef({});
+  const valetInitRef = useRef(true);
+
+  useEffect(() => {
+    const unsubAlerts = onValue(ref(db, 'tickets'), (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.val();
+      Object.keys(data).forEach(id => {
+        const t = data[id];
+        if (t.venueId !== venueId) return;
+        const prev = prevValetTicketsRef.current[id];
+        const carName = `${t.vehicle?.make || 'Car'} (${t.vehicle?.licensePlate || ''})`;
+
+        if (!valetInitRef.current && prev) {
+          if (prev.status !== 'requested' && t.status === 'requested') {
+            triggerPushNotification('🚨 Vehicle Retrieval Requested!', `Bring ${carName} from Spot ${t.parkingSpot} to ${t.returnLocation || 'Main Entrance'}.`);
+          }
+          if (!prev.wantsWash && t.wantsWash) {
+            triggerPushNotification('🫧 New Car Wash Ordered!', `${carName} in Spot ${t.parkingSpot} just paid for a wash.`);
+          }
+          if (!prev.tippedAmount && t.tippedAmount) {
+            triggerPushNotification('💸 Valet Tip Received!', `Guest just sent a $${t.tippedAmount}.00 tip for ${carName}!`);
+          }
+        }
+        prevValetTicketsRef.current[id] = { status: t.status, wantsWash: t.wantsWash, tippedAmount: t.tippedAmount };
+      });
+      valetInitRef.current = false;
+    });
+    return () => unsubAlerts();
+  }, [venueId]);
+
   useEffect(() => {
     const unsubscribe = onValue(ref(db, 'tickets'), (snapshot) => {
       if (snapshot.exists()) {
@@ -2577,49 +2832,55 @@ function App() {
 
   if (authLoading) return <div className="app-container center-wrapper"><div className="animate-pulse" style={{color: 'var(--accent-green)', letterSpacing: '2px', fontWeight: 800}}>AUTHENTICATING...</div></div>;
   
-  // Direct QR Ticket Tracker View (from URL or Customer Garage / Landing lookup)
+  let activeScreen = null;
+
   if (activeTicketOverlay) {
-    return (
+    activeScreen = (
       <GuestTicketView
         ticketId={activeTicketOverlay}
         onBack={!requestedTicketId ? () => setActiveTicketOverlay(null) : null}
       />
     );
-  }
-  
-  // Public Visitors: Show Luxury Landing Page first, then Auth Screen when clicked
-  if (!userRole) {
+  } else if (!userRole) {
     if (!authScreenMode) {
-      return (
+      activeScreen = (
         <LandingPageView
           onNavigateAuth={(mode) => setAuthScreenMode(mode)}
           onOpenTicket={(id) => setActiveTicketOverlay(id)}
         />
       );
+    } else {
+      activeScreen = (
+        <LoginView
+          initialMode={authScreenMode}
+          onBackToLanding={() => setAuthScreenMode(null)}
+        />
+      );
     }
-    return (
-      <LoginView
-        initialMode={authScreenMode}
-        onBackToLanding={() => setAuthScreenMode(null)}
-      />
-    );
-  }
-
-  // Logged-In Routes
-  if (userRole === "customer") {
-    return (
+  } else if (userRole === "customer") {
+    activeScreen = (
       <CustomerGarageView
         userProfile={userProfile}
         uid={currentUid}
         onOpenLiveTicket={(id) => setActiveTicketOverlay(id)}
       />
     );
+  } else if (userRole === "developer") {
+    activeScreen = <DeveloperView />;
+  } else if (userRole === "master_admin") {
+    activeScreen = <MasterAdminView parkingMap={globalParkingMap} venueId={userVenueId} />;
+  } else if (userRole === "wash_team") {
+    activeScreen = <WashBayView venueId={userVenueId} />;
+  } else {
+    activeScreen = <ValetDashboardView parkingMap={globalParkingMap} venueId={userVenueId} />;
   }
-  if (userRole === "developer") return <DeveloperView />;
-  if (userRole === "master_admin") return <MasterAdminView parkingMap={globalParkingMap} venueId={userVenueId} />;
-  if (userRole === "wash_team") return <WashBayView venueId={userVenueId} />;
-  
-  return <ValetDashboardView parkingMap={globalParkingMap} venueId={userVenueId} />;
+
+  return (
+    <>
+      <LiveNotificationToast />
+      {activeScreen}
+    </>
+  );
 }
 
 export default App;
